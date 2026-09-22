@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#080d10" />
+    <meta
+      name="description"
+      content="Explora la Milla Cuántica de Donostia: formación, ciencia, laboratorio, industria y ecosistema en una experiencia interactiva."
+    />
+    <title>Milla Cuántica · Donostia</title>
+  </head>
+  <body class="intro-active">
+    <a class="skip" href="#universe">Ir a la esfera</a>
+    <svg
+      aria-hidden="true"
+      style="position: absolute; width: 0; height: 0; overflow: hidden"
+    >
+      <defs>
+        <symbol id="i-arrow" viewBox="0 0 24 24">
+          <path d="M5 12h14m-6-6 6 6-6 6" />
+        </symbol>
+        <symbol id="i-back" viewBox="0 0 24 24">
+          <path d="M19 12H5m6-6-6 6 6 6" />
+        </symbol>
+        <symbol id="i-close" viewBox="0 0 24 24">
+          <path d="m6 6 12 12M6 18 18 6" />
+        </symbol>
+        <symbol id="i-degree" viewBox="0 0 24 24">
+          <path d="m2 8 10-5 10 5-10 5-10-5Zm4 2v7c4 3 8 3 12 0v-7m4-2v8" />
+        </symbol>
+        <symbol id="i-science" viewBox="0 0 24 24">
+          <ellipse cx="12" cy="12" rx="10" ry="4" />
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="10"
+            ry="4"
+            transform="rotate(60 12 12)"
+          />
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="10"
+            ry="4"
+            transform="rotate(120 12 12)"
+          />
+          <circle cx="12" cy="12" r="1" />
+        </symbol>
+        <symbol id="i-lab" viewBox="0 0 24 24">
+          <path d="M9 3h6m-5 0v7l-6 9q-1 2 2 2h12q3 0 2-2l-6-9V3M7 15h10" />
+          <path d="M10 18h1m2-5h1" />
+        </symbol>
+        <symbol id="i-industry" viewBox="0 0 24 24">
+          <path d="M3 21V9l7 4V9l6 4V3h4l1 18ZM7 17h1m4 0h1m4 0h1" />
+        </symbol>
+        <symbol id="i-eco" viewBox="0 0 24 24">
+          <circle cx="12" cy="5" r="3" />
+          <circle cx="5" cy="18" r="3" />
+          <circle cx="19" cy="18" r="3" />
+          <path d="m10 7-4 8m8-8 4 8M8 18h8" />
+        </symbol>
+        <symbol id="i-expand" viewBox="0 0 24 24">
+          <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
+        </symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24">
+          <path d="M9 5v14M15 5v14" />
+        </symbol>
+        <symbol id="i-play" viewBox="0 0 24 24">
+          <path d="m8 4 12 8-12 8Z" />
+        </symbol>
+        <symbol id="i-reset" viewBox="0 0 24 24">
+          <path d="M4 10a8 8 0 1 1 1 8M4 4v6h6" />
+        </symbol>
+        <symbol id="i-touch" viewBox="0 0 24 24">
+          <path
+            d="M9 13V5a2 2 0 0 1 4 0v6l4 1q3 1 2 4l-2 5H9l-5-7q-1-2 1-2l4 3"
+          />
+        </symbol>
+        <symbol id="i-sound" viewBox="0 0 24 24">
+          <path d="M3 9h4l5-4v14l-5-4H3ZM16 8q4 4 0 8m3-11q7 7 0 14" />
+        </symbol>
+        <symbol id="i-muted" viewBox="0 0 24 24">
+          <path d="M3 9h4l5-4v14l-5-4H3Zm13 0 6 6m0-6-6 6" />
+        </symbol>
+        <symbol id="i-help" viewBox="0 0 24 24">
+          <path d="M9 8a3 3 0 0 1 6 0c0 3-3 2-3 5m0 4v.1" />
+        </symbol>
+      </defs>
+    </svg>
+    <canvas id="quantum-background" aria-hidden="true"></canvas>
+    <section id="gateway" aria-label="Entrada a la Milla Cuántica">
+      <canvas id="birth-canvas" aria-hidden="true"></canvas>
+      <div class="gateway-top">
+        <span>milla cuántica.<small>DONOSTIA / SAN SEBASTIÁN</small></span
+        ><button
+          class="icon-button"
+          id="intro-sound"
+          aria-label="Silenciar sonido"
+          aria-pressed="true"
+        >
+          <svg aria-hidden="true"><use href="#i-sound" /></svg>
+        </button>
+      </div>
+      <button
+        id="hold-start"
+        aria-describedby="birth-hint"
+        aria-label="Mantén pulsado para comenzar"
+      >
+        <svg aria-hidden="true"><use href="#i-touch" /></svg
+        ><span class="sr-only">Mantén pulsado para comenzar</span>
+      </button>
+      <div class="gateway-action">
+        <p class="gateway-caption">Mantén pulsado para comenzar</p>
+        <div
+          id="birth-progress"
+          role="progressbar"
+          aria-label="Carga de energía"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        ></div>
+        <p id="birth-hint">
+          Pulsa con el ratón o manteniendo la tecla espacio.
+        </p>
+        <p id="birth-status" role="status" aria-live="polite"></p>
+        <button id="skip-intro">Entrar directamente</button>
+      </div>
+    </section>
+    <div class="shell">
+      <header>
+        <button
+          class="brand"
+          id="home"
+          aria-label="Milla Cuántica, volver al inicio"
+        >
+          <svg class="brand-mark" viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="17" />
+            <ellipse
+              cx="22"
+              cy="22"
+              rx="8"
+              ry="17"
+              transform="rotate(40 22 22)"
+            />
+            <ellipse
+              cx="22"
+              cy="22"
+              rx="17"
+              ry="6"
+              transform="rotate(40 22 22)"
+            />
+            <circle
+              cx="34"
+              cy="10"
+              r="3"
+              fill="currentColor"
+              stroke="none"
+            /></svg
+          ><span class="brand-name">milla<span>cuántica.</span></span>
+        </button>
+        <div class="location">
+          <span class="dot"></span>Donostia / San Sebastián
+        </div>
+        <div class="header-actions">
+          <button
+            class="icon-button"
+            id="sound"
+            aria-label="Silenciar sonido"
+            aria-pressed="true"
+            title="Silenciar sonido"
+          >
+            <svg><use href="#i-sound" /></svg></button
+          ><button class="text-button about-button" data-dialog="about">
+            Sobre la Milla ↗</button
+          ><button
+            class="icon-button"
+            id="kiosk"
+            aria-label="Activar modo exposición"
+            aria-pressed="false"
+            title="Modo exposición"
+          >
+            <svg><use href="#i-expand" /></svg></button
+          ><button
+            class="icon-button"
+            data-dialog="help"
+            aria-label="Cómo explorar"
+            title="Cómo explorar"
+          >
+            <svg><use href="#i-help" /></svg>
+          </button>
+        </div>
+      </header>
+      <main>
+        <section class="experience" aria-label="Explora la Milla Cuántica">
+          <svg id="point-signal" aria-hidden="true">
+            <path class="signal-halo" />
+            <path class="signal-line" />
+            <path class="signal-travel" pathLength="100" />
+            <circle r="3" />
+          </svg>
+          <h1 class="sr-only">Explora la Milla Cuántica</h1>
+          <button
+            class="icon-button"
+            id="detail-close"
+            aria-label="Cerrar información y volver al universo"
+            title="Cerrar información"
+            hidden
+          >
+            <svg aria-hidden="true"><use href="#i-close" /></svg>
+          </button>
+          <div class="detail" id="detail" hidden aria-labelledby="detail-title">
+            <p class="eyebrow" id="detail-label"></p>
+            <h2 id="detail-title" tabindex="-1"></h2>
+            <p class="detail-summary" id="detail-summary"></p>
+            <div
+              class="tabs"
+              id="tabs"
+              role="tablist"
+              aria-label="Contenido del territorio"
+            ></div>
+            <div id="tab-content" role="tabpanel" tabindex="0"></div>
+            <button class="next" id="next"></button>
+            <div class="progress" id="progress"></div>
+          </div>
+          <div class="visual">
+            <div class="stage-top">
+              <span class="live"
+                ><span class="dot"></span
+                ><span id="scene-state">EXPLORA LAS CONEXIONES</span></span
+              ><span>MILLA CUÁNTICA</span>
+            </div>
+            <div class="scene" id="scene">
+              <canvas
+                id="universe"
+                role="button"
+                tabindex="0"
+                aria-label="Esfera interactiva. Pulsa Enter o espacio para crear un pulso de luz; usa las flechas para girar. Los cinco puntos se pueden seleccionar con Tab y Enter."
+                aria-describedby="scene-instructions"
+                >Usa los cinco puntos luminosos para explorar los
+                contenidos.</canvas
+              >
+              <div id="nodes"></div>
+            </div>
+            <span class="pulse-label" id="pulse-label" aria-hidden="true"
+              >TODO ESTÁ CONECTADO</span
+            >
+            <div class="scene-controls">
+              <button
+                class="icon-button"
+                id="turn-left"
+                aria-label="Girar esfera a la izquierda"
+                title="Girar a la izquierda"
+              >
+                <svg><use href="#i-back" /></svg></button
+              ><button
+                class="icon-button"
+                id="turn-right"
+                aria-label="Girar esfera a la derecha"
+                title="Girar a la derecha"
+              >
+                <svg><use href="#i-arrow" /></svg></button
+              ><button
+                class="icon-button"
+                id="pause"
+                aria-label="Pausar animación"
+                aria-pressed="false"
+                title="Pausar animación"
+              >
+                <svg><use href="#i-pause" /></svg></button
+              ><button
+                class="icon-button"
+                id="reset"
+                aria-label="Reiniciar experiencia"
+                title="Reiniciar experiencia"
+              >
+                <svg><use href="#i-reset" /></svg>
+              </button>
+            </div>
+            <div class="scene-footer" id="scene-instructions">
+              <svg><use href="#i-touch" /></svg
+              ><span>Toca un punto para conectar</span><span class="sep">/</span
+              ><span>Gira para descubrir los cinco puntos</span>
+            </div>
+          </div>
+        </section>
+
+        <noscript
+          ><p>
+            Este prototipo necesita JavaScript para mostrar la esfera y abrir
+            los contenidos. Sus cinco áreas son Grado, Ciencia, Laboratorio,
+            Industria y Ecosistema.
+          </p></noscript
+        >
+      </main>
+      <footer class="site-footer">
+        <span>Donostia / San Sebastián</span
+        ><span>Un universo. Cinco conexiones.</span>
+      </footer>
+    </div>
+    <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+    <div class="idle-notice" id="idle-notice" hidden></div>
+    <dialog id="about" aria-labelledby="about-title">
+      <div class="dialog-top">
+        <h2 id="about-title">Una milla de conexiones.</h2>
+        <button class="icon-button dialog-close" aria-label="Cerrar">
+          <svg><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <p>
+        La Milla Cuántica se presenta como un espacio para acercarse a la
+        cuántica desde cinco perspectivas: aprender, investigar, experimentar,
+        aplicar y conectar.
+      </p>
+      <p>
+        Explora cada territorio para descubrir cómo la formación, la ciencia, el
+        laboratorio, la industria y el ecosistema se relacionan entre sí.
+      </p>
+      <p class="panel-note">
+        Primera propuesta de experiencia digital. Los textos son orientativos y
+        están pendientes de validación con el equipo de la Milla Cuántica. La
+        esfera es una interpretación artística, no una simulación física.
+      </p>
+    </dialog>
+    <dialog id="help" aria-labelledby="help-title">
+      <div class="dialog-top">
+        <h2 id="help-title">Sigue tu curiosidad.</h2>
+        <button class="icon-button dialog-close" aria-label="Cerrar">
+          <svg><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <ul>
+        <li>
+          <strong>Toca un punto luminoso:</strong> aparece su nombre y se
+          iluminan las partículas cercanas. Varios pulsos parten de distintas
+          zonas y convergen en el punto elegido. La luz se acumula alrededor;
+          las partículas conservan su posición sobre la esfera.
+        </li>
+        <li>
+          <strong>Arrastra en horizontal:</strong> gira la esfera para descubrir
+          sus puntos. Los de la cara posterior también se ven, con menos
+          intensidad. También puedes usar los dos botones de flecha. En móvil,
+          desliza en vertical para recorrer la página.
+        </li>
+        <li>
+          <strong>Elige un territorio:</strong> selecciona uno de los cinco
+          puntos de la esfera para leer sus contenidos.
+        </li>
+        <li>
+          <strong>Con teclado:</strong> usa Tab y Enter. Sobre la esfera, las
+          flechas giran y el espacio crea un pulso de luz. Escape vuelve al
+          universo.
+        </li>
+        <li>
+          <strong>Modo exposición:</strong> el icono de las cuatro esquinas
+          amplía los controles y solicita pantalla completa. Después de 90
+          segundos sin interacción, vuelve al inicio.
+        </li>
+      </ul>
+      <p class="panel-note">
+        El icono de altavoz activa o silencia los sonidos y la música ambiental.
+        El audio comienza tras la primera interacción. Las fichas se abren desde
+        cada punto mediante un enlace luminoso. El eje z une los polos |0⟩ y
+        |1⟩; x e y definen el plano ecuatorial de la esfera de Bloch. Los ejes
+        giran con la esfera. Los cinco accesos son contenidos, no estados
+        cuánticos. La pausa detiene el giro y el avance del pulso, pero la luz
+        sigue respirando. Al elegir otro punto cambia la zona iluminada, sin
+        desplazar partículas. Con movimiento reducido, la composición cambia sin
+        animaciones ni pulsación.
+      </p>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

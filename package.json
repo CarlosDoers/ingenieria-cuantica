@@ -1,0 +1,21 @@
+{
+  "name": "milla-campo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fusión de milla-cuantica (primer nivel) y campo-cubits (segundo nivel): la esfera se transforma en el campo de cúbits.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vite build --mode test && node tests/smoke.cjs",
+    "package": "vite build && python3 tools/package.py"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3",
+    "vite": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module"
+}
