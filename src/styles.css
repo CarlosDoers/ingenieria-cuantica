@@ -2408,3 +2408,307 @@ body {
     gap: 14px;
   }
 }
+
+/* ---------- Segundo nivel: pestañas sobre el chip ---------- */
+/* Cada pestaña de la ficha es un cúbit del campo; su nombre va encima de él. Sobrio a
+   propósito: una línea de un píxel y el color del territorio solo en la que está abierta. */
+#field-subs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* En el chip la cámara entra muy cerca y las secciones de los otros territorios caen fuera
+   del encuadre; sin recorte, sus botones ensanchaban la página y salía scroll horizontal. */
+.scene {
+  overflow: hidden;
+}
+.field-sub {
+  position: absolute;
+  /* Por encima de su esfera: `--lift` es su radio en pantalla más un margen, y lo calcula
+     el motor porque con la perspectiva cambia de una pestaña a otra. */
+  transform: translate(-50%, calc(-100% - var(--lift, 22px)));
+  padding: 5px 11px;
+  background: #080d1ae6;
+  border: 1px solid #3a4378;
+  border-radius: 3px;
+  color: #d9def7;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: border-color 0.2s, color 0.2s;
+}
+.field-sub:hover,
+.field-sub[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---------- Segundo nivel: el chip ---------- */
+/* Rótulo del cúbit señalado y estado del circuito, los dos de campo-cubits: información
+   de la máquina, en monoespaciada y sin competir con el menú. */
+.qubit-tip,
+.chip-hud {
+  position: absolute;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #9aa6d8;
+  pointer-events: none;
+  margin: 0;
+}
+.qubit-tip {
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  text-shadow: 0 0 10px #05081c, 0 0 4px #05081c;
+}
+.chip-hud {
+  left: 0;
+  bottom: 0;
+  color: #7783b4;
+}
+@media (max-width: 760px) {
+  .chip-hud {
+    font-size: 10px;
+  }
+}
+/* La sección la dibuja el lienzo como una esfera grande, igual que en campo-cubits. El
+   botón deja los adornos que tenía en la esfera, la cubre entera para poder pulsarla
+   (`--ball` es su diámetro en pantalla) y lleva el nombre encima. */
+.scene.in-field .orbit-node {
+  width: max(44px, var(--ball, 56px));
+  height: max(44px, var(--ball, 56px));
+  min-height: 0;
+  filter: none;
+}
+.scene.in-field .orbit-node:before,
+.scene.in-field .orbit-node:after {
+  display: none;
+}
+/* El nombre va a la izquierda de su esfera: encima pisaba el puente, que sale de la
+   sección hacia arriba y a la derecha. */
+.scene.in-field .orbit-node .node-name {
+  top: 50%;
+  left: auto;
+  /* El anillo sobresale un 30 % del radio de la esfera: el nombre se aparta también de él. */
+  right: calc(100% + var(--ball, 56px) * 0.16 + 12px);
+  transform: translateY(-50%);
+}
+.scene.in-field .orbit-node[data-side="right"] .node-name {
+  right: auto;
+  left: calc(100% + var(--ball, 56px) * 0.16 + 12px);
+}
+@media (max-width: 760px) {
+  /* En estrecho las pestañas quedan más juntas: etiquetas más compactas, y el nombre de la
+     sección debajo de su esfera, que a la izquierda se salía de la pantalla. */
+  .field-sub {
+    padding: 3px 7px;
+    font-size: 11.5px;
+  }
+  .scene.in-field .orbit-node .node-name,
+  .scene.in-field .orbit-node[data-side="right"] .node-name {
+    top: calc(100% + var(--ball, 56px) * 0.1 + 8px);
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+/* En el chip el arrastre orbita la cámara en las dos direcciones; con `pan-y` el vertical
+   se lo quedaba el desplazamiento de la página en pantallas táctiles. */
+.scene.in-field canvas {
+  touch-action: none;
+  /* Con la cámara dentro, el chip llega a los bordes de la escena y se cortaba en seco
+     contra ellos; así se funde con el fondo, como si siguiera. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 82%, transparent), linear-gradient(to right, transparent, #000 12%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, transparent, #000 7%, #000 82%, transparent), linear-gradient(to right, transparent, #000 12%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+
+/* ---------- Menú lateral ---------- */
+/* El raíl de la propuesta de Bloch: los territorios siempre a la vista y navegables con
+   teclado, como alternativa a buscarlos en la esfera. Sin color por territorio: lo activo
+   se marca con el acento y con su tamaño. */
+.rail {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+}
+/* La marca del activo: una sola pieza que se desplaza de un elemento a otro. Se coloca con
+   las medidas que le pasa `syncRail`, así que sirve en vertical y en horizontal. */
+.rail-marker {
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 2px;
+  height: var(--mh, 0);
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  transform: translateY(var(--my, 0));
+  transition: transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.36s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.3s, box-shadow 0.3s;
+  pointer-events: none;
+}
+.rail-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+  padding: 10px 16px;
+  margin-left: -1px;
+  border: 0;
+  border-left: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  transition: color 0.18s, border-color 0.18s;
+}
+/* Entrada escalonada al terminar la intro: el menú se presenta de arriba abajo en vez de
+   estar ya ahí. `--i` lo pone el guion al construirlo. */
+@keyframes rail-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+body:not(.intro-active) .rail-item {
+  animation: rail-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+/* El nombre se escala en vez de cambiar de cuerpo: el activo se ve más grande sin que el
+   menú entero se recoloque a cada cambio. */
+.rail-name {
+  display: inline-block;
+  transform-origin: left center;
+  transform: translateX(var(--slide, 0)) scale(var(--scale, 1));
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.rail-item:hover,
+.rail-item:focus-visible {
+  color: var(--text);
+  outline: none;
+}
+.rail-item:hover .rail-name,
+.rail-item:focus-visible .rail-name {
+  --slide: 3px;
+}
+.rail-item:focus-visible {
+  border-left-color: var(--muted);
+}
+.rail-item.active {
+  color: var(--text);
+}
+.rail-item.active .rail-name {
+  --scale: 1.3;
+  letter-spacing: 0.01em;
+}
+/* «Universo» vuelve al primer nivel: no es un territorio más, así que va en versaleta,
+   separado por una regla, y con una flecha que solo aparece cuando hay algo de lo que
+   volver —en el universo no lleva a ninguna parte—. */
+.rail-home {
+  margin-bottom: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.rail-home .rail-icon {
+  display: inline-flex;
+  width: 0;
+  opacity: 0;
+  transform: translateX(5px);
+  transition: width 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.28s, transform 0.28s;
+}
+.rail-home .rail-icon svg {
+  width: 13px;
+  height: 13px;
+}
+.rail.has-selection .rail-home {
+  color: var(--text);
+}
+.rail.has-selection .rail-home .rail-icon {
+  width: 13px;
+  opacity: 0.8;
+}
+.rail.has-selection .rail-home:hover .rail-icon,
+.rail.has-selection .rail-home:focus-visible .rail-icon {
+  opacity: 1;
+  transform: translateX(-3px);
+}
+/* En el universo, «Universo» es dónde estás: sin flecha y con la marca, pero sin agrandar
+   —no es un territorio— y con la marca más discreta. */
+.rail:not(.has-selection) .rail-marker {
+  background: var(--muted);
+  box-shadow: none;
+}
+.rail:not(.has-selection) .rail-home.active .rail-name {
+  --scale: 1;
+}
+/* Señalar un territorio en el menú lo destaca en la escena, como el hover sobre el punto. */
+.orbit-node.is-hover:after {
+  transform: scale(1.18);
+  opacity: 1;
+}
+.orbit-node.is-hover .node-name {
+  display: block;
+}
+@media (max-width: 760px) {
+  .rail-marker {
+    left: 0;
+    top: auto;
+    bottom: 0;
+    width: var(--mw, 0);
+    height: 2px;
+    transform: translateX(var(--mx, 0));
+    transition: transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.36s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .rail {
+    top: 30px;
+    left: 0;
+    right: 0;
+    transform: none;
+    flex-direction: row;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .rail::-webkit-scrollbar {
+    display: none;
+  }
+  .rail-item {
+    margin: 0 0 -1px;
+    padding: 8px 12px;
+    border-left: 0;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+  }
+  /* El menú se desplaza en horizontal, así que la vuelta se queda pegada a la izquierda:
+     si no, al abrir un territorio del final «Universo» se salía del encuadre —o peor, se
+     quedaba cortado a la mitad—. El degradado deja que los territorios pasen por debajo. */
+  .rail-home {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    margin-bottom: -1px;
+    padding-right: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid transparent;
+    border-right: 1px solid var(--line);
+    background: var(--bg);
+    box-shadow: 10px 0 12px -8px var(--bg);
+  }
+  .rail-item.active .rail-name {
+    --scale: 1.16;
+  }
+}

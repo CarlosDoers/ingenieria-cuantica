@@ -72,13 +72,22 @@ function check(reducedMotion = false, canvasAvailable = true) {
             );
         draws++;
       };
+      // Un radio negativo lanza `IndexSizeError` y se lleva por delante el fotograma
+      // entero: el lienzo se queda en negro desde el `clearRect`. Pasó con la profundidad
+      // de un punto medido con la cámara del campo, que se mete dentro del chip.
+      const guard = (name) => (...args) => {
+        noop(...args);
+        const radii = name === "arc" ? [args[2]] : name === "ellipse" ? [args[2], args[3]] : [];
+        for (const r of radii)
+          assert(r >= 0, `Canvas ${name}() received a negative radius: ${r}`);
+      };
       w.HTMLCanvasElement.prototype.getContext = () =>
         canvasAvailable
           ? new Proxy(
               { createRadialGradient: () => ({ addColorStop() {} }) },
               {
                 get(o, k) {
-                  return k in o ? o[k] : noop;
+                  return k in o ? o[k] : guard(k);
                 },
                 set(o, k, v) {
                   o[k] = v;
@@ -155,13 +164,26 @@ function check(reducedMotion = false, canvasAvailable = true) {
       waveCount,
       "Territory selection must not emit an outward wave"
     );
-    assert(!d.querySelector("#detail").hidden);
+    // Sin ficha en los dos primeros niveles: seleccionar entra en el chip.
+    assert(d.querySelector("#detail").hidden, "No card on levels 1-2");
     assert.equal(
       d.querySelectorAll('[data-index][aria-pressed="true"]').length,
       1
     );
+    assert.equal(
+      d.querySelector(".rail-item.active").dataset.rail,
+      String(i),
+      "Side menu marks the open territory"
+    );
+    // Con un territorio abierto, «Universo» es la vuelta al primer nivel y lo enseña.
+    assert(d.querySelector("#rail").classList.contains("has-selection"));
+    // Cada pestaña es un cúbit del chip; pulsarla la señala (y sigue cargando su contenido).
     for (let j = 0; j < 3; j++) {
-      d.querySelectorAll(".tab")[j].click();
+      d.querySelectorAll(".field-sub")[j].click();
+      assert.equal(
+        d.querySelectorAll('.field-sub[aria-pressed="true"]')[0],
+        d.querySelectorAll(".field-sub")[j]
+      );
       assert.equal(d.querySelectorAll(".feature").length, 3);
     }
     w.eval("elapsed+=2;draw()");
@@ -185,22 +207,159 @@ function check(reducedMotion = false, canvasAvailable = true) {
     assert.equal(w.eval("rotationY"), rotation);
     assert(w.eval("elapsed") > lightClock);
   }
-  d.querySelector("#detail-close").click();
+  d.querySelector(".rail-home").click();
   assert(d.querySelector("#detail").hidden);
   assert.equal(w.eval("lightCenter()"), null);
+  assert(d.querySelector(".rail-home").classList.contains("active"));
+  assert(!d.querySelector("#rail").classList.contains("has-selection"));
+  assert(d.querySelector(".rail-home .rail-icon svg"), "The universe entry carries its back arrow");
   assert.equal(w.eval("JSON.stringify(points)"), geometry);
-  // Anchored cards, world-space discovery and mute control.
+  // Sección en el chip, pestañas colocadas y sin haz; entrar también desde el menú.
   for (let i = 0; i < 5; i++) {
-    d.querySelectorAll(".orbit-node")[i].click();
-    w.eval("stepCamera(1);draw()");
-    assert.equal(d.querySelector("#point-signal").style.display, "block");
-    assert(
-      d.querySelector("#point-signal path").getAttribute("d").startsWith("M ")
+    const spin = w.eval("JSON.stringify([rotationY, rotationX])");
+    (i % 2 ? d.querySelectorAll(".orbit-node")[i] : d.querySelector(`[data-rail="${i}"]`)).click();
+    w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1);draw()");
+    // Elegir un territorio **no gira la esfera**: el chip se ancla en el punto pulsado esté
+    // donde esté, y el giro solo arrastraba consigo la malla a medio formar. Con uno de la
+    // cara de atrás, los puntos salían rotando en vez de expandiéndose.
+    assert.equal(w.eval("JSON.stringify([rotationY, rotationX])"), spin, "Selecting never spins the sphere");
+    assert.notEqual(d.querySelector("#point-signal").style.display, "block");
+    const node = d.querySelectorAll(".orbit-node")[i];
+    assert(Number.isFinite(parseFloat(node.style.left)));
+    assert(Number.isFinite(parseFloat(node.style.top)));
+    d.querySelectorAll(".field-sub").forEach((b) =>
+      assert(Number.isFinite(parseFloat(b.style.left)), "Tab label sits on its qubit")
     );
-    assert(Number.isFinite(parseFloat(d.querySelector("#detail").style.left)));
-    assert(Number.isFinite(parseFloat(d.querySelector("#detail").style.top)));
-    assert(w.eval(`transform(ANCHORS[${i}]).z`) > 0.02);
   }
+  // Fusión con el campo: abrir un territorio transforma la esfera en el chip, y cada
+  // pestaña de la ficha pasa a ser un cúbit del chip con su nombre encima.
+  assert.equal(
+    d.querySelectorAll(".field-sub").length,
+    d.querySelectorAll(".tab").length,
+    "Each tab is a qubit on the chip"
+  );
+  // En el chip, arrastrar **orbita la cámara del campo**, como en campo-cubits, y no gira
+  // la esfera, que ya no está. La rueda acerca y aleja, y el picado tiene límites.
+  w.eval("stepCamera(1);stepCamera(1);draw()");
+  assert.equal(w.eval("field.mix"), 1, "Chip fully open");
+  const surface = d.querySelector("#universe");
+  // jsdom 24 no trae PointerEvent ni captura de puntero: eventos genéricos con sus datos.
+  surface.setPointerCapture = surface.releasePointerCapture = () => {};
+  surface.hasPointerCapture = () => false;
+  const input = (type, props) => {
+    const ev = new w.Event(type, { bubbles: true, cancelable: true });
+    Object.assign(ev, { pointerId: 3, button: 0 }, props);
+    surface.dispatchEvent(ev);
+    return ev;
+  };
+  const spin = w.eval("rotationY"),
+    yaw = w.eval("orbit.yawTo"),
+    tilt = w.eval("orbit.pitchTo");
+  input("pointerdown", { clientX: 300, clientY: 300 });
+  input("pointermove", { clientX: 260, clientY: 280 });
+  input("pointermove", { clientX: 200, clientY: 250 });
+  input("pointerup", { clientX: 200, clientY: 250 });
+  assert.equal(w.eval("rotationY"), spin, "Dragging the chip does not spin the sphere");
+  assert(w.eval("orbit.yawTo") < yaw, "Horizontal drag orbits the field");
+  assert(w.eval("orbit.pitchTo") > tilt, "Vertical drag tilts the field camera");
+  w.eval("stepCamera(1);draw()");
+  assert.equal(w.eval("orbit.yaw"), w.eval("orbit.yawTo"), "Camera follows the drag");
+  input("pointerdown", { clientX: 300, clientY: 300 });
+  for (let k = 0; k < 40; k++) input("pointermove", { clientX: 300, clientY: 300 - k * 40 });
+  input("pointerup", { clientX: 300, clientY: -1300 });
+  assert(w.eval("orbit.pitchTo") <= -0.22 + 0.48 + 1e-9, "Tilt stays above the chip plane");
+  const zoom = w.eval("orbit.zoomTo");
+  assert(input("wheel", { deltaY: 120, deltaMode: 0 }).defaultPrevented, "Wheel zooms the chip, not the page");
+  assert(w.eval("orbit.zoomTo") > zoom);
+  w.eval("stepCamera(1);draw()");
+  d.querySelectorAll(".field-sub").forEach((b) =>
+    assert(Number.isFinite(parseFloat(b.style.left)), "Tab labels follow the orbit")
+  );
+  // La transformación mueve **todos** los puntos de la esfera: cada uno tiene su sitio en la
+  // retícula y ninguno se disuelve por el camino.
+  assert.equal(
+    w.eval("pointQubit.length"),
+    w.eval("points.length"),
+    "Every sphere point is mapped"
+  );
+  assert(w.eval("[...pointQubit].every((q) => q >= 0)"), "No sphere point dissolves");
+  assert.equal(w.eval("new Set(pointQubit).size"), w.eval("points.length"), "Each point lands on its own node");
+  assert.equal(w.eval("chip.nodes.length"), w.eval("points.length"), "The lattice holds every point");
+  // Y el reparto es un desenrollado: la fila 0 —la del fondo, arriba en pantalla— se queda
+  // el casquete de |0⟩ (y negativa en este motor) y la última, el de |1⟩. Al revés, las dos
+  // mitades de la esfera se cruzaban por el medio.
+  assert(
+    w.eval(`(() => {
+      const mean = [];
+      for (const n of chip.nodes) {
+        if (n.dust || n.bridge) continue;
+        (mean[n.row] ??= []).push(points[qubitSource[n.index]].y);
+      }
+      const avg = mean.map((ys) => ys.reduce((a, b) => a + b, 0) / ys.length);
+      return avg.every((v, i) => i === 0 || v > avg[i - 1]);
+    })()`),
+    "Lattice rows unroll the sphere from |0⟩ to |1⟩, without crossings"
+  );
+  // El chip está vivo, como en campo-cubits: el circuito avanza por capas y cada cierto
+  // tiempo un frente de lectura lo cruza y deja cada cúbit en |0⟩ o en |1⟩. Con movimiento
+  // reducido o con la escena pausada no corre: es movimiento, y el botón de pausa lo para.
+  if (d.querySelector("#pause").getAttribute("aria-pressed") === "true") d.querySelector("#pause").click();
+  if (!reducedMotion) {
+    // El circuito ya lleva un rato corriendo, así que puede estar en cualquiera de sus tres
+    // fases: lo que se comprueba es que el chip dice lo que hace.
+    assert(
+      /^(Capa \d+\/\d+ · \w+|Medida · |Preparando )/.test(d.querySelector("#chip-hud").textContent),
+      "Chip reports its circuit"
+    );
+    let measured = false;
+    for (let i = 0; i < 60 && !measured; i++) {
+      w.eval("stepCamera(0.3);draw()");
+      measured = w.eval("circuit.phase") === "measure" && w.eval("circuit.readout.some((r) => r > 0.2)");
+    }
+    assert(measured, "A measurement sweep crosses the chip");
+    assert(
+      w.eval("circuit.bits.some((b) => b === 1) && circuit.bits.some((b) => b === 0)"),
+      "Each qubit collapses to 0 or 1"
+    );
+    assert(/^Medida · /.test(d.querySelector("#chip-hud").textContent));
+    // Sin lienzo el botón de pausa está deshabilitado: ahí no hay animación que parar.
+    if (canvasAvailable) {
+      d.querySelector("#pause").click();
+      const frozen = w.eval("circuit.t");
+      w.eval("stepCamera(0.3);draw()");
+      assert.equal(w.eval("circuit.t"), frozen, "Pausing the scene pauses the circuit");
+      d.querySelector("#pause").click();
+      // Señalar un cúbit lo dice: mismo rótulo que en campo-cubits.
+      const hub = w.eval("territories[4].hub"),
+        at = JSON.parse(w.eval(`JSON.stringify([qubitScreen[${hub}].x, qubitScreen[${hub}].y])`));
+      input("pointermove", { clientX: at[0], clientY: at[1] });
+      w.eval("stepCamera(0.1);draw()");
+      const tip = d.querySelector("#qubit-tip");
+      assert(!tip.hidden && /^Q·\d{3}/.test(tip.textContent), "Pointing at a qubit names it");
+      input("pointerleave", {});
+      w.eval("stepCamera(0.1);draw()");
+      assert(d.querySelector("#qubit-tip").hidden, "The label goes with the pointer");
+    }
+  }
+  // Pulsar en el menú el territorio ya abierto recoloca la cámara y no lo cierra.
+  const open = d.querySelector(".rail-item.active").dataset.rail;
+  d.querySelector(`[data-rail="${open}"]`).click();
+  assert.equal(w.eval("orbit.yawTo"), 0, "Re-clicking the open territory recentres the camera");
+  assert.equal(w.eval("orbit.zoomTo"), 1);
+  assert.equal(d.querySelector(".rail-item.active").dataset.rail, open);
+  // Otro territorio se abre en su encuadre: lo girado a mano se deshace.
+  input("pointerdown", { clientX: 300, clientY: 300 });
+  input("pointermove", { clientX: 200, clientY: 300 });
+  input("pointerup", { clientX: 200, clientY: 300 });
+  assert.notEqual(w.eval("orbit.yawTo"), 0);
+  d.querySelector('[data-rail="2"]').click();
+  assert.equal(w.eval("orbit.yawTo"), 0);
+  assert.equal(w.eval("orbit.zoomTo"), 1);
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);draw()");
+  // Lo que sigue comprueba el primer nivel —puntos en la cara trasera de la esfera—, así
+  // que se vuelve antes a la esfera: con un territorio abierto ya no hay esfera.
+  d.querySelector("#detail-close").click();
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);draw()");
   const nodePositions = Array.from(
     d.querySelectorAll(".orbit-node"),
     (n) => n.style.left
@@ -231,24 +390,20 @@ function check(reducedMotion = false, canvasAvailable = true) {
   d.querySelector("#sound").click();
   assert.equal(d.querySelector("#sound").getAttribute("aria-pressed"), "true");
   assert(d.querySelector("#quantum-background"));
-  // Focus zoom goes left on desktop, then returns to the unzoomed central view.
+  // Sin ficha no hay que apartar la escena: se queda centrada y solo se acerca.
   w.eval("W=1200;H=700;camera.mix=0;camera.target=0;cameraLayout()");
   const baseRadius = w.eval("R");
   d.querySelectorAll(".orbit-node")[1].click();
   w.eval("stepCamera(1);draw()");
   assert(w.eval("camera.mix") === 1);
-  assert(w.eval("CX") < w.eval("W") * 0.4);
+  assert.equal(w.eval("CX"), w.eval("W") * 0.5, "Scene stays centred");
   assert(w.eval("R") > baseRadius);
-  assert(!d.querySelector("#detail-close").hidden);
-  assert.equal(
-    d.querySelector("#detail-close").parentElement,
-    d.querySelector(".experience"),
-    "Close is outside scrolling panel"
-  );
-  d.querySelector("#detail").scrollTop = 600;
-  assert(!d.querySelector("#detail-close").hidden);
-  d.querySelector("#detail-close").click();
+  assert(d.querySelector("#detail-close").hidden, "No card close button");
+  d.querySelector(".rail-home").click();
   w.eval("stepCamera(1);draw()");
+  // Al volver a la esfera el chip se apaga: ni medida a la vista ni cúbit señalado.
+  assert(w.eval("circuit.readout.every((r) => r === 0)"), "The chip stops measuring on the sphere");
+  assert(d.querySelector("#qubit-tip").hidden);
   assert.equal(w.eval("camera.mix"), 0);
   assert.equal(w.eval("CX"), w.eval("W") * 0.5);
   assert.equal(w.eval("R"), baseRadius);
@@ -271,16 +426,23 @@ function check(reducedMotion = false, canvasAvailable = true) {
   );
   d.querySelectorAll(".orbit-node")[2].click();
   w.eval("stepCamera(1);draw()");
-  assert(
-    parseFloat(d.querySelector("#detail-close").style.left) >
-      parseFloat(d.querySelector("#detail").style.left)
+  d.querySelectorAll(".field-sub")[1].click();
+  assert.equal(
+    d.querySelector(".rail-item.active").dataset.rail,
+    "2",
+    "Clicking a tab qubit keeps the territory open"
   );
-  d.querySelector("#detail-title").click();
-  assert(!d.querySelector("#detail").hidden, "Click inside keeps card open");
-  d.querySelectorAll(".orbit-node")[4].click();
-  assert(!d.querySelector("#detail").hidden, "Another point switches content");
+  d.querySelector('[data-rail="4"]').click();
+  assert.equal(
+    d.querySelector(".rail-item.active").dataset.rail,
+    "4",
+    "Side menu switches territory without leaving the chip"
+  );
   d.querySelector(".scene-footer").click();
-  assert(d.querySelector("#detail").hidden, "Outside click closes card");
+  assert(
+    d.querySelector(".rail-home").classList.contains("active"),
+    "Outside click returns to the sphere"
+  );
   assert.equal(w.eval("camera.target"), 0);
   assert.equal(errors.length, 0, errors.join("\n"));
   assert.equal(
@@ -289,7 +451,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
     0
   );
   console.log(
-    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; Hover update, intro copy, 5 panels, X only/top-right, outside dismissal, camera reset, Bloch geometry, fixed particles, intro hold.`
+    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles.`
   );
   dom.window.close();
 }

@@ -1,3 +1,218 @@
+# Milla Cuántica + Campo de cúbits · Fusión
+
+Copia de trabajo acordada con el cliente (22/09/2026): `milla-cuantica` es el primer nivel
+y, al pulsar un territorio, **la esfera se transforma en el campo de cúbits** de
+`campo-cubits`, que pasa a ser el segundo nivel. Los proyectos originales se conservan
+intactos. Arranca en http://localhost:5197 (`npm run dev`).
+
+## La transformación
+
+Los dos niveles viven **en el mismo lienzo**. `campo-cubits` estaba hecho en Three.js y
+milla en Canvas 2D; para que la esfera se transforme de verdad —que cada punto viaje a su
+sitio en el chip— el campo se ha traído al motor de milla, no al revés: rehacer milla en
+Three.js habría sido reescribir justo la parte que eligió el cliente. La topología
+heavy-hex del IBM Heron está en `src/field.js` y es la misma; lo que cambia es el tamaño de
+la oblea, para que quepan en ella todos los puntos de la esfera (ver abajo). `core` marca
+dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlos.
+
+- **Cada punto de la esfera es un cúbit, y no se disuelve ninguno.** Los 1.150 puntos
+  viajan y se colocan en la retícula: la transformación es una sola materia que se
+  recoloca, no una cosa que se va y otra que aparece. Para que quepan todos, la retícula es
+  mucho mayor que un Heron —22 filas × 42 columnas con sus puentes, 1.145 nodos, 1.344
+  acopladores— y los 5 puntos que aun así sobran son motas en los extremos de la primera y
+  la última fila. Sigue siendo la misma retícula heavy-hex y sus mismas reglas; lo que crece
+  es la oblea, que ahora sigue más allá del encuadre. La escala baja de 0,14 a 0,05 para que
+  la oblea entera mida como el diámetro de la esfera —si no, al desplegarse se saldría de la
+  pantalla— y la distancia de la cámara va en columnas, así que el encuadre final no cambia.
+- **El reparto es un desenrollado, no una búsqueda del punto más cercano.** Los puntos se
+  ordenan por latitud y se reparten banda a banda —fila, puentes, fila…— y dentro de cada
+  banda por longitud, columna a columna. Así la esfera se abre anillo a anillo y ninguna
+  trayectoria se cruza con otra; buscando el más cercano, los últimos nodos se quedaban con
+  puntos del otro lado de la esfera y el vuelo salía enmarañado. **El sentido importa**: en
+  este motor la `y` positiva se dibuja hacia abajo (|0⟩ es `y = −1` y va arriba) y la fila 0
+  del chip cae arriba en pantalla, así que la latitud se ordena de forma ascendente. Al
+  revés, el casquete de abajo se iba a la fila del fondo y las dos mitades de la esfera se
+  cruzaban por el medio.
+- **Las secciones guardan margen con el borde de la oblea.** Con la cámara metida en el
+  territorio se ven unas tres columnas a cada lado y unas cinco filas hacia el fondo; una
+  sección pegada al canto dejaba media pantalla de vacío. Que el cúbit elegido no sea
+  exactamente el del ancla no se nota, porque el chip se ancla igualmente para que la
+  sección nazca donde acaba de converger la luz.
+- **Primero la luz.** Al pulsar se deja arrancar la luz convergente —el gesto propio de
+  milla— antes de desplegar, y cada territorio nace en el cúbit **cuyo punto está más cerca
+  de su ancla**: la sección aparece justo donde acaba de converger la luz.
+- **La esfera no gira al elegir.** Antes la cámara la giraba para traer el punto al frente
+  —venía de cuando había una ficha al lado—, y al elegir un territorio de la cara de atrás
+  ese giro se llevaba consigo la malla a medio formar: los puntos salían rotando en vez de
+  expandiéndose. Ahora la esfera se queda quieta y solo se abre; el acercamiento sí se
+  conserva.
+- **El chip nace del punto pulsado.** Al empezar, se ancla para que la sección caiga
+  exactamente donde estaba su punto en la esfera. Sin eso la sección saltaba a un lado y el
+  racimo de luz se quedaba solo en medio.
+- **Después entra la cámara** hasta el encuadre oblicuo de `campo-cubits` (ver abajo).
+- La interpolación va **en espacio de cámara**: la esfera conserva su giro y el chip su
+  propia cámara, sin pelearse por `rotationX/Y`.
+
+## El segundo nivel, como campo-cubits
+
+**Encuadre final** (`FIELD_VIEW` en `sphere.js`): cámara girada 0,44 rad, picado de 0,48 rad
+y muy cerca. La sección queda grande abajo a la izquierda con su anillo, el puente sube a la
+derecha y la fila de pestañas se aleja en diagonal con sus nombres encima. El punto de mira
+(`AIM_ALONG`, `AIM_SIDE` en `field.js`) cae casi en la fila de las hijas. Es una **cámara de
+verdad**, con distancia y perspectiva, no un zoom de la imagen: arranca en la de la esfera
+(`FIELD_START`, a 3,8 con el picado de campo) y giro, picado y distancia se interpolan con
+la entrada; la distancia de forma geométrica.
+
+**Dos capas al dibujar.** La oblea son 1.150 cúbits y 1.344 acopladores, y casi todos caen
+lejos y apagados: dibujarlos uno a uno costaba más que todo lo demás junto. Lo pequeño y
+apagado va en **trazo de grupo** —un solo camino por color para los puntos y otro para los
+hilos de los acopladores—, y lo cercano y lo encendido, que es lo que se mira, conserva su
+tratamiento completo, su recorte contra las esferas y su orden por profundidad. Lo que queda
+fuera del encuadre se descarta **antes** de calcular su aspecto. Medido: el fotograma sigue
+en p95 ≈ 14 ms con toda la oblea en pantalla, igual que con 156 cúbits.
+
+**Aspecto** (`drawField`), con los tamaños de `campo-cubits` pasados a esta escala: esferas
+con volumen (color plano más un sombreado común pintado una vez), acopladores como barras
+con grosor y perspectiva, anillo tumbado en el plano del chip alrededor de la sección
+abierta y halos aditivos en lo encendido, que hacen de bloom. Esferas y barras se ordenan
+juntas por profundidad y las barras se recortan a la superficie de cada esfera, para que con
+la cámara tan baja lo de delante tape de verdad a lo de detrás. En reposo los cúbits están
+apagados y, al entrar la cámara, lo que no es el territorio abierto cede, como `REST_DIM` en
+campo. Se mantienen los **colores de cada territorio** de milla (los de la luz convergente),
+no el acento único de campo.
+
+**Arrastrar para orbitar**, como `OrbitControls` en campo: en el chip, arrastrar en
+horizontal gira alrededor del territorio y en vertical cambia el picado (limitado entre
+casi cenital y casi a ras); la rueda acerca y aleja; las flechas del teclado también
+orbitan. La cámara sigue al dedo con amortiguado. Arrastrar no cuenta como pulsar en vacío,
+así que no devuelve a la esfera. En pantalla táctil el lienzo del chip usa
+`touch-action: none` para que el arrastre vertical no se lo quede el desplazamiento de la
+página. Pulsar en el menú el territorio ya abierto recoloca la cámara; abrir otro también.
+
+**Cómo se ve encendido.** En `campo-cubits` el cúbit no es una esfera sombreada: es un
+material **sin luz** —un disco de color plano— y lo que lo hace orgánico son otras dos capas
+encima. Aquí se hace igual, porque intentar sombrear la esfera en Canvas 2D —un brillo
+especular arriba a la izquierda y el borde oscuro— los volvía de plástico y nada tenía que
+ver con el original.
+
+- **Halos.** Cada cúbit lleva detrás un degradado aditivo en su tono (la capa de halos del
+  original). Casi nada en reposo; lo levantan el encendido del menú, la medida, el destello
+  de la lectura y el puntero. Es lo que hace que lo apagado se vea luminoso.
+- **Bloom** (`drawBloom`). Lo que pasa de cierto brillo —cúbits encendidos y acopladores del
+  camino— se vuelve a pintar en un lienzo a **un cuarto de resolución**, con el borde suave
+  (un degradado, no un disco duro: al desenfocarlo, un disco duro deja canto y el halo se ve
+  pegado), y se suma encima desenfocado a **tres escalas**. El reparto importa tanto como el
+  desenfoque: **poco brillo cerca del núcleo y un ambiente muy ancho**, que es como se ve el
+  del original —un baño de luz, no un halo caliente—. La escala ancha se desenfoca en un
+  lienzo a un octavo, porque desenfocar cien píxeles sobre el lienzo grande cuesta y ahí sale
+  igual por mucho menos. Usa el filtro del contexto cuando existe y, si no, encadena
+  reducciones.
+- Los encendidos van **pálidos**, casi blancos, y el tono queda en el halo, como con el mapeo
+  de tonos del original; saturados se veían de neón y no de luz. Del disco solo queda un apagado muy leve hacia el borde, para que a
+  tamaño grande no se lea como una pegatina, y en lo que brilla ni eso: un borde oscuro
+  alrededor de algo encendido se lee como un agujero.
+- En reposo el cúbit coge además un punto del tono del territorio abierto, porque allí el
+  chip entero se baña del acento.
+
+**El chip está vivo** (`src/circuit.js`, portado de `campo-cubits`). Un circuito corre sobre
+la retícula mientras nadie lo toca:
+
+- Avanza por **capas**, que el rótulo de abajo a la izquierda va contando (`Capa 4/10 · CZ`).
+  Las capas no se pintan: encender sus puertas hacía parpadear el chip entero y en un menú
+  eso cansa. El circuito se cuenta, no se destella.
+- Lo que sí se ve es la **medida**: un frente de lectura cruza el chip de lado a lado, da un
+  destello a cada cúbit al pasarle por encima y lo deja en |0⟩ —apagado— o en |1⟩ —encendido
+  en el color del territorio abierto—. El patrón se queda un rato a la vista y se desvanece;
+  después, otro circuito.
+- La medida **se aparta del menú**: se atenúa mientras hay un territorio abierto y no toca su
+  camino encendido, o el recorrido de la luz se perdería entre el ruido de fondo.
+- No corre con movimiento reducido, con la escena pausada ni en la esfera.
+
+**Señalar** (hover), también como en el original: un cúbit señalado crece, se eleva y dice su
+nombre (`Q·084 · |1⟩`, con el bit si está medido); señalar una **sección** —su bola, su
+entrada del menú lateral o con el tabulador— **adelanta su subnivel** encendiendo su camino
+sin abrirlo; y señalar una pestaña señala su cúbit. Cada territorio tiene su propio reloj de
+luz, así que el adelanto viaja desde su sección aunque haya otro abierto.
+
+- **Vuelo entre territorios.** Al saltar de uno a otro desde el menú, la cámara se aleja un
+  poco a mitad de camino y vuelve a entrar (`field.lift`).
+- **Plano cercano.** Con la cámara dentro del chip hay cúbits detrás o pegados a ella: se
+  dejan de dibujar con un fundido, y los botones de sección que caen ahí se ocultan.
+- **Etiquetas.** El botón de cada sección cubre su esfera (para poder pulsarla) y lleva el
+  nombre al lado contrario del puente; las pestañas se elevan según el radio en pantalla de
+  su esfera. En estrecho (≤ 760 px) la cámara se acerca algo más y se desplaza para centrar
+  el grupo, las etiquetas son más compactas y el nombre de la sección va debajo.
+- Los bordes de la escena se funden con el fondo en el chip, que ahora llega hasta ellos.
+- **Movimiento reducido:** sin vuelos; la cámara salta al encuadre y la órbita se aplica al
+  instante.
+- Los cúbits respiran en vertical, como en campo: solo en altura, la retícula no se
+  desalinea nunca.
+- Medido en escritorio: la transformación, el arrastre y el chip vivo van a todo refresco
+  (p95 14,1 ms; sin el circuito eran 17,6 ms a 60 Hz).
+
+## Sin ficha en los dos primeros niveles
+
+El cliente quiere que en la esfera y en el chip se vea la parte visual, así que **no se abre
+la ficha lateral**. Sus contenidos se siguen cargando en la ficha oculta, para cuando haya un
+nivel más. Con ella se van también el haz que la unía al punto y el desplazamiento de la
+escena a la izquierda: la esfera y el chip se quedan centrados.
+
+Se retiró la clase `has-selection`, que solo servía para estrechar la escena y hacerle sitio a
+la ficha. Además de sobrar, ese estrechamiento redimensionaba el lienzo justo cuando arranca
+la transformación.
+
+## Pestañas en el chip
+
+Cada pestaña del territorio es una hija en el chip, con su nombre encima (`.field-sub`).
+Pulsarla la señala: su cúbit se enciende del todo y las otras dos ceden un poco. Es la única
+respuesta visible mientras no haya un tercer nivel. La luz del territorio recorre el camino
+real del chip —sección, puente, fila— hasta ellas.
+
+## Menú lateral
+
+Como el raíl de la propuesta de Bloch: los cinco territorios siempre a la vista a la
+izquierda, alternativa a buscarlos en la esfera y navegable con teclado. Señalar uno en el
+menú lo destaca también en la escena. Desde el chip se salta directamente a otro territorio
+y la cámara se desplaza por el chip hasta él.
+
+El menú se presenta de arriba abajo al terminar la intro, el territorio abierto **se ve más
+grande** —el nombre se escala, no cambia de cuerpo, así el menú no se recoloca a cada
+cambio— y la marca del activo es **una sola pieza que se desplaza** de uno a otro en el
+color del territorio, en vez de un borde que se enciende y se apaga: cuenta de dónde vienes
+y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
+dejar a la vista el territorio abierto y la vuelta se queda fija a la izquierda.
+
+Arriba va **«Universo»**, que vuelve a la esfera. Sin la ficha desapareció su X, y hacía falta
+una vuelta visible: en un kiosco táctil no basta con Escape ni con adivinar que se puede
+pulsar en vacío (las dos cosas siguen funcionando). No es un territorio más y no se pinta
+como tal: va en versaleta, separado por una regla, y **le sale una flecha solo cuando hay
+algo de lo que volver** —en el universo no lleva a ninguna parte, y ahí solo dice dónde
+estás—.
+
+## Fluidez de la transición
+
+Medido con el mismo método antes y después: la transición pasó de **30 a 60 fps** (un
+fotograma cada 16,7 ms, p95 de 17,2, sin tirones).
+
+- **A todo refresco mientras hay movimiento.** El bucle dibujaba como mucho cada 30 ms; en
+  reposo basta, pero un despliegue con zoom a medio refresco se ve a saltos. Ahora
+  `moving()` detecta transformación, cámara o desplazamiento por el chip y, mientras dura,
+  se dibuja en cada refresco.
+- **Curvas sin tirón.** Las etapas usan *smootherstep*, que arranca y termina sin
+  aceleración; con *smoothstep* quedaba un pequeño golpe al empezar y al acabar.
+- **Un solo movimiento.** Despliegue (0–0,7) y entrada de cámara (0,12–1) se solapan casi
+  del todo; antes había un valle de velocidad entre los dos y se leían como dos gestos, y la
+  cámara —el movimiento grande— tardaba medio segundo en arrancar.
+- **Zoom geométrico.** Con escala lineal el acercamiento corría al principio y se arrastraba
+  al final; lo que el ojo percibe es la proporción, así que la distancia de la cámara se
+  interpola de forma geométrica.
+- **Arranca con el clic.** La espera previa es de 0,12 s (`FIELD_DELAY`), lo justo para que
+  la luz salga; antes eran 0,55 y la transformación parecía responder a otra cosa. La luz
+  convergente no se pierde: sigue viva sobre los puntos que aún son esfera, y esa zona es la
+  última en disolverse. La transformación dura 2,8 s (`FIELD_SECONDS`).
+
+---
+
 # Milla Cuántica · Entrega de desarrollo
 
 Última versión del prototipo, 7 de septiembre de 2026. Incluye la intro, esfera transparente, pulsos convergentes, cámara, fichas, coordenadas de Bloch y audio. Conserva los últimos ajustes: pestañas y botón Explorar sin sonido, ficha más elevada y controles superiores más pequeños.
@@ -146,7 +361,7 @@ Parámetros útiles, todos en `sphere.js`:
 
 ## Cámara, Bloch y fichas
 
-`transform()` rota, `project()` aplica perspectiva y `cameraLayout()` ajusta centro y radio. `focusCamera()` acerca el territorio seleccionado y coloca la esfera a la izquierda en pantallas amplias. `unfocusCamera()` devuelve la vista general. `positionCard()` calcula la ubicación de la ficha y su conexión desde el mismo punto 3D; actualizarlo junto con la cámara si se cambia la composición.
+`transform()` rota, `project()` aplica perspectiva y `cameraLayout()` ajusta centro y radio. `focusCamera()` solo **acerca**: ya no gira la esfera para traer el punto al frente (ver «La transformación»). `unfocusCamera()` devuelve la vista general. `positionCard()` calcula la ubicación de la ficha y su conexión desde el mismo punto 3D; actualizarlo junto con la cámara si se cambia la composición.
 
 La X vive fuera del área desplazable de la ficha, por lo que permanece visible. Se cierra también al hacer clic fuera o pulsar Escape. El gesto de arrastre de la esfera se diferencia del clic de cierre.
 

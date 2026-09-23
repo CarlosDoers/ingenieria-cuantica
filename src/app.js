@@ -3,13 +3,25 @@ import { DATA } from './content.js';
 import {
   canvas,
   consumeDragOutside,
+  enterField,
   focusCamera,
+  hoverFieldTab,
+  leaveField,
+  recenterField,
   selectLight,
+  setFieldPreview,
+  setFieldTab,
   unfocusCamera,
 } from './sphere.js';
-import { openPointCard, positionCard } from './card.js';
+import { positionCard } from './card.js';
 import { sound } from './audio.js';
 
+/**
+ * Pie de la escena. En el chip las indicaciones de la esfera ya no valen —ahí se arrastra
+ * para girar el chip y la rueda acerca—, así que se cambian y se devuelven al volver.
+ */
+const sphereHint = $("#scene-instructions").innerHTML;
+const chipHint = `<svg><use href="#i-touch" /></svg><span>Arrastra para girar el chip</span><span class="sep">/</span><span>Rueda para acercar</span>`;
 export let selected = -1;
 let activeTab = 0,
   visited = new Set(),
@@ -44,6 +56,9 @@ function renderTab(index, focus = false) {
     b.setAttribute("aria-selected", String(i === index));
     b.tabIndex = i === index ? 0 : -1;
   });
+  // En el chip, cada pestaña es un cúbit: se marca la que está abierta.
+  $$(".field-sub").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+  setFieldTab(index);
   $("#tab-content").setAttribute("aria-labelledby", `tab-${index}`);
   $("#tab-content").innerHTML =
     t.items
@@ -64,8 +79,11 @@ function selectTerritory(index, { focus = true, audible = true } = {}) {
   visited.add(index);
   const d = DATA[index];
   document.documentElement.style.setProperty("--accent", d.color);
-  $("#detail").hidden = false;
-  $(".experience").classList.add("has-selection");
+  // En los dos primeros niveles **no hay ficha**: el cliente quiere que se vea la parte
+  // visual, la esfera y el chip. Los contenidos se siguen cargando en la ficha oculta para
+  // cuando haya un nivel más; `has-selection` ya no se usa porque solo servía para
+  // estrechar la escena y hacerle sitio, y ese estrechamiento redimensionaba el lienzo
+  // justo cuando arranca la transformación.
   $("#detail-label").textContent = `0${index + 1} / ${d.name}`;
   $("#detail-title").textContent = d.title;
   $("#detail-summary").textContent = d.summary;
@@ -107,20 +125,104 @@ function selectTerritory(index, { focus = true, audible = true } = {}) {
   $("#scene-state").textContent = `EXPLORANDO / ${d.name.toUpperCase()}`;
   focusCamera(index);
   selectLight(index);
-  openPointCard();
+  // Segundo nivel: la esfera se transforma en el campo de cúbits. Las pestañas de la ficha
+  // pasan a ser las hijas del territorio en el chip, unidas a él por el puente.
+  $("#field-subs").innerHTML = d.tabs
+    .map((t, i) => `<button class="field-sub" type="button" data-tab="${i}" aria-pressed="${i === 0}">${t.name}</button>`)
+    .join("");
+  $$(".field-sub").forEach((b, i) => {
+    b.addEventListener("click", () => renderTab(i));
+    // Señalar una pestaña señala su cúbit en el chip, como en campo-cubits.
+    b.addEventListener("pointerenter", () => hoverFieldTab(index, i));
+    b.addEventListener("pointerleave", () => hoverFieldTab(-1, -1));
+  });
+  enterField(index);
+  $("#scene-instructions").innerHTML = chipHint;
+  syncRail();
   if (audible) sound("select", index);
-  if (focus) $("#detail-title").focus({ preventScroll: true });
   // Un solo aviso. Dos seguidos en el mismo tick se pisan: el lector de pantalla solo
   // llega a leer el último, y el primero se perdía siempre.
   announce(
-    `Territorio ${d.name}. ${d.title}` +
-      (focus ? " Ficha conectada al punto seleccionado." : "")
+    `Territorio ${d.name}. ${d.title}. En el chip: ${d.tabs.map((t) => t.name).join(", ")}.`
   );
   activity();
 }
-$$("[data-index]").forEach((b) =>
-  b.addEventListener("click", () => selectTerritory(Number(b.dataset.index)))
-);
+$$("[data-index]").forEach((b) => {
+  const i = Number(b.dataset.index);
+  b.addEventListener("click", () => selectTerritory(i));
+  // En el chip, señalar una sección adelanta su subnivel sin abrirla.
+  b.addEventListener("pointerenter", () => setFieldPreview(i));
+  b.addEventListener("pointerleave", () => setFieldPreview(-1));
+  b.addEventListener("focus", () => setFieldPreview(i));
+  b.addEventListener("blur", () => setFieldPreview(-1));
+});
+/**
+ * Menú lateral, como el raíl de la propuesta de Bloch: los cinco territorios siempre a la
+ * vista, alternativa a buscarlos en la esfera y navegable con teclado. Arriba va «Universo»,
+ * que vuelve al primer nivel: sin la ficha ya no está su X, y hacía falta una vuelta visible
+ * —en un kiosco táctil no vale con Escape ni con adivinar que se puede pulsar fuera—.
+ * Señalar un territorio en el menú lo destaca también en la escena.
+ */
+const rail = $("#rail");
+rail.innerHTML =
+  // La marca del activo es **una sola pieza que se desplaza** de un territorio a otro, no un
+  // borde que se enciende y se apaga: el menú cuenta así de dónde vienes y a dónde vas.
+  `<span class="rail-marker" aria-hidden="true"></span>` +
+  // «Universo» no es un territorio más: es la vuelta al primer nivel. Va aparte, en
+  // versaleta, y le sale una flecha cuando de verdad hay algo de lo que volver.
+  `<button class="rail-item rail-home" type="button" style="--i:0"><span class="rail-icon">${icon(
+    "back"
+  )}</span><span class="rail-name">Universo</span></button>` +
+  DATA.map(
+    (d, i) =>
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${
+        i + 1
+      }"><span class="rail-name">${d.name}</span></button>`
+  ).join("");
+$$(".rail-item[data-rail]").forEach((b) => {
+  const i = Number(b.dataset.rail),
+    mark = (on) => {
+      nodeEls[i].classList.toggle("is-hover", on);
+      setFieldPreview(on ? i : -1);
+    };
+  b.addEventListener("click", () => {
+    // Pulsar el territorio que ya está abierto recoloca la cámara si se había girado.
+    if (selected !== i) selectTerritory(i, { focus: false });
+    else recenterField();
+  });
+  b.addEventListener("pointerenter", () => mark(true));
+  b.addEventListener("pointerleave", () => mark(false));
+  b.addEventListener("focus", () => mark(true));
+  b.addEventListener("blur", () => mark(false));
+});
+$(".rail-home").addEventListener("click", () => {
+  if (selected >= 0) resetExperience(false);
+});
+function syncRail() {
+  let current = null;
+  $$(".rail-item").forEach((b) => {
+    const on = b.dataset.rail === undefined ? selected < 0 : Number(b.dataset.rail) === selected;
+    b.classList.toggle("active", on);
+    if (on) {
+      current = b;
+      b.setAttribute("aria-current", "true");
+    } else b.removeAttribute("aria-current");
+  });
+  rail.classList.toggle("has-selection", selected >= 0);
+  if (!current) return;
+  // La marca se coloca con las medidas del elemento activo, no con un índice: así vale
+  // igual en vertical y en la versión horizontal de pantallas estrechas, y no se descoloca
+  // si cambian el texto o el tamaño de letra.
+  rail.style.setProperty("--my", current.offsetTop + "px");
+  rail.style.setProperty("--mh", current.offsetHeight + "px");
+  rail.style.setProperty("--mx", current.offsetLeft + "px");
+  rail.style.setProperty("--mw", current.offsetWidth + "px");
+  // En horizontal el menú se desplaza: el territorio abierto tiene que quedar a la vista.
+  if (rail.scrollWidth > rail.clientWidth + 4)
+    current.scrollIntoView({ inline: "center", block: "nearest", behavior: reduced.matches ? "instant" : "smooth" });
+}
+addEventListener("resize", syncRail);
+syncRail();
 /**
  * Vuelve al universo. `restart` distingue **cerrar** de **empezar de nuevo**: cerrar la
  * ficha no debería borrar por dónde has pasado.
@@ -136,11 +238,13 @@ function resetExperience(focus = false, { restart = false } = {}) {
   document.documentElement.style.setProperty("--accent", "#89b5ff");
   $("#detail-close").hidden = true;
   unfocusCamera();
+  leaveField();
+  $("#scene-instructions").innerHTML = sphereHint;
   $("#detail").hidden = true;
   $("#detail").style.visibility = "visible";
   $("#point-signal").style.display = "none";
-  $(".experience").classList.remove("has-selection");
   $$("[data-index]").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  syncRail();
   $("#scene-state").textContent = "EXPLORA LAS CONEXIONES";
   selectLight(-1);
   activity();
@@ -196,7 +300,9 @@ document.addEventListener(
   (e) => {
     if (
       selected < 0 ||
-      e.target.closest?.("#detail,#detail-close,.orbit-node,dialog")
+      // Cualquier botón queda fuera de esto: los suyos ya deciden qué hacer, y pulsar
+      // pausa o sonido desde el chip no es «pulsar en vacío» —devolvía a la esfera—.
+      e.target.closest?.("#detail,#detail-close,.orbit-node,.field-sub,.rail,dialog,button")
     )
       return;
     if (e.target === canvas && consumeDragOutside()) return;

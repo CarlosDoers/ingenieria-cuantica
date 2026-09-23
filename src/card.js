@@ -2,6 +2,7 @@ import { $ } from './dom.js';
 import { selected } from './app.js';
 import {
   ANCHORS,
+  anchorScreen,
   CX,
   R,
   canvas,
@@ -33,7 +34,7 @@ export function positionCard() {
     $("#detail-close").hidden = true;
     return;
   }
-  const projectedNode = project(transform(ANCHORS[selected]));
+  const projectedNode = anchorScreen(selected); // en la esfera o ya en el chip
   detail.style.visibility = "visible";
   const root = $(".experience").getBoundingClientRect(),
     scene = canvas.getBoundingClientRect();
