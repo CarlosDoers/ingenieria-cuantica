@@ -104,6 +104,9 @@ export function stepCircuit(dt) {
     // Frente de lectura que cruza el chip de izquierda a derecha.
     const front = (circuit.t / MEASURE_SECONDS) * (1 + MEASURE_WIDTH * 2) - MEASURE_WIDTH;
     chip.nodes.forEach((node, i) => {
+      // Las motas no son cúbits: no se miden. Además caen fuera del tramo de lectura, así
+      // que el frente se las encontraba ya pasadas y se encendían antes de empezar.
+      if (node.dust) return;
       const u = (node.x - x0) / span,
         d = (front - u) / MEASURE_WIDTH;
       if (d < 0) return;

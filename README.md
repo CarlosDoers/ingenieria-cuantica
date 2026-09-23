@@ -1,4 +1,8 @@
-# Milla Cuántica + Campo de cúbits · Fusión
+# Ingeniería cuántica para la industria · Fusión de las dos propuestas
+
+> El cliente fijó el nombre el 23/09/2026: la web se llama **«Ingeniería cuántica para la
+> industria»**, no «Milla Cuántica». El repositorio, la carpeta y el paquete conservan el
+> nombre de trabajo `milla-campo` (viene de fusionar `milla-cuantica` con `campo-cubits`).
 
 Copia de trabajo acordada con el cliente (22/09/2026): `milla-cuantica` es el primer nivel
 y, al pulsar un territorio, **la esfera se transforma en el campo de cúbits** de
@@ -213,7 +217,7 @@ fotograma cada 16,7 ms, p95 de 17,2, sin tirones).
 
 ---
 
-# Milla Cuántica · Entrega de desarrollo
+# Entrega de desarrollo
 
 Última versión del prototipo, 7 de septiembre de 2026. Incluye la intro, esfera transparente, pulsos convergentes, cámara, fichas, coordenadas de Bloch y audio. Conserva los últimos ajustes: pestañas y botón Explorar sin sonido, ficha más elevada y controles superiores más pequeños.
 

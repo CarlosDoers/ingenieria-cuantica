@@ -99,15 +99,72 @@ header {
   width: 42px;
   height: 42px;
   color: var(--accent);
+  overflow: visible;
+}
+/* El estado del cúbit recorre el ecuador de la esfera del logotipo. Se mueve con
+   `transform` y `opacity`, que el navegador compone sin recalcular nada, así que un punto
+   dando vueltas no cuesta nada; y con movimiento reducido se queda quieto (la regla global
+   de `prefers-reduced-motion` apaga todas las animaciones). Se atenúa y encoge al pasar por
+   detrás, que es lo que da la vuelta a la esfera. */
+.mark-state {
+  transform-box: view-box;
+  transform-origin: 22px 22px;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: mark-state 7s linear infinite;
+}
+@keyframes mark-state {
+  0% {
+    transform: translate(17px, 0) scale(1);
+    opacity: 0.85;
+  }
+  12.5% {
+    transform: translate(12.02px, 4.24px) scale(1.08);
+    opacity: 0.95;
+  }
+  25% {
+    transform: translate(0, 6px) scale(1.15);
+    opacity: 1;
+  }
+  37.5% {
+    transform: translate(-12.02px, 4.24px) scale(1.08);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(-17px, 0) scale(1);
+    opacity: 0.8;
+  }
+  62.5% {
+    transform: translate(-12.02px, -4.24px) scale(0.88);
+    opacity: 0.55;
+  }
+  75% {
+    transform: translate(0, -6px) scale(0.78);
+    opacity: 0.4;
+  }
+  87.5% {
+    transform: translate(12.02px, -4.24px) scale(0.88);
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(17px, 0) scale(1);
+    opacity: 0.85;
+  }
 }
 .brand-name {
   font-size: 18px;
-  line-height: 1.06;
-  letter-spacing: -0.6px;
+  line-height: 1.12;
+  letter-spacing: -0.4px;
   font-weight: 600;
 }
+/* La segunda línea completa el nombre, en menor jerarquía: «Ingeniería cuántica» / «para la
+   industria». */
 .brand-name span {
   display: block;
+  font-size: 0.66em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 .location {
   font-size: 12px;
@@ -2178,6 +2235,12 @@ body {
   }
 }
 @media (max-width: 650px) {
+  /* El nombre completo más la ciudad no caben en una línea de móvil con el espaciado de
+     escritorio. */
+  .gateway-top small {
+    font-size: 8.5px;
+    letter-spacing: 1.2px;
+  }
   #hold-start {
     width: 94px;
     height: 94px;

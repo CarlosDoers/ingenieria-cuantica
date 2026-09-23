@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#080d10" />
     <meta
       name="description"
-      content="Explora la Milla Cuántica de Donostia: formación, ciencia, laboratorio, industria y ecosistema en una experiencia interactiva."
+      content="Ingeniería cuántica para la industria, en Donostia: formación, ciencia, laboratorio, industria y ecosistema en una experiencia interactiva."
     />
-    <title>Milla Cuántica · Donostia</title>
+    <title>Ingeniería cuántica para la industria · Donostia</title>
   </head>
   <body class="intro-active">
     <a class="skip" href="#universe">Ir a la esfera</a>
@@ -89,10 +89,10 @@
       </defs>
     </svg>
     <canvas id="quantum-background" aria-hidden="true"></canvas>
-    <section id="gateway" aria-label="Entrada a la Milla Cuántica">
+    <section id="gateway" aria-label="Entrada a Ingeniería cuántica para la industria">
       <canvas id="birth-canvas" aria-hidden="true"></canvas>
       <div class="gateway-top">
-        <span>milla cuántica.<small>DONOSTIA / SAN SEBASTIÁN</small></span
+        <span>ingeniería cuántica<small>PARA LA INDUSTRIA · DONOSTIA / SAN SEBASTIÁN</small></span
         ><button
           class="icon-button"
           id="intro-sound"
@@ -132,32 +132,20 @@
         <button
           class="brand"
           id="home"
-          aria-label="Milla Cuántica, volver al inicio"
+          aria-label="Ingeniería cuántica para la industria, volver al inicio"
         >
-          <svg class="brand-mark" viewBox="0 0 44 44">
+          <!-- Esfera de Bloch en miniatura: el estado del cúbit da vueltas por el
+               ecuador y se atenúa cuando pasa por detrás. Son dos animaciones CSS sobre un
+               solo punto (desplazamiento y opacidad), así que no cuestan nada y el ajuste
+               de movimiento reducido del sistema las apaga solo. -->
+          <svg class="brand-mark" viewBox="0 0 44 44" aria-hidden="true">
             <circle cx="22" cy="22" r="17" />
-            <ellipse
-              cx="22"
-              cy="22"
-              rx="8"
-              ry="17"
-              transform="rotate(40 22 22)"
-            />
-            <ellipse
-              cx="22"
-              cy="22"
-              rx="17"
-              ry="6"
-              transform="rotate(40 22 22)"
-            />
-            <circle
-              cx="34"
-              cy="10"
-              r="3"
-              fill="currentColor"
-              stroke="none"
-            /></svg
-          ><span class="brand-name">milla<span>cuántica.</span></span>
+            <ellipse cx="22" cy="22" rx="8" ry="17" transform="rotate(-20 22 22)" />
+            <ellipse cx="22" cy="22" rx="17" ry="6" transform="rotate(-20 22 22)" />
+            <g transform="rotate(-20 22 22)">
+              <circle class="mark-state" cx="22" cy="22" r="2.9" fill="currentColor" stroke="none" />
+            </g></svg
+          ><span class="brand-name">Ingeniería cuántica<span>para la industria</span></span>
         </button>
         <div class="location">
           <span class="dot"></span>Donostia / San Sebastián
@@ -172,7 +160,7 @@
           >
             <svg><use href="#i-sound" /></svg></button
           ><button class="text-button about-button" data-dialog="about">
-            Sobre la Milla ↗</button
+            Sobre el proyecto ↗</button
           ><button
             class="icon-button"
             id="kiosk"
@@ -192,14 +180,14 @@
         </div>
       </header>
       <main>
-        <section class="experience" aria-label="Explora la Milla Cuántica">
+        <section class="experience" aria-label="Explora la ingeniería cuántica para la industria">
           <svg id="point-signal" aria-hidden="true">
             <path class="signal-halo" />
             <path class="signal-line" />
             <path class="signal-travel" pathLength="100" />
             <circle r="3" />
           </svg>
-          <h1 class="sr-only">Explora la Milla Cuántica</h1>
+          <h1 class="sr-only">Ingeniería cuántica para la industria</h1>
           <button
             class="icon-button"
             id="detail-close"
@@ -229,7 +217,7 @@
               <span class="live"
                 ><span class="dot"></span
                 ><span id="scene-state">EXPLORA LAS CONEXIONES</span></span
-              ><span>MILLA CUÁNTICA</span>
+              ><span>INGENIERÍA CUÁNTICA</span>
             </div>
             <div class="scene" id="scene">
               <canvas
@@ -306,15 +294,15 @@
     <div class="idle-notice" id="idle-notice" hidden></div>
     <dialog id="about" aria-labelledby="about-title">
       <div class="dialog-top">
-        <h2 id="about-title">Una milla de conexiones.</h2>
+        <h2 id="about-title">Una red de conexiones.</h2>
         <button class="icon-button dialog-close" aria-label="Cerrar">
           <svg><use href="#i-close" /></svg>
         </button>
       </div>
       <p>
-        La Milla Cuántica se presenta como un espacio para acercarse a la
-        cuántica desde cinco perspectivas: aprender, investigar, experimentar,
-        aplicar y conectar.
+        La ingeniería cuántica para la industria se presenta aquí como un
+        espacio para acercarse a la cuántica desde cinco perspectivas: aprender,
+        investigar, experimentar, aplicar y conectar.
       </p>
       <p>
         Explora cada territorio para descubrir cómo la formación, la ciencia, el
@@ -322,7 +310,7 @@
       </p>
       <p class="panel-note">
         Primera propuesta de experiencia digital. Los textos son orientativos y
-        están pendientes de validación con el equipo de la Milla Cuántica. La
+        están pendientes de validación con el equipo del centro. La
         esfera es una interpretación artística, no una simulación física.
       </p>
     </dialog>
