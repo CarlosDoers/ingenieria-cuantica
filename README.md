@@ -138,8 +138,12 @@ entrada del menú lateral o con el tabulador— **adelanta su subnivel** encendi
 sin abrirlo; y señalar una pestaña señala su cúbit. Cada territorio tiene su propio reloj de
 luz, así que el adelanto viaja desde su sección aunque haya otro abierto.
 
-- **Vuelo entre territorios.** Al saltar de uno a otro desde el menú, la cámara se aleja un
-  poco a mitad de camino y vuelve a entrar (`field.lift`).
+- **Vuelo entre territorios: lateral y con algo de giro** (petición de diseño). La cámara se
+  desplaza a la misma altura —antes se alejaba a mitad de camino y, como mira en picado, eso
+  se veía como un subir y bajar— con curva suave en la salida y la llegada, y gira hacia el
+  lado al que va: hasta ~17° a mitad de vuelo, según cuánto del trayecto sea de lado, y se
+  endereza al llegar (`startFlight`, `FLIGHT_TURN`). Dura entre 1,05 y 1,9 s según la
+  distancia.
 - **Plano cercano.** Con la cámara dentro del chip hay cúbits detrás o pegados a ella: se
   dejan de dibujar con un fundido, y los botones de sección que caen ahí se ocultan.
 - **Etiquetas.** El botón de cada sección cubre su esfera (para poder pulsarla) y lleva el

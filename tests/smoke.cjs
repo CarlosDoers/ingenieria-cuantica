@@ -376,6 +376,21 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert.equal(w.eval("orbit.yawTo"), 0);
   assert.equal(w.eval("orbit.zoomTo"), 1);
   w.eval("stepCamera(1);stepCamera(1);stepCamera(1);draw()");
+  // Vuelo de un territorio a otro: **lateral y con algo de giro**, sin alejar la cámara
+  // —como mira en picado, alejarse era subir, y diseño pidió quitarlo—. El giro sube a mitad
+  // de camino y se deshace al llegar.
+  if (!reducedMotion) {
+    const k = w.eval("view.k");
+    d.querySelector('[data-rail="0"]').click();
+    let turned = 0;
+    for (let i = 0; i < 10; i++) {
+      w.eval("stepCamera(0.25);draw()");
+      assert(Math.abs(w.eval("view.k") - k) < 1e-9, "The camera never pulls back between territories");
+      turned = Math.max(turned, Math.abs(w.eval("field.turn")));
+    }
+    assert(turned > 0.05, "The flight turns on the way");
+    assert.equal(w.eval("field.turn"), 0, "…and straightens out on arrival");
+  }
   // Lo que sigue comprueba el primer nivel —puntos en la cara trasera de la esfera—, así
   // que se vuelve antes a la esfera: con un territorio abierto ya no hay esfera.
   d.querySelector("#detail-close").click();

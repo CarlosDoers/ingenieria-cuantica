@@ -168,7 +168,7 @@ const field = {
   aim: { x: 0, z: 0 },
   aimTo: { x: 0, z: 0 },
   preview: -1, // territorio señalado (sin abrir): adelanta su encendido
-  lift: 0, // cuánto se aleja la cámara al volar de un territorio a otro
+  turn: 0, // giro extra de la cámara durante el vuelo de un territorio a otro
 };
 /**
  * Lo que la persona ha girado, inclinado y acercado a mano, por encima del encuadre del
@@ -286,6 +286,36 @@ export function anchorScreen(i) {
   const hub = territories[i].hub;
   return project(blended(ANCHORS[i], hub, morphOf(qubitSource[hub])));
 }
+/**
+ * Vuelo de un territorio a otro dentro del chip: **lateral y con algo de giro** (petición de
+ * diseño). Antes la cámara se alejaba a mitad de camino —y como mira en picado, alejarse era
+ * subir— y el punto de mira se acercaba al destino con una curva exponencial, que arranca a
+ * toda velocidad. Ahora es un desplazamiento a la misma altura, con tiempo propio y curva
+ * suave en la salida y en la llegada, mientras la cámara gira hacia el lado al que va y se
+ * endereza al llegar.
+ */
+const flight = { active: false, t: 0, dur: 1, fx: 0, fz: 0, tx: 0, tz: 0, amp: 0, turn0: 0 };
+const FLIGHT_TURN = 0.3; // giro máximo a mitad de vuelo, en radianes (~17°)
+function startFlight() {
+  const dx = field.aimTo.x - field.aim.x,
+    dz = field.aimTo.z - field.aim.z,
+    dist = Math.hypot(dx, dz);
+  // Cuánto del trayecto es de lado según la cámara: el eje «derecha» de la pantalla, en
+  // coordenadas del chip, es (cos giro, sin giro). El giro va hacia ese lado y crece con el
+  // desplazamiento lateral, así que un salto casi frontal apenas gira.
+  const lateral = dx * view.cy + dz * view.sy;
+  flight.active = dist > 1e-4;
+  flight.t = 0;
+  flight.dur = Math.min(1.9, Math.max(1.05, 0.9 + (dist / SCALE) * 0.035));
+  flight.fx = field.aim.x;
+  flight.fz = field.aim.z;
+  flight.tx = field.aimTo.x;
+  flight.tz = field.aimTo.z;
+  flight.amp = Math.sign(lateral) * Math.min(FLIGHT_TURN, (Math.abs(lateral) / SCALE) * 0.02);
+  // Si se cambia de destino a mitad de otro vuelo, el giro que llevaba se deshace poco a
+  // poco en vez de saltar a cero.
+  flight.turn0 = field.turn;
+}
 /** Entra en el campo (o cambia de territorio dentro de él). */
 export function enterField(index) {
   const fromSphere = field.target === 0 && field.mix === 0;
@@ -298,19 +328,22 @@ export function enterField(index) {
   orbit.zoomTo = 1;
   if (fromSphere) {
     field.aim = { ...field.aimTo };
-    field.lift = 0;
+    field.turn = 0;
+    flight.active = false;
     orbit.yaw = orbit.pitch = 0;
     orbit.zoom = 1;
     field.wait = reduced.matches ? 0 : FIELD_DELAY;
     const a = ANCHORS[index];
     for (let i = 0; i < N; i++) pointDelay[i] = (Math.acos(dot(points[i], a)) / Math.PI) * FIELD_SPREAD;
   }
+  else startFlight();
   field.target = 1;
   if (reduced.matches) {
     // Sin animación no hay vuelo: se salta directamente al encuadre del territorio.
     field.mix = 1;
     field.aim = { ...field.aimTo };
-    field.lift = 0;
+    field.turn = 0;
+    flight.active = false;
     settleOrbit();
   }
 }
@@ -376,16 +409,27 @@ function stepField(dt) {
     field.mix = field.target > field.mix ? Math.min(field.target, field.mix + step) : Math.max(field.target, field.mix - step);
   }
   // Un paso de un segundo o más es un salto (movimiento reducido, pruebas): sin suavizado.
-  const instant = reduced.matches || dt >= 1,
-    k = instant ? 1 : 1 - Math.exp(-dt * 4);
-  field.aim.x += (field.aimTo.x - field.aim.x) * k;
-  field.aim.z += (field.aimTo.z - field.aim.z) * k;
-  // Al saltar de un territorio a otro la cámara se aleja un poco a mitad de camino y vuelve
-  // a entrar, como el vuelo de campo-cubits. Sin eso, a esta distancia, el chip pasaba por
-  // delante como un barrido.
-  const travel = Math.hypot(field.aimTo.x - field.aim.x, field.aimTo.z - field.aim.z);
-  field.lift = instant ? 0 : field.lift + (clamp01(travel / (14 * SCALE)) - field.lift) * (1 - Math.exp(-dt * 5));
-  if (field.lift < 1e-4) field.lift = 0;
+  const instant = reduced.matches || dt >= 1;
+  if (flight.active && !instant) {
+    flight.t += dt;
+    const p = clamp01(flight.t / flight.dur),
+      e = soft(p);
+    field.aim.x = flight.fx + (flight.tx - flight.fx) * e;
+    field.aim.z = flight.fz + (flight.tz - flight.fz) * e;
+    // El giro sube y baja con el trayecto: nada al salir, lo máximo a mitad, nada al llegar.
+    field.turn = Math.sin(Math.PI * e) * flight.amp + flight.turn0 * (1 - e);
+    if (p >= 1) {
+      flight.active = false;
+      field.turn = 0;
+      field.aim.x = field.aimTo.x;
+      field.aim.z = field.aimTo.z;
+    }
+  } else {
+    flight.active = false;
+    field.turn = 0;
+    field.aim.x = field.aimTo.x;
+    field.aim.z = field.aimTo.z;
+  }
   // Mientras se arrastra, la cámara sigue al dedo de cerca; al soltar o al volver al
   // encuadre del territorio, con más calma.
   const ko = instant ? 1 : 1 - Math.exp(-dt * (pointer ? 14 : 5));
@@ -456,10 +500,10 @@ function updateFieldStages() {
   fieldRaw = clamp01(field.mix / 0.7);
   fe = soft(fieldRaw);
   ff = soft(clamp01((field.mix - 0.12) / 0.88));
-  const yaw = FIELD_START.yaw + (FIELD_VIEW.yaw + orbit.yaw - FIELD_START.yaw) * ff,
+  const yaw = FIELD_START.yaw + (FIELD_VIEW.yaw + orbit.yaw + field.turn - FIELD_START.yaw) * ff,
     pitch = FIELD_START.pitch + (FIELD_VIEW.pitch + orbit.pitch - FIELD_START.pitch) * ff,
     small = compact.matches,
-    end = FIELD_VIEW.dist * (small ? 0.8 : 1) * orbit.zoom * (1 + 2.6 * field.lift);
+    end = FIELD_VIEW.dist * (small ? 0.8 : 1) * orbit.zoom;
   // Desplazamiento lateral de la cámara, en unidades de espacio de cámara a la distancia
   // del objetivo (donde una unidad mide `R` píxeles).
   view.pan = small && R > 0 ? ((W * 0.12) / R) * ff : 0;
@@ -1378,12 +1422,12 @@ export function draw() {
     lastView.oy !== orbit.yaw ||
     lastView.op !== orbit.pitch ||
     lastView.oz !== orbit.zoom ||
-    lastView.lf !== field.lift
+    lastView.tn !== field.turn
   ) {
     lastView.oy = orbit.yaw;
     lastView.op = orbit.pitch;
     lastView.oz = orbit.zoom;
-    lastView.lf = field.lift;
+    lastView.tn = field.turn;
     lastView.fm = field.mix;
     lastView.ax = field.aim.x;
     lastView.az = field.aim.z;
@@ -1735,7 +1779,7 @@ function moving() {
     camera.turning ||
     camera.mix !== camera.target ||
     Math.abs(field.aimTo.x - field.aim.x) + Math.abs(field.aimTo.z - field.aim.z) > 1e-4 ||
-    field.lift > 0 ||
+    flight.active ||
     orbit.yaw !== orbit.yawTo ||
     orbit.pitch !== orbit.pitchTo ||
     orbit.zoom !== orbit.zoomTo ||
