@@ -172,6 +172,14 @@ Pulsarla la señala: su cúbit se enciende del todo y las otras dos ceden un poc
 respuesta visible mientras no haya un tercer nivel. La luz del territorio recorre el camino
 real del chip —sección, puente, fila— hasta ellas.
 
+## Nombres en la esfera
+
+En el primer nivel **los cinco nombres se ven siempre** (petición de diseño), no solo al
+señalar un punto. La jerarquía la pone la profundidad: los de la cara de atrás van
+atenuados, más pequeños y por debajo de los de delante, aunque lo justo para que se sigan
+leyendo. En el chip se desvanecen todos menos el del territorio abierto —las demás
+secciones suelen caer fuera del encuadre— y reaparecen al señalarlos.
+
 ## Menú lateral
 
 Como el raíl de la propuesta de Bloch: los cinco territorios siempre a la vista a la

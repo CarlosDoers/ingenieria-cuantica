@@ -2723,7 +2723,27 @@ body:not(.intro-active) .rail-item {
   opacity: 1;
 }
 .orbit-node.is-hover .node-name {
-  display: block;
+  display: flex;
+}
+/* En la esfera **los cinco nombres se ven siempre** (petición de diseño): antes solo
+   aparecían al señalar el punto, y sin ellos la esfera no decía qué había en cada sitio.
+   La jerarquía la pone la profundidad —los puntos de la cara de atrás ya van atenuados— y
+   sus nombres quedan por debajo de los de delante. En el chip siguen como estaban: el del
+   territorio abierto y el que se señala, porque allí las demás secciones suelen caer fuera
+   del encuadre. */
+.scene .orbit-node .node-name {
+  display: flex;
+  transition: opacity 0.35s ease;
+}
+/* Al entrar en el chip los demás nombres se desvanecen en vez de desaparecer de golpe a
+   mitad de la transformación. */
+.scene.in-field
+  .orbit-node:not([aria-pressed="true"]):not(:hover):not(:focus-visible):not(.is-hover)
+  .node-name {
+  opacity: 0;
+}
+.orbit-node[data-back="true"]:not(:hover):not(:focus-visible):not(.is-hover) {
+  z-index: 2;
 }
 @media (max-width: 760px) {
   .rail-marker {

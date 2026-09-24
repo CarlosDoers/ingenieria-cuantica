@@ -1139,7 +1139,9 @@ export function positionNodes() {
     b.style.top = p.y + "px";
     // En el chip todos los territorios quedan a la vista y se puede saltar de uno a otro;
     // el abierto manda y los demás ceden.
-    const sphereOpacity = front ? 0.72 + 0.28 * Math.max(0, p.z) : 0.43,
+    // Los de la cara de atrás van atenuados, pero no tanto que su nombre —que ahora se ve
+    // siempre— deje de leerse.
+    const sphereOpacity = front ? 0.72 + 0.28 * Math.max(0, p.z) : 0.58,
       fieldOpacity = i === field.focus ? 1 : 0.62;
     b.style.opacity = String(sphereOpacity + (fieldOpacity - sphereOpacity) * fe);
     b.style.pointerEvents = "auto";
