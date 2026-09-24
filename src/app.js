@@ -173,11 +173,13 @@ rail.innerHTML =
   `<button class="rail-item rail-home" type="button" style="--i:0"><span class="rail-icon">${icon(
     "back"
   )}</span><span class="rail-name">Universo</span></button>` +
+  // Cada territorio con el mismo icono y el mismo color que lleva su punto en la esfera: el
+  // menú y la escena se leen como la misma cosa.
   DATA.map(
     (d, i) =>
-      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${
-        i + 1
-      }"><span class="rail-name">${d.name}</span></button>`
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${
+        d.color
+      }"><span class="rail-glyph">${icon(d.icon)}</span><span class="rail-name">${d.name}</span></button>`
   ).join("");
 $$(".rail-item[data-rail]").forEach((b) => {
   const i = Number(b.dataset.rail),

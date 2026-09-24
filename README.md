@@ -191,11 +191,15 @@ izquierda, alternativa a buscarlos en la esfera y navegable con teclado. Señala
 menú lo destaca también en la escena. Desde el chip se salta directamente a otro territorio
 y la cámara se desplaza por el chip hasta él.
 
-El menú se presenta de arriba abajo al terminar la intro, el territorio abierto **se ve más
-grande** —el nombre se escala, no cambia de cuerpo, así el menú no se recoloca a cada
-cambio— y la marca del activo es **una sola pieza que se desplaza** de uno a otro en el
-color del territorio, en vez de un borde que se enciende y se apaga: cuenta de dónde vienes
-y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
+Tiene forma de **índice en filas**, a la manera de studiors.be (petición de diseño): una
+línea fina arriba de la lista y otra bajo cada fila, delante del nombre **el mismo icono y el
+mismo color que lleva su punto en la esfera** —el menú y la escena se leen como la misma
+cosa—, y la fila entera que se desplaza hacia dentro al señalarla (0,4 s, curva de salida
+larga). Se presenta de arriba abajo al terminar la intro. El territorio abierto se queda
+desplazado, con el nombre algo mayor —se escala, no cambia de cuerpo, así el menú no se
+recoloca— y su icono encendido; y la marca del activo es **la línea bajo su
+fila, encendida, que se desliza** de una fila a otra, en vez de un borde que se enciende y se
+apaga: cuenta de dónde vienes y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
 dejar a la vista el territorio abierto y la vuelta se queda fija a la izquierda.
 
 Arriba va **«Universo»**, que vuelve a la esfera. Sin la ficha desapareció su X, y hacía falta
