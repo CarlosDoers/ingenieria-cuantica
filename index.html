@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#080d10" />
     <meta
       name="description"
-      content="Ingeniería cuántica para la industria, en Donostia: formación, ciencia, laboratorio, industria y ecosistema en una experiencia interactiva."
+      content="Ingeniería cuántica para la industria, en Donostia: formación, tecnologías cuánticas, del laboratorio a la industria, casos industriales y ecosistema vasco en una experiencia interactiva."
     />
     <title>Ingeniería cuántica para la industria · Donostia</title>
   </head>
@@ -47,9 +47,13 @@
           />
           <circle cx="12" cy="12" r="1" />
         </symbol>
-        <symbol id="i-lab" viewBox="0 0 24 24">
-          <path d="M9 3h6m-5 0v7l-6 9q-1 2 2 2h12q3 0 2-2l-6-9V3M7 15h10" />
-          <path d="M10 18h1m2-5h1" />
+        <!-- Del laboratorio a la industria: una línea que sube de nodo en nodo y acaba en
+             flecha (propuesta del cliente). -->
+        <symbol id="i-transfer" viewBox="0 0 24 24">
+          <circle cx="4" cy="19" r="1.7" />
+          <circle cx="10" cy="13" r="1.7" />
+          <circle cx="15" cy="17" r="1.7" />
+          <path d="M5.2 17.8 8.8 14.2M11.3 14.1l2.4 1.8M15.9 15.5 20 8M16.6 8H20v3.4" />
         </symbol>
         <symbol id="i-industry" viewBox="0 0 24 24">
           <path d="M3 21V9l7 4V9l6 4V3h4l1 18ZM7 17h1m4 0h1m4 0h1" />
@@ -60,17 +64,14 @@
           <circle cx="19" cy="18" r="3" />
           <path d="m10 7-4 8m8-8 4 8M8 18h8" />
         </symbol>
+        <symbol id="i-universe" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.4" transform="rotate(-20 12 12)" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" transform="rotate(-20 12 12)" />
+          <circle cx="20.4" cy="8.9" r="1.7" fill="currentColor" stroke="none" />
+        </symbol>
         <symbol id="i-expand" viewBox="0 0 24 24">
           <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
-        </symbol>
-        <symbol id="i-pause" viewBox="0 0 24 24">
-          <path d="M9 5v14M15 5v14" />
-        </symbol>
-        <symbol id="i-play" viewBox="0 0 24 24">
-          <path d="m8 4 12 8-12 8Z" />
-        </symbol>
-        <symbol id="i-reset" viewBox="0 0 24 24">
-          <path d="M4 10a8 8 0 1 1 1 8M4 4v6h6" />
         </symbol>
         <symbol id="i-touch" viewBox="0 0 24 24">
           <path
@@ -82,9 +83,6 @@
         </symbol>
         <symbol id="i-muted" viewBox="0 0 24 24">
           <path d="M3 9h4l5-4v14l-5-4H3Zm13 0 6 6m0-6-6 6" />
-        </symbol>
-        <symbol id="i-help" viewBox="0 0 24 24">
-          <path d="M9 8a3 3 0 0 1 6 0c0 3-3 2-3 5m0 4v.1" />
         </symbol>
       </defs>
     </svg>
@@ -168,14 +166,7 @@
             aria-pressed="false"
             title="Modo exposición"
           >
-            <svg><use href="#i-expand" /></svg></button
-          ><button
-            class="icon-button"
-            data-dialog="help"
-            aria-label="Cómo explorar"
-            title="Cómo explorar"
-          >
-            <svg><use href="#i-help" /></svg>
+            <svg><use href="#i-expand" /></svg>
           </button>
         </div>
       </header>
@@ -237,38 +228,6 @@
             <span class="pulse-label" id="pulse-label" aria-hidden="true"
               >TODO ESTÁ CONECTADO</span
             >
-            <div class="scene-controls">
-              <button
-                class="icon-button"
-                id="turn-left"
-                aria-label="Girar esfera a la izquierda"
-                title="Girar a la izquierda"
-              >
-                <svg><use href="#i-back" /></svg></button
-              ><button
-                class="icon-button"
-                id="turn-right"
-                aria-label="Girar esfera a la derecha"
-                title="Girar a la derecha"
-              >
-                <svg><use href="#i-arrow" /></svg></button
-              ><button
-                class="icon-button"
-                id="pause"
-                aria-label="Pausar animación"
-                aria-pressed="false"
-                title="Pausar animación"
-              >
-                <svg><use href="#i-pause" /></svg></button
-              ><button
-                class="icon-button"
-                id="reset"
-                aria-label="Reiniciar experiencia"
-                title="Reiniciar experiencia"
-              >
-                <svg><use href="#i-reset" /></svg>
-              </button>
-            </div>
             <div class="scene-footer" id="scene-instructions">
               <svg><use href="#i-touch" /></svg
               ><span>Toca un punto para conectar</span><span class="sep">/</span
@@ -280,16 +239,48 @@
         <noscript
           ><p>
             Este prototipo necesita JavaScript para mostrar la esfera y abrir
-            los contenidos. Sus cinco áreas son Grado, Ciencia, Laboratorio,
-            Industria y Ecosistema.
+            los contenidos. Sus cinco áreas son Formación, Tecnologías Cuánticas,
+            Del laboratorio a la Industria, Casos Industriales y Ecosistema Vasco.
           </p></noscript
         >
       </main>
       <footer class="site-footer">
-        <span>Donostia / San Sebastián</span
-        ><span>Un universo. Cinco conexiones.</span>
+        <span>Donostia / San Sebastián</span>
       </footer>
+      <!-- Menú en móvil: un botón abajo, al alcance del pulgar, que abre la navegación a
+           pantalla completa. En escritorio no se ve: allí está el menú lateral. -->
+      <div class="nav-dock">
+        <span class="nav-dock-label" aria-hidden="true">Menú</span>
+        <button
+          class="nav-orb"
+          id="nav-trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="nav-sheet"
+          aria-expanded="false"
+          aria-label="Abrir el menú"
+        >
+          <span class="nav-orb-core" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
+    <dialog id="nav-sheet" class="nav-sheet" aria-label="Navegación" tabindex="-1">
+      <div class="nav-sheet-panel">
+        <div class="nav-sheet-meta">
+          <span>// Navegación</span><span>Donostia / 2026</span>
+        </div>
+        <nav class="nav-sheet-links" id="nav-sheet-links" aria-label="Territorios"></nav>
+        <div class="nav-sheet-foot">
+          <span>Ingeniería cuántica para la industria</span><span>Esfera y campo de cúbits</span>
+        </div>
+      </div>
+      <div class="nav-dock nav-dock-in-sheet">
+        <span class="nav-dock-label" aria-hidden="true">Cerrar</span>
+        <button class="nav-orb is-open dialog-close" type="button" aria-label="Cerrar el menú">
+          <span class="nav-orb-core" aria-hidden="true"></span>
+        </button>
+      </div>
+    </dialog>
     <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
     <div class="idle-notice" id="idle-notice" hidden></div>
     <dialog id="about" aria-labelledby="about-title">
@@ -305,60 +296,14 @@
         investigar, experimentar, aplicar y conectar.
       </p>
       <p>
-        Explora cada territorio para descubrir cómo la formación, la ciencia, el
-        laboratorio, la industria y el ecosistema se relacionan entre sí.
+        Explora cada territorio para descubrir cómo la formación, las tecnologías
+        cuánticas, el paso del laboratorio a la industria, los casos industriales y el
+        ecosistema vasco se relacionan entre sí.
       </p>
       <p class="panel-note">
         Primera propuesta de experiencia digital. Los textos son orientativos y
         están pendientes de validación con el equipo del centro. La
         esfera es una interpretación artística, no una simulación física.
-      </p>
-    </dialog>
-    <dialog id="help" aria-labelledby="help-title">
-      <div class="dialog-top">
-        <h2 id="help-title">Sigue tu curiosidad.</h2>
-        <button class="icon-button dialog-close" aria-label="Cerrar">
-          <svg><use href="#i-close" /></svg>
-        </button>
-      </div>
-      <ul>
-        <li>
-          <strong>Toca un punto luminoso:</strong> aparece su nombre y se
-          iluminan las partículas cercanas. Varios pulsos parten de distintas
-          zonas y convergen en el punto elegido. La luz se acumula alrededor;
-          las partículas conservan su posición sobre la esfera.
-        </li>
-        <li>
-          <strong>Arrastra en horizontal:</strong> gira la esfera para descubrir
-          sus puntos. Los de la cara posterior también se ven, con menos
-          intensidad. También puedes usar los dos botones de flecha. En móvil,
-          desliza en vertical para recorrer la página.
-        </li>
-        <li>
-          <strong>Elige un territorio:</strong> selecciona uno de los cinco
-          puntos de la esfera para leer sus contenidos.
-        </li>
-        <li>
-          <strong>Con teclado:</strong> usa Tab y Enter. Sobre la esfera, las
-          flechas giran y el espacio crea un pulso de luz. Escape vuelve al
-          universo.
-        </li>
-        <li>
-          <strong>Modo exposición:</strong> el icono de las cuatro esquinas
-          amplía los controles y solicita pantalla completa. Después de 90
-          segundos sin interacción, vuelve al inicio.
-        </li>
-      </ul>
-      <p class="panel-note">
-        El icono de altavoz activa o silencia los sonidos y la música ambiental.
-        El audio comienza tras la primera interacción. Las fichas se abren desde
-        cada punto mediante un enlace luminoso. El eje z une los polos |0⟩ y
-        |1⟩; x e y definen el plano ecuatorial de la esfera de Bloch. Los ejes
-        giran con la esfera. Los cinco accesos son contenidos, no estados
-        cuánticos. La pausa detiene el giro y el avance del pulso, pero la luz
-        sigue respirando. Al elegir otro punto cambia la zona iluminada, sin
-        desplazar partículas. Con movimiento reducido, la composición cambia sin
-        animaciones ni pulsación.
       </p>
     </dialog>
     <script type="module" src="/src/main.js"></script>

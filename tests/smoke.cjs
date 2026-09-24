@@ -196,23 +196,23 @@ function check(reducedMotion = false, canvasAvailable = true) {
   }
   w.eval("emitWave(0,0)");
   assert(w.eval("waves.length") >= 2, "Free touches preserve original pulse");
-  if (!reducedMotion && canvasAvailable) {
-    d.querySelector("#pause").click();
-    w.eval("stepCamera(1);draw()");
-    const clock = w.eval("motionTime"),
-      lightClock = w.eval("elapsed"),
-      rotation = w.eval("rotationY");
-    w.eval("tick(lastFrame+100)");
-    assert.equal(w.eval("motionTime"), clock);
-    assert.equal(w.eval("rotationY"), rotation);
-    assert(w.eval("elapsed") > lightClock);
-  }
+  // Sin controles en la esquina: ni giro con botones, ni pausa, ni reinicio, ni lema.
+  ["#turn-left", "#turn-right", "#pause", "#reset", ".scene-controls"].forEach((sel) =>
+    assert.equal(d.querySelector(sel), null, `${sel} is gone`)
+  );
+  assert(!/Un universo\. Cinco conexiones/.test(d.querySelector(".site-footer").textContent));
   d.querySelector(".rail-home").click();
   assert(d.querySelector("#detail").hidden);
   assert.equal(w.eval("lightCenter()"), null);
   assert(d.querySelector(".rail-home").classList.contains("active"));
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
-  assert(d.querySelector(".rail-home .rail-icon svg"), "The universe entry carries its back arrow");
+  assert.equal(d.querySelector(".rail-home").textContent.trim(), "Universo Quantum");
+  assert(d.querySelector(".rail-home .rail-glyph svg"), "The first level carries its sphere icon");
+  assert.equal(
+    d.querySelectorAll(".rail-children .rail-item[data-rail]").length,
+    5,
+    "The five territories hang from the first level"
+  );
   assert.equal(w.eval("JSON.stringify(points)"), geometry);
   // Arrastrar la esfera la gira **siguiendo al dedo** también en vertical: hacia abajo, la
   // cara de delante baja. Antes giraba al revés que el arrastre.
@@ -322,8 +322,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
   );
   // El chip está vivo, como en campo-cubits: el circuito avanza por capas y cada cierto
   // tiempo un frente de lectura lo cruza y deja cada cúbit en |0⟩ o en |1⟩. Con movimiento
-  // reducido o con la escena pausada no corre: es movimiento, y el botón de pausa lo para.
-  if (d.querySelector("#pause").getAttribute("aria-pressed") === "true") d.querySelector("#pause").click();
+  // reducido no corre: es movimiento.
   if (!reducedMotion) {
     // El circuito ya lleva un rato corriendo, así que puede estar en cualquiera de sus tres
     // fases: lo que se comprueba es que el chip dice lo que hace.
@@ -342,13 +341,8 @@ function check(reducedMotion = false, canvasAvailable = true) {
       "Each qubit collapses to 0 or 1"
     );
     assert(/^Medida · /.test(d.querySelector("#chip-hud").textContent));
-    // Sin lienzo el botón de pausa está deshabilitado: ahí no hay animación que parar.
+    // Sin lienzo no hay cúbits dibujados que señalar.
     if (canvasAvailable) {
-      d.querySelector("#pause").click();
-      const frozen = w.eval("circuit.t");
-      w.eval("stepCamera(0.3);draw()");
-      assert.equal(w.eval("circuit.t"), frozen, "Pausing the scene pauses the circuit");
-      d.querySelector("#pause").click();
       // Señalar un cúbit lo dice: mismo rótulo que en campo-cubits.
       const hub = w.eval("territories[4].hub"),
         at = JSON.parse(w.eval(`JSON.stringify([qubitScreen[${hub}].x, qubitScreen[${hub}].y])`));
@@ -479,6 +473,26 @@ function check(reducedMotion = false, canvasAvailable = true) {
     "Outside click returns to the sphere"
   );
   assert.equal(w.eval("camera.target"), 0);
+  // Menú de móvil: el botón de abajo abre la navegación a pantalla completa, con el primer
+  // nivel y los cinco territorios; elegir en ella un territorio lo abre y cierra el panel.
+  const sheetEl = d.querySelector("#nav-sheet"),
+    trigger = d.querySelector("#nav-trigger");
+  trigger.click();
+  assert(sheetEl.hasAttribute("open"), "The mobile menu opens");
+  assert.equal(trigger.getAttribute("aria-expanded"), "true");
+  assert.equal(d.querySelectorAll(".sheet-link").length, 6, "First level plus five territories");
+  assert(d.querySelector(".sheet-home").classList.contains("active"), "It shows where you are");
+  d.querySelector('.sheet-link[data-sheet="3"]').click();
+  assert.equal(
+    d.querySelector(".rail-item.active").dataset.rail,
+    "3",
+    "Picking in the mobile menu opens that territory"
+  );
+  assert(d.querySelector('.sheet-link[data-sheet="3"]').classList.contains("active"));
+  assert(
+    reducedMotion ? !sheetEl.hasAttribute("open") : sheetEl.classList.contains("is-closing"),
+    "…and the menu closes"
+  );
   assert.equal(errors.length, 0, errors.join("\n"));
   assert.equal(
     d.querySelectorAll('script[src],link[rel="stylesheet"],img[src],iframe')
@@ -486,7 +500,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
     0
   );
   console.log(
-    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles.`
+    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, mobile menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles.`
   );
   dom.window.close();
 }

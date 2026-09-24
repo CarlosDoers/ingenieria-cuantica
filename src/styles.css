@@ -467,23 +467,9 @@ canvas:active {
 .scene-footer .sep {
   color: #42534f;
 }
-.scene-controls {
-  position: absolute;
-  right: 0;
-  bottom: 45px;
-  display: flex;
-  gap: 8px;
-  z-index: 3;
-}
-.scene-controls .icon-button {
-  width: 40px;
-  height: 40px;
-  background: #0b1317c9;
-}
-.scene-controls svg {
-  width: 16px;
-  height: 16px;
-}
+
+
+
 .pulse-label {
   position: absolute;
   bottom: 83px;
@@ -579,9 +565,7 @@ canvas:active {
   letter-spacing: 0.4px;
   color: #8a9c9d;
 }
-.site-footer span:last-child {
-  color: #93b7ae;
-}
+
 .detail {
   align-self: center;
   max-height: 100%;
@@ -886,9 +870,7 @@ noscript p {
     gap: 7px;
     font-size: 10px;
   }
-  .scene-controls {
-    bottom: 70px;
-  }
+
   .orbit-node {
     font-size: 12px;
     gap: 6px;
@@ -1015,15 +997,8 @@ noscript p {
     font-size: 10px;
     gap: 8px;
   }
-  .scene-controls {
-    bottom: 36px;
-    right: 4px;
-    gap: 5px;
-  }
-  .scene-controls .icon-button {
-    width: 34px;
-    height: 34px;
-  }
+
+
   .orbit-node {
     font-size: 11px;
     min-height: 44px;
@@ -1072,9 +1047,7 @@ noscript p {
   .site-footer span {
     max-width: 50%;
   }
-  .site-footer span:last-child {
-    text-align: right;
-  }
+
   .detail {
     order: 2;
     max-height: none;
@@ -1276,14 +1249,8 @@ header {
   font-size: 12px;
   gap: 15px;
 }
-.scene-controls {
-  right: 4px;
-  bottom: 1px;
-}
-.scene-controls .icon-button {
-  width: 38px;
-  height: 38px;
-}
+
+
 .pulse-label {
   display: none;
 }
@@ -1419,9 +1386,7 @@ header {
   padding: 14px 0;
   color: #717b9d;
 }
-.site-footer span:last-child {
-  color: #7c88ab;
-}
+
 .panel-note {
   border-color: #414b80;
 }
@@ -1520,10 +1485,7 @@ dialog::backdrop {
     gap: 9px;
     font-size: 11px;
   }
-  .scene-controls {
-    bottom: 38px;
-    right: 0;
-  }
+
   .stage-top {
     font-size: 9px;
     top: 5px;
@@ -1572,14 +1534,8 @@ dialog::backdrop {
   .scene-footer svg {
     width: 14px;
   }
-  .scene-controls {
-    bottom: 44px;
-    right: 0;
-  }
-  .scene-controls .icon-button {
-    width: 34px;
-    height: 34px;
-  }
+
+
   .orbit-node,
   .kiosk .orbit-node {
     width: 48px;
@@ -1784,9 +1740,7 @@ body {
 #sound[aria-pressed="false"] {
   opacity: 0.6;
 }
-.scene-controls {
-  z-index: 6;
-}
+
 .scene-footer {
   left: 150px;
   right: 150px;
@@ -1831,9 +1785,7 @@ body {
     right: 0;
     bottom: 0;
   }
-  .scene-controls {
-    bottom: 36px;
-  }
+
 }
 @media (max-width: 650px) {
   .experience,
@@ -1873,13 +1825,8 @@ body {
     font-size: 9px;
     gap: 6px;
   }
-  .scene-controls {
-    bottom: 35px;
-  }
-  .scene-controls .icon-button {
-    width: 32px;
-    height: 32px;
-  }
+
+
   .header-actions {
     gap: 7px;
   }
@@ -2235,9 +2182,7 @@ body {
     width: 40px;
     height: 40px;
   }
-  .scene-controls {
-    z-index: 6;
-  }
+
 }
 @media (max-width: 650px) {
   /* El nombre completo más la ciudad no caben en una línea de móvil con el espaciado de
@@ -2555,15 +2500,13 @@ body {
 /* El nombre va a la izquierda de su esfera: encima pisaba el puente, que sale de la
    sección hacia arriba y a la derecha. */
 .scene.in-field .orbit-node .node-name {
-  top: 50%;
-  left: auto;
-  /* El anillo sobresale un 30 % del radio de la esfera: el nombre se aparta también de él. */
-  right: calc(100% + var(--ball, 56px) * 0.16 + 12px);
-  transform: translateY(-50%);
-}
-.scene.in-field .orbit-node[data-side="right"] .node-name {
+  /* Debajo de su esfera, apartado del anillo, que sobresale un poco por abajo. A un lado se
+     metía encima del menú lateral en cuanto el nombre era largo («Del laboratorio a la
+     Industria»), y encima pisaba el puente, que sale de la sección hacia arriba. */
+  top: calc(100% + var(--ball, 56px) * 0.1 + 8px);
   right: auto;
-  left: calc(100% + var(--ball, 56px) * 0.16 + 12px);
+  left: 50%;
+  transform: translateX(-50%);
 }
 @media (max-width: 760px) {
   /* En estrecho las pestañas quedan más juntas: etiquetas más compactas, y el nombre de la
@@ -2571,13 +2514,6 @@ body {
   .field-sub {
     padding: 3px 7px;
     font-size: 11.5px;
-  }
-  .scene.in-field .orbit-node .node-name,
-  .scene.in-field .orbit-node[data-side="right"] .node-name {
-    top: calc(100% + var(--ball, 56px) * 0.1 + 8px);
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
   }
 }
 /* En el chip el arrastre orbita la cámara en las dos direcciones; con `pan-y` el vertical
@@ -2607,7 +2543,7 @@ body {
   z-index: 5;
   display: flex;
   flex-direction: column;
-  width: 236px;
+  width: 252px;
 }
 /* La marca del activo: una sola pieza que se desplaza de una fila a otra —la línea de debajo
    de la fila, encendida—. Se coloca con las medidas que le pasa `syncRail`, así que sirve en
@@ -2616,12 +2552,12 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100%;
+  width: var(--mw, 0px);
   height: 1px;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
-  transform: translateY(calc(var(--my, 0px) + var(--mh, 0px) - 1px));
-  transition: transform 0.5s var(--ease-out), background 0.3s, box-shadow 0.3s;
+  transform: translate(var(--mx, 0px), calc(var(--my, 0px) + var(--mh, 0px) - 1px));
+  transition: transform 0.5s var(--ease-out), width 0.5s var(--ease-out), background 0.3s, box-shadow 0.3s;
   pointer-events: none;
   z-index: 1;
 }
@@ -2673,6 +2609,10 @@ body:not(.intro-active) .rail-item {
    menú entero se recoloque a cada cambio. */
 .rail-name {
   display: inline-block;
+  /* Los nombres largos parten en dos líneas equilibradas: «Del laboratorio / a la
+     Industria» y no «Del laboratorio a la / Industria». */
+  text-wrap: balance;
+  line-height: 1.15;
   transform-origin: left center;
   transform: scale(var(--scale, 1));
   transition: transform 0.4s var(--ease-out);
@@ -2706,51 +2646,35 @@ body:not(.intro-active) .rail-item {
 .rail-item[data-rail].active .rail-name {
   --scale: 1.12;
 }
-/* «Universo» vuelve al primer nivel: no es un territorio más, así que va en versaleta, sin
-   número, por encima de la lista —su línea de abajo es la de arriba de la lista— y con una
-   flecha que solo aparece cuando hay algo de lo que volver. */
+/* «Universo Quantum» es el primer nivel —la esfera— y los territorios cuelgan de él. Va como
+   una fila más del menú pero con más peso: su esfera por icono, el nombre algo mayor y su
+   línea de abajo, que hace de línea de arriba de la lista. Cuando se está en él, su icono va
+   encendido y la marca se queda bajo su fila; con un territorio abierto, es la vuelta. */
 .rail-home {
-  align-items: center;
-  gap: 0;
-  padding: 0 0 12px;
+  font-size: 19px;
+  letter-spacing: -0.015em;
+  color: var(--text);
   border-bottom: 1px solid var(--rule);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
 }
-.rail-home .rail-icon {
-  display: inline-flex;
-  width: 0;
-  margin-right: 0;
-  opacity: 0;
-  transform: translateX(5px);
-  transition: width 0.4s var(--ease-out), margin-right 0.4s var(--ease-out), opacity 0.4s var(--ease-out),
-    transform 0.4s var(--ease-out);
+.rail-home .rail-glyph svg {
+  width: 20px;
+  height: 20px;
 }
-.rail-home .rail-icon svg {
-  width: 13px;
-  height: 13px;
+.rail:not(.has-selection) .rail-home .rail-glyph {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px var(--node-color));
 }
 .rail.has-selection .rail-home {
-  color: var(--text);
+  color: rgba(238, 240, 255, 0.82);
 }
-.rail.has-selection .rail-home .rail-icon {
-  width: 13px;
-  margin-right: 7px;
-  opacity: 0.8;
-}
-.rail.has-selection .rail-home:hover .rail-icon,
-.rail.has-selection .rail-home:focus-visible .rail-icon {
-  opacity: 1;
-  transform: translateX(-3px);
-}
-/* En el universo, «Universo» es dónde estás: la marca se queda en la línea de arriba de la
-   lista, sin el acento. */
-.rail:not(.has-selection) .rail-marker {
-  background: rgba(238, 240, 255, 0.45);
-  box-shadow: none;
+/* Los territorios, sangrados bajo el primer nivel y unidos a él por una línea vertical que
+   baja desde el centro de su esfera: se lee como un árbol de dos niveles. */
+.rail-children {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  padding-left: 16px;
+  border-left: 1px solid var(--rule);
 }
 /* Señalar un territorio en el menú lo destaca en la escena, como el hover sobre el punto. */
 .orbit-node.is-hover:after {
@@ -2781,61 +2705,285 @@ body:not(.intro-active) .rail-item {
   z-index: 2;
 }
 @media (max-width: 760px) {
-  .rail-marker {
-    left: 0;
-    top: auto;
-    bottom: 0;
-    width: var(--mw, 0);
-    height: 2px;
-    transform: translateX(var(--mx, 0));
-    transition: transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.36s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
+  /* En móvil el menú lateral deja paso al botón de abajo y su panel a pantalla completa. */
   .rail {
-    top: 30px;
-    left: 0;
-    right: 0;
-    width: auto;
-    transform: none;
-    flex-direction: row;
-    border-bottom: 1px solid var(--rule);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .rail::-webkit-scrollbar {
     display: none;
   }
-  .rail-item,
-  .rail-item[data-rail],
-  .rail-item:hover,
-  .rail-item:focus-visible,
-  .rail-item[data-rail].active {
-    margin: 0 0 -1px;
-    padding: 8px 12px;
-    gap: 7px;
-    border: 0;
-    font-size: 14px;
-    white-space: nowrap;
+}
+
+/* ---------- Menú de móvil ---------- */
+/* A partir del de aaronjcunningham.com (petición de diseño): un botón abajo, al alcance del
+   pulgar, que abre la navegación a pantalla completa. Filas con el icono del territorio, el
+   nombre enorme en peso fino y una flecha; cada fila con su color de territorio en la línea
+   de debajo —una rayita en reposo, entera en la activa—. En escritorio no se ve. */
+.nav-dock {
+  display: none;
+}
+@media (max-width: 760px) {
+  .nav-dock {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right) + 12px);
+    bottom: max(18px, env(safe-area-inset-bottom) + 12px);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  /* El menú se desplaza en horizontal, así que la vuelta se queda pegada a la izquierda:
-     si no, al abrir un territorio del final «Universo» se salía del encuadre —o peor, se
-     quedaba cortado a la mitad—. El degradado deja que los territorios pasen por debajo. */
-  .rail-home {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    margin-bottom: -1px;
-    padding: 8px 14px 8px 0;
-    border: 0;
-    border-right: 1px solid var(--rule);
-    font-size: 11px;
-    background: var(--bg);
-    box-shadow: 10px 0 12px -8px var(--bg);
+  /* Hueco al final de la página para que el botón no tape el pie. */
+  .site-footer {
+    padding-right: 96px;
   }
-  .rail-item[data-rail].active .rail-name {
-    --scale: 1.08;
+  /* La indicación de la escena se aparta del botón: alineada a la izquierda y, si no cabe,
+     en dos líneas. */
+  .scene-footer {
+    right: 100px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 4px;
   }
-  .rail-glyph svg {
-    width: 14px;
-    height: 14px;
-  }
+}
+.nav-dock-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(238, 240, 255, 0.5);
+}
+/* El botón: un círculo fino con un anillo dentro y un punto de luz en el centro. Abierto, el
+   punto se convierte en una cruz. */
+.nav-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 0;
+  border: 1px solid rgba(238, 240, 255, 0.72);
+  border-radius: 50%;
+  background: rgba(3, 4, 13, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.24s, box-shadow 0.24s, background-color 0.24s;
+}
+.nav-orb::after {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border: 1px solid rgba(238, 240, 255, 0.42);
+  border-radius: inherit;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s;
+}
+.nav-orb:hover,
+.nav-orb:focus-visible,
+.nav-orb:active {
+  border-color: rgba(238, 240, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(137, 181, 255, 0.2), 0 0 26px rgba(137, 181, 255, 0.22);
+}
+.nav-orb:focus-visible {
+  outline: 1px solid rgba(238, 240, 255, 0.9);
+  outline-offset: 5px;
+}
+.nav-orb-core {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f2f0ff;
+  box-shadow: 0 0 10px rgba(238, 240, 255, 0.45), 0 0 18px rgba(137, 181, 255, 0.4);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s, border-radius 0.4s, box-shadow 0.3s;
+}
+.nav-orb.is-open::after {
+  transform: scale(1.35);
+  opacity: 0;
+}
+.nav-orb.is-open .nav-orb-core {
+  width: 16px;
+  height: 1px;
+  border-radius: 0;
+  transform: rotate(45deg);
+  box-shadow: none;
+}
+.nav-orb.is-open .nav-orb-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  transform: rotate(90deg);
+}
+/* El panel. */
+.nav-sheet {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: max(64px, env(safe-area-inset-top) + 52px) 22px max(96px, env(safe-area-inset-bottom) + 86px);
+  border: 0;
+  color: var(--text);
+  background: radial-gradient(circle at 78% 14%, rgba(137, 181, 255, 0.08), transparent 38%),
+    linear-gradient(rgba(238, 240, 255, 0.028) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, rgba(238, 240, 255, 0.028) 1px, transparent 1px) 0 0 / 44px 44px,
+    rgba(3, 4, 13, 0.97);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1), transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-sheet[open] {
+  display: flex;
+  align-items: center;
+}
+.nav-sheet::backdrop {
+  background: transparent;
+}
+.nav-sheet:focus {
+  outline: none;
+}
+.nav-sheet.is-open {
+  opacity: 1;
+  transform: none;
+}
+.nav-sheet.is-closing {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition-delay: 0.18s;
+}
+.nav-sheet-panel {
+  width: 100%;
+}
+.nav-sheet-meta,
+.nav-sheet-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: rgba(238, 240, 255, 0.4);
+}
+.nav-sheet-meta {
+  padding-bottom: 20px;
+}
+.nav-sheet-meta span:first-child {
+  color: var(--accent);
+}
+.nav-sheet-foot {
+  padding-top: 20px;
+}
+.nav-sheet-links {
+  display: grid;
+  border-top: 1px solid rgba(238, 240, 255, 0.18);
+}
+.sheet-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: clamp(62px, 11vh, 92px);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(238, 240, 255, 0.18);
+  background: transparent;
+  color: #f2f0ff;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-sheet.is-open .sheet-link {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(0.08s + var(--i) * 0.06s);
+}
+.nav-sheet.is-closing .sheet-link {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.24s, transform 0.34s cubic-bezier(0.7, 0, 0.84, 0);
+  transition-delay: calc((5 - var(--i)) * 0.035s);
+}
+/* La línea de cada fila en su color: una rayita en reposo y entera en la activa. */
+.sheet-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--row);
+  box-shadow: 0 0 16px var(--row);
+  opacity: 0.85;
+  transform: scaleX(0.07);
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+}
+.sheet-glyph {
+  display: inline-flex;
+  color: var(--row);
+  opacity: 0.55;
+  transition: opacity 0.3s;
+}
+.sheet-glyph svg {
+  width: 20px;
+  height: 20px;
+}
+/* El nombre, enorme y fino. La pila busca el peso más fino que tenga cada sistema: Helvetica
+   Neue y SF en iOS, Roboto en Android. */
+.sheet-name {
+  font-family: "Helvetica Neue", -apple-system, "SF Pro Display", Roboto, system-ui, sans-serif;
+  font-size: clamp(22px, 6.6vw, 40px);
+  font-weight: 100;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  /* Los nombres del cliente son largos («Del laboratorio a la Industria»): parten en dos
+     líneas equilibradas en vez de salirse. */
+  text-wrap: balance;
+  padding: 10px 0;
+  transition: transform 0.58s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* «Universo Quantum» es el primer nivel y su nombre es más largo: va algo menor, en una
+   línea. */
+.sheet-home .sheet-name {
+  font-size: clamp(20px, 5.8vw, 34px);
+}
+.sheet-go {
+  font-size: 13px;
+  color: rgba(238, 240, 255, 0.42);
+  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s;
+}
+.sheet-link.active::after,
+.sheet-link:focus-visible::after,
+.sheet-link:active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+.sheet-link.active .sheet-name,
+.sheet-link:focus-visible .sheet-name,
+.sheet-link:active .sheet-name {
+  transform: translateX(10px);
+}
+.sheet-link.active .sheet-glyph,
+.sheet-link:focus-visible .sheet-glyph {
+  opacity: 1;
+}
+.sheet-link.active .sheet-go,
+.sheet-link:focus-visible .sheet-go {
+  color: var(--row);
+  transform: translate(3px, -3px);
+}
+.sheet-link:focus-visible {
+  outline: 1px solid var(--row);
+  outline-offset: 4px;
+}
+/* El botón de cerrar va en el mismo sitio que el de abrir: parece el mismo, que cambia. */
+.nav-dock-in-sheet {
+  display: flex;
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right) + 12px);
+  bottom: max(18px, env(safe-area-inset-bottom) + 12px);
+  align-items: center;
+  gap: 12px;
 }

@@ -168,19 +168,23 @@ rail.innerHTML =
   // La marca del activo es **una sola pieza que se desplaza** de un territorio a otro, no un
   // borde que se enciende y se apaga: el menú cuenta así de dónde vienes y a dónde vas.
   `<span class="rail-marker" aria-hidden="true"></span>` +
-  // «Universo» no es un territorio más: es la vuelta al primer nivel. Va aparte, en
-  // versaleta, y le sale una flecha cuando de verdad hay algo de lo que volver.
-  `<button class="rail-item rail-home" type="button" style="--i:0"><span class="rail-icon">${icon(
-    "back"
-  )}</span><span class="rail-name">Universo</span></button>` +
+  // «Universo Quantum» es **el primer nivel**, la esfera, y los cinco territorios cuelgan de
+  // él: va como un elemento más del menú —con su esfera por icono y algo mayor— y los
+  // territorios, sangrados debajo y unidos por una línea de árbol. Antes era una etiqueta
+  // pequeña en versaleta encima de la lista, y no se leía como el nivel de arriba.
+  `<button class="rail-item rail-home" type="button" style="--i:0;--node-color:#9aa9ff"><span class="rail-glyph">${icon(
+    "universe"
+  )}</span><span class="rail-name">Universo Quantum</span></button>` +
   // Cada territorio con el mismo icono y el mismo color que lleva su punto en la esfera: el
   // menú y la escena se leen como la misma cosa.
+  `<div class="rail-children">` +
   DATA.map(
     (d, i) =>
       `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${
         d.color
       }"><span class="rail-glyph">${icon(d.icon)}</span><span class="rail-name">${d.name}</span></button>`
-  ).join("");
+  ).join("") +
+  `</div>`;
 $$(".rail-item[data-rail]").forEach((b) => {
   const i = Number(b.dataset.rail),
     mark = (on) => {
@@ -211,17 +215,101 @@ function syncRail() {
     } else b.removeAttribute("aria-current");
   });
   rail.classList.toggle("has-selection", selected >= 0);
+  syncSheet();
   if (!current) return;
-  // La marca se coloca con las medidas del elemento activo, no con un índice: así vale
-  // igual en vertical y en la versión horizontal de pantallas estrechas, y no se descoloca
-  // si cambian el texto o el tamaño de letra.
+  // La marca se coloca con las medidas del elemento activo, no con un índice: así no se
+  // descoloca si cambian el texto o el tamaño de letra.
   rail.style.setProperty("--my", current.offsetTop + "px");
   rail.style.setProperty("--mh", current.offsetHeight + "px");
   rail.style.setProperty("--mx", current.offsetLeft + "px");
   rail.style.setProperty("--mw", current.offsetWidth + "px");
-  // En horizontal el menú se desplaza: el territorio abierto tiene que quedar a la vista.
-  if (rail.scrollWidth > rail.clientWidth + 4)
-    current.scrollIntoView({ inline: "center", block: "nearest", behavior: reduced.matches ? "instant" : "smooth" });
+}
+/**
+ * Menú de móvil (petición de diseño, a partir del de aaronjcunningham.com): en vez del menú
+ * lateral, un botón **abajo**, al alcance del pulgar, que abre la navegación a pantalla
+ * completa. Filas con el icono del territorio, el nombre enorme en peso fino y una flecha;
+ * cada fila con **su color de territorio** en la línea de debajo, que se alarga entera en la
+ * activa. Entran escalonadas y salen al revés.
+ *
+ * Va en un `<dialog>` modal: atrapa el foco, deja el resto de la página inerte y se cierra
+ * con Escape. Donde no hay `showModal` (el entorno de pruebas), se abre con el atributo.
+ */
+const sheet = $("#nav-sheet"),
+  sheetLinks = $("#nav-sheet-links"),
+  trigger = $("#nav-trigger");
+const UNIVERSE_COLOR = "#9aa9ff";
+sheetLinks.innerHTML =
+  `<button class="sheet-link sheet-home" type="button" style="--i:0;--row:${UNIVERSE_COLOR}"><span class="sheet-glyph">${icon(
+    "universe"
+  )}</span><span class="sheet-name">Universo Quantum</span><span class="sheet-go" aria-hidden="true">↗</span></button>` +
+  DATA.map(
+    (d, i) =>
+      `<button class="sheet-link" type="button" data-sheet="${i}" style="--i:${i + 1};--row:${d.color}"><span class="sheet-glyph">${icon(
+        d.icon
+      )}</span><span class="sheet-name">${d.name}</span><span class="sheet-go" aria-hidden="true">↗</span></button>`
+  ).join("");
+let sheetTimer = 0;
+function openSheet() {
+  clearTimeout(sheetTimer);
+  syncSheet();
+  sheet.classList.remove("is-closing");
+  if (sheet.showModal) {
+    if (!sheet.open) sheet.showModal();
+  } else sheet.setAttribute("open", "");
+  // El foco entra en el panel y no en su primera fila: si no, esa fila sale con el marco de
+  // foco como si estuviera elegida. Con teclado, Tab entra en las filas.
+  sheet.focus({ preventScroll: true });
+  // Un fotograma después, para que la entrada escalonada parta del estado cerrado.
+  requestAnimationFrame(() => sheet.classList.add("is-open"));
+  trigger.setAttribute("aria-expanded", "true");
+  activity();
+}
+function closeSheet(instant = false) {
+  if (!sheet.hasAttribute("open")) return;
+  const done = () => {
+    sheet.classList.remove("is-open", "is-closing");
+    if (sheet.close) sheet.close();
+    else sheet.removeAttribute("open");
+    trigger.setAttribute("aria-expanded", "false");
+  };
+  clearTimeout(sheetTimer);
+  if (instant || reduced.matches) return done();
+  sheet.classList.add("is-closing");
+  sheetTimer = setTimeout(done, 520);
+}
+trigger.addEventListener("click", openSheet);
+// Si la pantalla pasa a ancho de escritorio con el panel abierto —girar una tableta—, se
+// cierra: ahí manda el menú lateral y el panel se quedaría tapándolo todo.
+matchMedia("(max-width: 760px)").addEventListener("change", (e) => {
+  if (!e.matches) closeSheet(true);
+});
+sheet.querySelector(".dialog-close").addEventListener("click", () => closeSheet());
+// Escape cierra con la misma salida animada que el botón.
+sheet.addEventListener("cancel", (e) => {
+  e.preventDefault();
+  closeSheet();
+});
+sheet.addEventListener("close", () => trigger.setAttribute("aria-expanded", "false"));
+$(".sheet-home").addEventListener("click", () => {
+  if (selected >= 0) resetExperience(false);
+  closeSheet();
+});
+$$(".sheet-link[data-sheet]").forEach((b) =>
+  b.addEventListener("click", () => {
+    // La transformación arranca ya, detrás del menú mientras se desvanece.
+    const i = Number(b.dataset.sheet);
+    if (selected !== i) selectTerritory(i, { focus: false });
+    else recenterField();
+    closeSheet();
+  })
+);
+function syncSheet() {
+  $$(".sheet-link").forEach((b) => {
+    const on = b.dataset.sheet === undefined ? selected < 0 : Number(b.dataset.sheet) === selected;
+    b.classList.toggle("active", on);
+    if (on) b.setAttribute("aria-current", "true");
+    else b.removeAttribute("aria-current");
+  });
 }
 addEventListener("resize", syncRail);
 syncRail();
@@ -262,7 +350,6 @@ function resetExperience(focus = false, { restart = false } = {}) {
 }
 $("#detail-close").addEventListener("click", () => resetExperience(true));
 $("#home").addEventListener("click", () => resetExperience(true));
-$("#reset").addEventListener("click", () => resetExperience(true, { restart: true }));
 $("#next").addEventListener("click", () =>
   selectTerritory((selected + 1) % 5, { audible: false })
 );
@@ -272,7 +359,7 @@ $$("[data-dialog]").forEach((b) =>
     activity();
   })
 );
-$$("dialog").forEach((d) => {
+$$("dialog:not(.nav-sheet)").forEach((d) => {
   d.querySelector(".dialog-close").addEventListener("click", () => d.close());
   d.addEventListener("click", (e) => {
     if (e.target === d) {

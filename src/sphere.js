@@ -1,8 +1,8 @@
-import { $, $$, icon, reduced } from './dom.js';
+import { $, $$, reduced } from './dom.js';
 import { SCALE, assignSources, chip } from './field.js';
 import { circuit, circuitStatus, resetCircuit, stepCircuit } from './circuit.js';
 import { DATA } from './content.js';
-import { activity, announce, nodeEls, selected } from './app.js';
+import { activity, nodeEls, selected } from './app.js';
 import { positionCard } from './card.js';
 import { sound } from './audio.js';
 import { drawBackdrop } from './background.js';
@@ -12,8 +12,9 @@ import { drawBackdrop } from './background.js';
 export const canvas = $("#universe"),
   ctx = canvas.getContext("2d");
 /**
- * Pausa del movimiento. La declaraba `app.js`, que no la usaba para nada: la leen y la
- * escriben `tick` y `syncMotion`, que están aquí.
+ * Pausa del movimiento: el giro de la esfera, los pulsos y el circuito del chip. Ya no hay
+ * botón de pausa —se quitó con los controles de la esquina—, así que solo la activa el
+ * ajuste de movimiento reducido del sistema.
  */
 let paused = reduced.matches;
 export let W = 0,
@@ -443,7 +444,7 @@ function stepField(dt) {
   }
   updateLinks(dt);
   // El circuito solo corre mientras se ve el chip —en la esfera no hay nada que medir— y se
-  // para con el botón de pausa, que es el que para el movimiento de la escena.
+  // para con el movimiento reducido, como el resto de la escena.
   if (fe > 0.3 && !paused) stepCircuit(dt);
   for (let i = 0; i < flash.length; i++) {
     const to = circuit.pulse[i] * 0.85;
@@ -1195,11 +1196,6 @@ export function positionNodes() {
     if (chipView) {
       const r = (i === field.focus ? HUB_R * 1.15 : HUB_R) * view.k * R * p.scale;
       b.style.setProperty("--ball", Math.round(r * 2) + "px");
-      // El nombre va al lado contrario del puente: al orbitar, el puente puede quedar a la
-      // izquierda de la sección y el nombre lo taparía.
-      const [ea, eb] = chip.edges[territories[i].path[0]],
-        bridge = qubitScreen[ea === territories[i].hub ? eb : ea];
-      b.dataset.side = bridge && bridge.x < p.x - 4 ? "right" : "left";
     }
   });
   // Pestañas del territorio abierto, cada una sobre su cúbit hija y por encima de su
@@ -1369,11 +1365,6 @@ export function emitWave(x, y, hue = 230, audible = false) {
 export function setRotation(y, x) {
   rotationY = y;
   rotationX = x;
-}
-export function turnBy(delta) {
-  camera.turning = false;
-  rotationY += delta;
-  draw();
 }
 export function clearWaves() {
   waves = [];
@@ -1810,33 +1801,11 @@ function tick(now) {
 export function syncMotion() {
   cancelAnimationFrame(raf);
   raf = 0;
-  $("#pause").innerHTML = icon(paused ? "play" : "pause");
-  const label = paused
-    ? "Reanudar pulso y giro"
-    : "Pausar pulso y giro; mantener luz viva";
-  $("#pause").setAttribute("aria-label", label);
-  $("#pause").title = label;
-  $("#pause").setAttribute("aria-pressed", String(paused));
   if (!document.hidden && !reduced.matches) {
     lastFrame = performance.now();
     raf = requestAnimationFrame(tick);
   } else draw();
 }
-$("#pause").addEventListener("click", () => {
-  if (reduced.matches) {
-    announce(
-      "El dispositivo tiene movimiento reducido. La iluminación cambia sin animación."
-    );
-    return;
-  }
-  paused = !paused;
-  syncMotion();
-  announce(
-    paused
-      ? "Pulso y giro pausados. La luz sigue respirando."
-      : "Pulso y giro reanudados."
-  );
-});
 reduced.addEventListener("change", () => {
   paused = reduced.matches;
   syncMotion();

@@ -130,7 +130,7 @@ la retícula mientras nadie lo toca:
   después, otro circuito.
 - La medida **se aparta del menú**: se atenúa mientras hay un territorio abierto y no toca su
   camino encendido, o el recorrido de la luz se perdería entre el ruido de fondo.
-- No corre con movimiento reducido, con la escena pausada ni en la esfera.
+- No corre con movimiento reducido ni en la esfera.
 
 **Señalar** (hover), también como en el original: un cúbit señalado crece, se eleva y dice su
 nombre (`Q·084 · |1⟩`, con el bit si está medido); señalar una **sección** —su bola, su
@@ -147,9 +147,10 @@ luz, así que el adelanto viaja desde su sección aunque haya otro abierto.
 - **Plano cercano.** Con la cámara dentro del chip hay cúbits detrás o pegados a ella: se
   dejan de dibujar con un fundido, y los botones de sección que caen ahí se ocultan.
 - **Etiquetas.** El botón de cada sección cubre su esfera (para poder pulsarla) y lleva el
-  nombre al lado contrario del puente; las pestañas se elevan según el radio en pantalla de
-  su esfera. En estrecho (≤ 760 px) la cámara se acerca algo más y se desplaza para centrar
-  el grupo, las etiquetas son más compactas y el nombre de la sección va debajo.
+  nombre **debajo**: a un lado se metía encima del menú lateral en cuanto el nombre era
+  largo, y encima pisaba el puente. Las pestañas se elevan según el radio en pantalla de su
+  esfera. En estrecho (≤ 760 px) la cámara se acerca algo más y se desplaza para centrar el
+  grupo, y las etiquetas son más compactas.
 - Los bordes de la escena se funden con el fondo en el chip, que ahora llega hasta ellos.
 - **Movimiento reducido:** sin vuelos; la cámara salta al encuadre y la órbita se aplica al
   instante.
@@ -175,6 +176,30 @@ Cada pestaña del territorio es una hija en el chip, con su nombre encima (`.fie
 Pulsarla la señala: su cúbit se enciende del todo y las otras dos ceden un poco. Es la única
 respuesta visible mientras no haya un tercer nivel. La luz del territorio recorre el camino
 real del chip —sección, puente, fila— hasta ellas.
+
+## Sin controles en la esquina
+
+Fuera los cuatro botones de abajo a la derecha —girar a un lado y a otro, pausa y reiniciar—
+y el lema «Un universo. Cinco conexiones.» (petición de diseño). La esfera se sigue girando
+arrastrando o con las flechas del teclado; la vuelta al primer nivel está en «Universo» del
+menú y en el logotipo; y el reinicio completo lo sigue haciendo la vuelta por inactividad
+del modo exposición. La pausa queda solo para quien tenga activado el movimiento reducido
+en su sistema.
+
+También fuera el botón «?» de arriba a la derecha y el diálogo de ayuda que abría —solo se
+llegaba a él por ese botón—. Arriba quedan el sonido, «Sobre el proyecto» y el modo
+exposición.
+
+## Nombres de los territorios
+
+Los del cliente: **Formación**, **Tecnologías Cuánticas**, **Del laboratorio a la
+Industria**, **Casos Industriales** y **Ecosistema Vasco** (en `content.js`). Son bastante más
+largos que los de trabajo, así que en el menú lateral y en el de móvil parten en dos líneas
+equilibradas cuando no caben («Del laboratorio / a la Industria»). Iconos: los de Formación,
+Tecnologías Cuánticas y Casos Industriales ya coincidían con los propuestos; Del laboratorio
+a la Industria usa el propuesto —una línea que sube de nodo en nodo hasta una flecha—, que
+cuenta el paso mejor que el matraz de antes; Ecosistema Vasco conserva la red de nodos,
+porque el globo propuesto se confundía en el menú con la esfera de «Universo Quantum».
 
 ## Nombres en la esfera
 
@@ -202,12 +227,34 @@ fila, encendida, que se desliza** de una fila a otra, en vez de un borde que se 
 apaga: cuenta de dónde vienes y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
 dejar a la vista el territorio abierto y la vuelta se queda fija a la izquierda.
 
-Arriba va **«Universo»**, que vuelve a la esfera. Sin la ficha desapareció su X, y hacía falta
-una vuelta visible: en un kiosco táctil no basta con Escape ni con adivinar que se puede
-pulsar en vacío (las dos cosas siguen funcionando). No es un territorio más y no se pinta
-como tal: va en versaleta, separado por una regla, y **le sale una flecha solo cuando hay
-algo de lo que volver** —en el universo no lleva a ninguna parte, y ahí solo dice dónde
-estás—.
+Arriba va **«Universo Quantum»**, el primer nivel —la esfera—, y los cinco territorios
+**cuelgan de él**: es una fila del menú como las demás pero con más peso (su esfera por
+icono y el nombre algo mayor), y los territorios van sangrados debajo, unidos por una línea
+de árbol que baja desde el centro de su esfera. Antes era una etiqueta pequeña en versaleta
+encima de la lista y no se leía como el nivel de arriba. Cuando se está en él, su icono va
+encendido y la marca se queda bajo su fila; con un territorio abierto, pulsarlo vuelve a la
+esfera. Sin la ficha desapareció su X y hacía falta una vuelta visible: en un kiosco táctil
+no basta con Escape ni con adivinar que se puede pulsar en vacío (las dos cosas siguen
+funcionando). En móvil va fijo a la izquierda del menú horizontal.
+
+## Menú en móvil
+
+En pantallas estrechas (≤ 760 px) el menú lateral deja paso a **un botón abajo a la
+derecha**, al alcance del pulgar, que abre la navegación **a pantalla completa** (petición
+de diseño, a partir del menú de aaronjcunningham.com). El botón es un círculo fino con un
+anillo y un punto de luz; abierto, el punto se vuelve una cruz en el mismo sitio.
+
+El panel lleva arriba «// Navegación» y abajo un pie, en monoespaciada, sobre una retícula
+tenue. Cada fila tiene el icono del territorio, el nombre **enorme en peso fino y en
+mayúsculas** —la pila de fuentes busca el más fino de cada sistema: Helvetica Neue y SF en
+iOS, Roboto en Android— y una flecha. La línea de debajo de cada fila va en **el color de
+su territorio**: una rayita en reposo y entera en la activa, que además desplaza el nombre.
+Las filas entran escalonadas desde abajo y salen al revés. «Universo Quantum» va el primero
+y algo menor, porque su nombre es más largo.
+
+Es un `<dialog>` modal: atrapa el foco, deja el resto de la página inerte y se cierra con
+Escape. Al elegir un territorio, la transformación arranca detrás mientras el panel se
+desvanece.
 
 ## Fluidez de la transición
 

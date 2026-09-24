@@ -3,7 +3,7 @@
 export const DATA = [
   {
     id: "grado",
-    name: "Grado",
+    name: "Formación",
     verb: "Aprender a transformar",
     icon: "degree",
     color: "#ba97ff",
@@ -69,7 +69,7 @@ export const DATA = [
   },
   {
     id: "ciencia",
-    name: "Ciencia",
+    name: "Tecnologías Cuánticas",
     verb: "Entender lo invisible",
     icon: "science",
     color: "#89b5ff",
@@ -134,9 +134,9 @@ export const DATA = [
   },
   {
     id: "laboratorio",
-    name: "Laboratorio",
+    name: "Del laboratorio a la Industria",
     verb: "De la idea al experimento",
-    icon: "lab",
+    icon: "transfer",
     color: "#62ccff",
     hue: 201,
     title: "Aquí, las preguntas se ponen a prueba.",
@@ -196,7 +196,7 @@ export const DATA = [
   },
   {
     id: "industria",
-    name: "Industria",
+    name: "Casos Industriales",
     verb: "Convertir ideas en impacto",
     icon: "industry",
     color: "#cf8cff",
@@ -262,7 +262,7 @@ export const DATA = [
   },
   {
     id: "ecosistema",
-    name: "Ecosistema",
+    name: "Ecosistema Vasco",
     verb: "Conectar para avanzar",
     icon: "eco",
     color: "#71dcff",
