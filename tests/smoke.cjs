@@ -214,6 +214,26 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
   assert(d.querySelector(".rail-home .rail-icon svg"), "The universe entry carries its back arrow");
   assert.equal(w.eval("JSON.stringify(points)"), geometry);
+  // Arrastrar la esfera la gira **siguiendo al dedo** también en vertical: hacia abajo, la
+  // cara de delante baja. Antes giraba al revés que el arrastre.
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);draw()");
+  {
+    const canvasEl = d.querySelector("#universe");
+    canvasEl.setPointerCapture = canvasEl.releasePointerCapture = () => {};
+    canvasEl.hasPointerCapture = () => false;
+    const drag = (type, y) => {
+      const ev = new w.Event(type, { bubbles: true });
+      Object.assign(ev, { pointerId: 11, button: 0, clientX: 300, clientY: y });
+      canvasEl.dispatchEvent(ev);
+    };
+    const front = "transform({ x: 0, y: 0, z: 1 }).y";
+    const before = w.eval(front);
+    drag("pointerdown", 200);
+    drag("pointermove", 230);
+    drag("pointermove", 260);
+    drag("pointerup", 260);
+    assert(w.eval(front) > before, "Dragging down moves the sphere's front face down");
+  }
   // Sección en el chip, pestañas colocadas y sin haz; entrar también desde el menú.
   for (let i = 0; i < 5; i++) {
     const spin = w.eval("JSON.stringify([rotationY, rotationX])");

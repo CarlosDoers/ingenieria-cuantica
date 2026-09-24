@@ -1835,7 +1835,9 @@ canvas.addEventListener("pointermove", (e) => {
     } else {
       camera.turning = false;
       rotationY += dx * 0.006;
-      rotationX = Math.max(-1.1, Math.min(1.1, rotationX + dy * 0.003));
+      // La esfera sigue al dedo en las dos direcciones: arrastrar hacia abajo baja la cara
+      // de delante. Con el signo al revés, en vertical giraba en contra del arrastre.
+      rotationX = Math.max(-1.1, Math.min(1.1, rotationX - dy * 0.003));
       draw();
     }
   }
@@ -1903,8 +1905,10 @@ canvas.addEventListener("keydown", (e) => {
     camera.turning = false;
     if (e.key === "ArrowLeft") rotationY -= 0.12;
     if (e.key === "ArrowRight") rotationY += 0.12;
-    if (e.key === "ArrowUp") rotationX -= 0.1;
-    if (e.key === "ArrowDown") rotationX += 0.1;
+    // Igual que el arrastre: flecha arriba sube la cara de delante. Con el mismo tope, que
+    // sin él se podía dar la vuelta a la esfera por el polo.
+    if (e.key === "ArrowUp") rotationX = Math.min(1.1, rotationX + 0.1);
+    if (e.key === "ArrowDown") rotationX = Math.max(-1.1, rotationX - 0.1);
     draw();
   }
 });
