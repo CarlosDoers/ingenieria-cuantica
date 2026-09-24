@@ -177,6 +177,10 @@ function check(reducedMotion = false, canvasAvailable = true) {
     );
     // Con un territorio abierto, «Universo» es la vuelta al primer nivel y lo enseña.
     assert(d.querySelector("#rail").classList.contains("has-selection"));
+    // Al abrir un territorio **ninguna pestaña sale señalada**, ni en su etiqueta ni en su
+    // cúbit: la señala quien la pulsa.
+    assert.equal(d.querySelectorAll('.field-sub[aria-pressed="true"]').length, 0, "No tab marked on open");
+    assert.equal(w.eval("field.tab"), -1);
     // Cada pestaña es un cúbit del chip; pulsarla la señala (y sigue cargando su contenido).
     for (let j = 0; j < 3; j++) {
       d.querySelectorAll(".field-sub")[j].click();

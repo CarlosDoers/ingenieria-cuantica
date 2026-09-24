@@ -128,7 +128,7 @@ function selectTerritory(index, { focus = true, audible = true } = {}) {
   // Segundo nivel: la esfera se transforma en el campo de cúbits. Las pestañas de la ficha
   // pasan a ser las hijas del territorio en el chip, unidas a él por el puente.
   $("#field-subs").innerHTML = d.tabs
-    .map((t, i) => `<button class="field-sub" type="button" data-tab="${i}" aria-pressed="${i === 0}">${t.name}</button>`)
+    .map((t, i) => `<button class="field-sub" type="button" data-tab="${i}" aria-pressed="false">${t.name}</button>`)
     .join("");
   $$(".field-sub").forEach((b, i) => {
     b.addEventListener("click", () => renderTab(i));

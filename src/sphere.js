@@ -322,7 +322,9 @@ export function enterField(index) {
   const fromSphere = field.target === 0 && field.mix === 0;
   field.focus = index;
   field.aimTo = { ...territories[index].aim };
-  field.tab = 0;
+  // Ninguna pestaña señalada al abrir: la señala quien la pulsa. Antes salía la primera,
+  // resto de cuando había ficha y siempre había una pestaña abierta.
+  field.tab = -1;
   litT[index] = 0;
   // Cada territorio se abre en su encuadre: lo que se hubiera girado a mano se deshace.
   orbit.yawTo = orbit.pitchTo = 0;
