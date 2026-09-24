@@ -60,7 +60,8 @@ dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlo
 ## El segundo nivel, como campo-cubits
 
 **Encuadre final** (`FIELD_VIEW` en `sphere.js`): cámara girada 0,44 rad, picado de 0,48 rad
-y muy cerca. La sección queda grande abajo a la izquierda con su anillo, el puente sube a la
+y muy cerca, y **corrida un 7 % del ancho hacia la derecha** (`view.pan`) para que el
+territorio quede lejos del menú lateral. La sección queda grande abajo a la izquierda con su anillo, el puente sube a la
 derecha y la fila de pestañas se aleja en diagonal con sus nombres encima. El punto de mira
 (`AIM_ALONG`, `AIM_SIDE` en `field.js`) cae casi en la fila de las hijas. Es una **cámara de
 verdad**, con distancia y perspectiva, no un zoom de la imagen: arranca en la de la esfera
@@ -194,8 +195,9 @@ exposición.
 
 Los del cliente: **Formación**, **Tecnologías Cuánticas**, **Del laboratorio a la
 Industria**, **Casos Industriales** y **Ecosistema Vasco** (en `content.js`). Son bastante más
-largos que los de trabajo, así que en el menú lateral y en el de móvil parten en dos líneas
-equilibradas cuando no caben («Del laboratorio / a la Industria»). Iconos: los de Formación,
+largos que los de trabajo: en el menú lateral van **en una sola línea** —el menú se ajusta a
+su nombre más largo— y en el de móvil parten en dos líneas equilibradas cuando no caben («Del
+laboratorio / a la Industria»). Iconos: los de Formación,
 Tecnologías Cuánticas y Casos Industriales ya coincidían con los propuestos; Del laboratorio
 a la Industria usa el propuesto —una línea que sube de nodo en nodo hasta una flecha—, que
 cuenta el paso mejor que el matraz de antes; Ecosistema Vasco conserva la red de nodos,

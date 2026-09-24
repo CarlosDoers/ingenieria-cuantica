@@ -507,7 +507,9 @@ function updateFieldStages() {
     end = FIELD_VIEW.dist * (small ? 0.8 : 1) * orbit.zoom;
   // Desplazamiento lateral de la cámara, en unidades de espacio de cámara a la distancia
   // del objetivo (donde una unidad mide `R` píxeles).
-  view.pan = small && R > 0 ? ((W * 0.12) / R) * ff : 0;
+  // En escritorio el territorio se corre un poco a la derecha, lejos del menú lateral; en
+  // estrecho, algo más, para que la sección no se salga por la izquierda.
+  view.pan = R > 0 ? ((W * (small ? 0.12 : 0.07)) / R) * ff : 0;
   view.cy = Math.cos(yaw);
   view.sy = Math.sin(yaw);
   view.cp = Math.cos(pitch);

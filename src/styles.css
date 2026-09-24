@@ -2543,7 +2543,9 @@ body {
   z-index: 5;
   display: flex;
   flex-direction: column;
-  width: 252px;
+  /* El menú se ajusta a su nombre más largo: cada territorio en una sola línea. */
+  width: max-content;
+  min-width: 236px;
 }
 /* La marca del activo: una sola pieza que se desplaza de una fila a otra —la línea de debajo
    de la fila, encendida—. Se coloca con las medidas que le pasa `syncRail`, así que sirve en
@@ -2571,7 +2573,7 @@ body {
   background: transparent;
   color: rgba(238, 240, 255, 0.82);
   font: inherit;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: padding-left 0.4s var(--ease-out), color 0.4s var(--ease-out);
@@ -2609,10 +2611,7 @@ body:not(.intro-active) .rail-item {
    menú entero se recoloque a cada cambio. */
 .rail-name {
   display: inline-block;
-  /* Los nombres largos parten en dos líneas equilibradas: «Del laboratorio / a la
-     Industria» y no «Del laboratorio a la / Industria». */
-  text-wrap: balance;
-  line-height: 1.15;
+  white-space: nowrap;
   transform-origin: left center;
   transform: scale(var(--scale, 1));
   transition: transform 0.4s var(--ease-out);
@@ -2644,7 +2643,7 @@ body:not(.intro-active) .rail-item {
   filter: drop-shadow(0 0 4px var(--node-color));
 }
 .rail-item[data-rail].active .rail-name {
-  --scale: 1.12;
+  --scale: 1.08;
 }
 /* «Universo Quantum» es el primer nivel —la esfera— y los territorios cuelgan de él. Va como
    una fila más del menú pero con más peso: su esfera por icono, el nombre algo mayor y su
