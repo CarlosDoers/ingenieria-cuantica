@@ -2,7 +2,7 @@ import { $, $$, icon, reduced } from './dom.js';
 import { DATA } from './content.js';
 import {
   canvas,
-  consumeDragOutside,
+  consumeCanvasClick,
   enterField,
   focusCamera,
   hoverFieldTab,
@@ -394,7 +394,7 @@ document.addEventListener(
       e.target.closest?.("#detail,#detail-close,.orbit-node,.field-sub,.rail,dialog,button")
     )
       return;
-    if (e.target === canvas && consumeDragOutside()) return;
+    if (e.target === canvas && consumeCanvasClick()) return;
     resetExperience(false);
   },
   true

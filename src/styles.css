@@ -2451,6 +2451,7 @@ body {
   transition: border-color 0.2s, color 0.2s;
 }
 .field-sub:hover,
+.field-sub.is-hover,
 .field-sub[aria-pressed="true"] {
   border-color: var(--accent);
   color: #fff;

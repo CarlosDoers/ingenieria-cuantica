@@ -43,7 +43,8 @@ export const camera = {
   restY: 0.12,
   restX: -0.1,
 };
-let draggedOutside = false;
+/** El último gesto sobre el lienzo ya se resolvió (un arrastre, o pulsar una pestaña). */
+let swallowClick = false;
 export let elapsed = 0;
 let motionTime = 0,
   lastIdle = 0,
@@ -262,14 +263,21 @@ function chipCam(x, h, z) {
  * vertical, la retícula no se desalinea nunca— y el empujoncito de lo que está señalado.
  */
 const BREATH = 0.045 * SCALE;
-const HOVER_LIFT = 0.16 * SCALE;
+const HOVER_LIFT = 0.08 * SCALE;
+/**
+ * ¿Es este cúbit una pestaña del territorio abierto? Son lo único del chip que se pulsa —van a
+ * ser enlaces a sus páginas—, así que son lo único que crece y se eleva al señalarlo.
+ */
+function isOpenTab(qi) {
+  return field.focus >= 0 && childOf[qi] === field.focus;
+}
 function heightOf(node) {
   // La fase va por **fila y columna**, no por distancia: la retícula se hizo mucho más fina
   // al crecer, y midiendo en unidades del mundo los vecinos respiraban casi a la vez y la
   // oblea entera subía y bajaba como una plancha.
   return (
     BREATH * Math.sin(elapsed * 0.8 + node.col * 0.35 + (node.row + (node.bridge ? 0.5 : 0)) * 0.9) +
-    HOVER_LIFT * hover[node.index]
+    (isOpenTab(node.index) ? HOVER_LIFT * hover[node.index] : 0)
   );
 }
 function fieldCam(node) {
@@ -326,6 +334,7 @@ export function enterField(index) {
   // resto de cuando había ficha y siempre había una pestaña abierta.
   field.tab = -1;
   litT[index] = 0;
+  tabHover = -2; // etiquetas nuevas: que se vuelva a aplicar la marca de la señalada
   // Cada territorio se abre en su encuadre: lo que se hubiera girado a mano se deshace.
   orbit.yawTo = orbit.pitchTo = 0;
   orbit.zoomTo = 1;
@@ -622,9 +631,12 @@ function ballStyle(qi, b) {
   // Destello del frente de lectura y cúbit señalado con el puntero.
   lum += (96 - lum) * gate * 0.55;
   sat *= 1 - 0.45 * gate;
-  lum += (92 - lum) * 0.35 * hov;
-  size *= 1 + 0.35 * gate + 0.5 * hov;
-  b.glow += 0.5 * gate + 0.4 * hov;
+  // Señalar: solo las pestañas crecen —son lo que se pulsa— y con mesura; el resto de
+  // cúbits apenas se ilumina, lo justo para acompañar al rótulo con su nombre.
+  const tab = isOpenTab(qi);
+  lum += (92 - lum) * (tab ? 0.35 : 0.2) * hov;
+  size *= 1 + 0.35 * gate + (tab ? 0.22 : 0) * hov;
+  b.glow += 0.5 * gate + (tab ? 0.35 : 0.12) * hov;
   b.h = hue;
   b.s = sat;
   b.l = lum;
@@ -639,7 +651,7 @@ function ballStyle(qi, b) {
   b.gloss = 0.9 - 0.75 * clamp01(b.bright);
   // Halo de alrededor, con los mismos pesos que la capa de halos de campo-cubits: casi nada
   // en reposo, y lo que de verdad lo levanta son el encendido, la medida y el puntero.
-  b.halo = 0.05 + 0.3 * gate + 0.13 * read * (one ? 1 : 0.15) + 0.28 * hov + 0.22 * lit + b.glow * 0.3;
+  b.halo = 0.05 + 0.3 * gate + 0.13 * read * (one ? 1 : 0.15) + (tab ? 0.24 : 0.1) * hov + 0.22 * lit + b.glow * 0.3;
 }
 /**
  * Cúbit bajo el puntero. Se busca sobre lo ya dibujado —posición y radio en pantalla del
@@ -665,7 +677,20 @@ function pickQubit(x, y) {
  * Rótulo del cúbit señalado y estado del circuito, los dos de `campo-cubits`. Se escriben
  * desde el dibujado porque el cúbit respira y el estado cambia solo con el tiempo.
  */
+/**
+ * Pestaña señalada desde su esfera: su etiqueta se marca igual que si se señalara la propia
+ * etiqueta. Se guarda la última para no tocar el DOM en cada fotograma; `enterField` la
+ * olvida, porque las etiquetas se rehacen al cambiar de territorio.
+ */
+let tabHover = -1;
+function syncTabHover() {
+  const j = hoverQ >= 0 && isOpenTab(hoverQ) ? territories[field.focus].children.indexOf(hoverQ) : -1;
+  if (j === tabHover) return;
+  tabHover = j;
+  $$(".field-sub").forEach((b, i) => b.classList.toggle("is-hover", i === j));
+}
 function updateChipHud() {
+  syncTabHover();
   const tip = $("#qubit-tip"),
     hud = $("#chip-hud"),
     on = fe > 0.3;
@@ -678,7 +703,8 @@ function updateChipHud() {
     }
   }
   if (!tip) return;
-  const b = hoverQ >= 0 ? balls[hoverQ] : null;
+  // Las pestañas ya tienen su etiqueta con nombre: el rótulo técnico se pegaba encima.
+  const b = hoverQ >= 0 && !isOpenTab(hoverQ) ? balls[hoverQ] : null;
   if (!on || !b || !b.vis) {
     if (!tip.hidden) tip.hidden = true;
     return;
@@ -1373,10 +1399,13 @@ export function setRotation(y, x) {
 export function clearWaves() {
   waves = [];
 }
-/** Devuelve si el último gesto sobre la esfera fue un arrastre, y consume la marca. */
-export function consumeDragOutside() {
-  const was = draggedOutside;
-  draggedOutside = false;
+/**
+ * Devuelve si el último gesto sobre el lienzo ya se resolvió —un arrastre, o pulsar una
+ * pestaña del chip— y consume la marca. Así `app.js` no lo toma por un toque en vacío.
+ */
+export function consumeCanvasClick() {
+  const was = swallowClick;
+  swallowClick = false;
   return was;
 }
 
@@ -1820,7 +1849,7 @@ document.addEventListener("visibilitychange", () => {
 });
 canvas.addEventListener("pointerdown", (e) => {
   if (pointer || e.button !== 0) return;
-  draggedOutside = false;
+  swallowClick = false;
   pointer = {
     id: e.pointerId,
     x: e.clientX,
@@ -1837,6 +1866,8 @@ canvas.addEventListener("pointermove", (e) => {
   if (inField() && (!pointer || !pointer.dragged)) {
     const r = canvas.getBoundingClientRect();
     hoverQ = pickQubit(e.clientX - r.left, e.clientY - r.top);
+    // Sobre una pestaña, mano: es lo que se pulsa.
+    canvas.style.cursor = hoverQ >= 0 && isOpenTab(hoverQ) ? "pointer" : "";
   }
   if (!pointer || pointer.id !== e.pointerId) return;
   const dx = e.clientX - pointer.lastX,
@@ -1864,8 +1895,19 @@ canvas.addEventListener("pointermove", (e) => {
 canvas.addEventListener("pointerup", (e) => {
   if (!pointer || pointer.id !== e.pointerId) return;
   const dragged = pointer.dragged;
-  draggedOutside = dragged;
+  swallowClick = dragged;
   pointer = null;
+  // Pulsar la esfera de una pestaña la señala, igual que pulsar su etiqueta. Antes contaba
+  // como un toque en vacío y devolvía a la esfera.
+  if (!dragged && inField()) {
+    const r = canvas.getBoundingClientRect(),
+      qi = pickQubit(e.clientX - r.left, e.clientY - r.top);
+    if (qi >= 0 && isOpenTab(qi)) {
+      const j = territories[field.focus].children.indexOf(qi);
+      $$(".field-sub")[j]?.click();
+      swallowClick = true;
+    }
+  }
   if (canvas.hasPointerCapture(e.pointerId))
     canvas.releasePointerCapture(e.pointerId);
   // En el chip un toque en vacío es volver a la esfera (lo resuelve `app.js`); el pulso
@@ -1882,6 +1924,7 @@ canvas.addEventListener("pointerup", (e) => {
 });
 canvas.addEventListener("pointerleave", () => {
   hoverQ = -1;
+  canvas.style.cursor = "";
 });
 canvas.addEventListener("pointercancel", () => {
   pointer = null;

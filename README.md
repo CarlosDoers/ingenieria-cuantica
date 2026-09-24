@@ -133,10 +133,16 @@ la retícula mientras nadie lo toca:
   camino encendido, o el recorrido de la luz se perdería entre el ruido de fondo.
 - No corre con movimiento reducido ni en la esfera.
 
-**Señalar** (hover), también como en el original: un cúbit señalado crece, se eleva y dice su
-nombre (`Q·084 · |1⟩`, con el bit si está medido); señalar una **sección** —su bola, su
-entrada del menú lateral o con el tabulador— **adelanta su subnivel** encendiendo su camino
-sin abrirlo; y señalar una pestaña señala su cúbit. Cada territorio tiene su propio reloj de
+**Señalar** (hover). **Solo las pestañas del territorio abierto crecen** —un 22 %, con una
+elevación discreta— y ponen el cursor de mano: son lo único del chip que se pulsa, porque van
+a ser enlaces a sus páginas. Esfera y etiqueta responden como una sola cosa: señalar la
+esfera marca el borde de su etiqueta como si se señalara la etiqueta, y pulsar la esfera la
+señala igual que pulsar la etiqueta (antes contaba como un toque en vacío y devolvía a la
+esfera). El resto de cúbits, como en el
+original, solo se ilumina un poco y dice su nombre (`Q·084 · |1⟩`, con el bit si está
+medido); en las pestañas ese rótulo no sale, que ya tienen el suyo. Señalar una **sección**
+—su bola, su entrada del menú lateral o con el tabulador— **adelanta su subnivel**
+encendiendo su camino sin abrirlo, y señalar la etiqueta de una pestaña señala su cúbit. Cada territorio tiene su propio reloj de
 luz, así que el adelanto viaja desde su sección aunque haya otro abierto.
 
 - **Vuelo entre territorios: lateral y con algo de giro** (petición de diseño). La cámara se

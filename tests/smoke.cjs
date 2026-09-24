@@ -357,6 +357,26 @@ function check(reducedMotion = false, canvasAvailable = true) {
       input("pointerleave", {});
       w.eval("stepCamera(0.1);draw()");
       assert(d.querySelector("#qubit-tip").hidden, "The label goes with the pointer");
+      // Pulsar la esfera de una pestaña la señala, igual que su etiqueta, y no cuenta como un
+      // toque en vacío: se sigue en el chip.
+      const tabQ = w.eval("territories[4].children[1]"),
+        tp = JSON.parse(w.eval(`JSON.stringify([qubitScreen[${tabQ}].x, qubitScreen[${tabQ}].y])`));
+      // Señalar la esfera de una pestaña marca su etiqueta, como si se señalara la etiqueta.
+      input("pointermove", { clientX: tp[0], clientY: tp[1] });
+      w.eval("stepCamera(0.1);draw()");
+      assert(d.querySelectorAll(".field-sub")[1].classList.contains("is-hover"), "Hovering a tab's qubit marks its label");
+      input("pointerleave", {});
+      w.eval("stepCamera(0.1);draw()");
+      assert(!d.querySelectorAll(".field-sub")[1].classList.contains("is-hover"), "…and leaving unmarks it");
+      input("pointerdown", { clientX: tp[0], clientY: tp[1] });
+      input("pointerup", { clientX: tp[0], clientY: tp[1] });
+      surface.dispatchEvent(new w.MouseEvent("click", { bubbles: true, clientX: tp[0], clientY: tp[1] }));
+      assert.equal(
+        d.querySelector('.field-sub[aria-pressed="true"]'),
+        d.querySelectorAll(".field-sub")[1],
+        "Clicking a tab's qubit marks that tab"
+      );
+      assert.equal(d.querySelector(".rail-item.active").dataset.rail, "4", "…and stays in the chip");
     }
   }
   // Pulsar en el menú el territorio ya abierto recoloca la cámara y no lo cierra.
