@@ -90,7 +90,9 @@
     <section id="gateway" aria-label="Entrada a Ingeniería cuántica para la industria">
       <canvas id="birth-canvas" aria-hidden="true"></canvas>
       <div class="gateway-top">
-        <span>Ingeniería cuántica<small>PARA LA INDUSTRIA · DONOSTIA / SAN SEBASTIÁN</small></span
+        <span class="gateway-brand"
+          ><img class="brand-mark" src="/src/assets/brand/logo-q.png" width="60" height="60" alt=""
+          /><span>Ingeniería cuántica<small>PARA LA INDUSTRIA · DONOSTIA / SAN SEBASTIÁN</small></span></span
         ><button
           class="icon-button"
           id="intro-sound"
@@ -119,10 +121,16 @@
           aria-valuenow="0"
         ></div>
         <p id="birth-hint">
-          Pulsa con el ratón o manteniendo la tecla espacio.
+          Pulsa con el ratón o manteniendo la tecla espacio
         </p>
         <p id="birth-status" role="status" aria-live="polite"></p>
-        <button id="skip-intro">Entrar directamente</button>
+        <!-- Socios, del Figma «Universo Quantum» (nodo 1:727): exportados tal cual. -->
+        <ul class="gateway-partners" aria-label="Socios">
+          <li><img src="/src/assets/partners/ehu.svg" width="55" height="55" alt="EHU, Universidad del País Vasco" /></li>
+          <li><img src="/src/assets/partners/tecnalia.svg" width="87" height="37" alt="Tecnalia" /></li>
+          <li><img src="/src/assets/partners/gaia.svg" width="88" height="38" alt="GAIA" /></li>
+          <li><img src="/src/assets/partners/euskampus.png" width="128" height="27" alt="Euskampus" /></li>
+        </ul>
       </div>
     </section>
     <div class="shell">
@@ -132,18 +140,9 @@
           id="home"
           aria-label="Ingeniería cuántica para la industria, volver al inicio"
         >
-          <!-- Esfera de Bloch en miniatura: el estado del cúbit da vueltas por el
-               ecuador y se atenúa cuando pasa por detrás. Son dos animaciones CSS sobre un
-               solo punto (desplazamiento y opacidad), así que no cuestan nada y el ajuste
-               de movimiento reducido del sistema las apaga solo. -->
-          <svg class="brand-mark" viewBox="0 0 44 44" aria-hidden="true">
-            <circle cx="22" cy="22" r="17" />
-            <ellipse cx="22" cy="22" rx="8" ry="17" transform="rotate(-20 22 22)" />
-            <ellipse cx="22" cy="22" rx="17" ry="6" transform="rotate(-20 22 22)" />
-            <g transform="rotate(-20 22 22)">
-              <circle class="mark-state" cx="22" cy="22" r="2.9" fill="currentColor" stroke="none" />
-            </g></svg
-          ><span class="brand-name">Ingeniería cuántica<span>para la industria</span></span>
+          <!-- Logotipo del Figma «Universo Quantum» (nodo 1:762): la Q de puntos. -->
+          <img class="brand-mark" src="/src/assets/brand/logo-q.png" width="60" height="60" alt=""
+          /><span class="brand-name">Ingeniería cuántica<span>para la industria</span></span>
         </button>
         <div class="location">
           <span class="dot"></span>Donostia / San Sebastián

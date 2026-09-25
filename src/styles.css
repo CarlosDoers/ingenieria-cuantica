@@ -110,60 +110,15 @@ header {
   padding: 0;
   min-height: 48px;
 }
+/* Logotipo del Figma: una imagen cuadrada con aire transparente alrededor de la Q (que ocupa
+   del 25 % al 80 % del ancho). Se muestra al tamaño del diseño, 60 px, y los márgenes
+   negativos recogen ese aire: la Q queda a ras del borde del contenido, a unos 10 px del
+   nombre como en el Figma, y la cabecera no crece. */
 .brand-mark {
-  width: 42px;
-  height: 42px;
-  color: var(--accent);
-  overflow: visible;
-}
-/* El estado del cúbit recorre el ecuador de la esfera del logotipo. Se mueve con
-   `transform` y `opacity`, que el navegador compone sin recalcular nada, así que un punto
-   dando vueltas no cuesta nada; y con movimiento reducido se queda quieto (la regla global
-   de `prefers-reduced-motion` apaga todas las animaciones). Se atenúa y encoge al pasar por
-   detrás, que es lo que da la vuelta a la esfera. */
-.mark-state {
-  transform-box: view-box;
-  transform-origin: 22px 22px;
-  filter: drop-shadow(0 0 3px currentColor);
-  animation: mark-state 7s linear infinite;
-}
-@keyframes mark-state {
-  0% {
-    transform: translate(17px, 0) scale(1);
-    opacity: 0.85;
-  }
-  12.5% {
-    transform: translate(12.02px, 4.24px) scale(1.08);
-    opacity: 0.95;
-  }
-  25% {
-    transform: translate(0, 6px) scale(1.15);
-    opacity: 1;
-  }
-  37.5% {
-    transform: translate(-12.02px, 4.24px) scale(1.08);
-    opacity: 0.95;
-  }
-  50% {
-    transform: translate(-17px, 0) scale(1);
-    opacity: 0.8;
-  }
-  62.5% {
-    transform: translate(-12.02px, -4.24px) scale(0.88);
-    opacity: 0.55;
-  }
-  75% {
-    transform: translate(0, -6px) scale(0.78);
-    opacity: 0.4;
-  }
-  87.5% {
-    transform: translate(12.02px, -4.24px) scale(0.88);
-    opacity: 0.55;
-  }
-  100% {
-    transform: translate(17px, 0) scale(1);
-    opacity: 0.85;
-  }
+  width: 60px;
+  height: 60px;
+  margin: -8px -15px -8px -15px;
+  flex: none;
 }
 .brand-name {
   font-size: 18px;
@@ -894,8 +849,9 @@ noscript p {
     height: 80px;
   }
   .brand-mark {
-    width: 34px;
-    height: 34px;
+    width: 52px;
+    height: 52px;
+    margin: -7px -13px;
   }
   .brand-name {
     font-size: 16px;
@@ -1158,11 +1114,7 @@ header {
   font-size: 15px;
   font-weight: var(--weight);
 }
-.brand-mark {
-  width: 33px;
-  height: 33px;
-  color: #849dff;
-}
+
 .header-actions {
   gap: 16px;
 }
@@ -1456,8 +1408,9 @@ dialog::backdrop {
     font-size: 14px;
   }
   .brand-mark {
-    width: 30px;
-    height: 30px;
+    width: 52px;
+    height: 52px;
+    margin: -7px -13px;
   }
   .header-actions {
     gap: 9px;
@@ -1833,6 +1786,11 @@ body {
   font-size: 18px;
   letter-spacing: -0.4px;
 }
+.gateway-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
 .gateway-top small {
   display: block;
   margin-top: 8px;
@@ -1910,13 +1868,31 @@ body {
   height: 0;
   overflow: hidden;
 }
-#skip-intro {
-  font-size: 11px;
-  min-height: 38px;
-  color: #8690b4;
-  padding: 8px 18px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
+/* Logos de los socios bajo los textos de la entrada, como en el Figma (nodo 1:727): en
+   fila, 25 px entre ellos y al 70 %. Cada imagen va a su tamaño de diseño. */
+.gateway-partners {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin: 44px 0 10px;
+  padding: 0;
+  list-style: none;
+  opacity: 0.7;
+}
+.gateway-partners li {
+  display: flex;
+}
+.gateway-partners img {
+  display: block;
+}
+/* En móvil la fila entera (unos 434 px) no cabe: se reduce en bloque, sin cambiar las
+   proporciones entre logos. */
+@media (max-width: 520px) {
+  .gateway-partners {
+    zoom: 0.72;
+    margin-top: 48px;
+  }
 }
 .intro-active .skip {
   display: none;
@@ -2137,7 +2113,12 @@ body {
 @media (max-width: 650px) {
   /* El nombre completo más la ciudad no caben en una línea de móvil con el espaciado de
      escritorio. */
-  .gateway-top small {
+  .gateway-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.gateway-top small {
     font-size: 8.5px;
     letter-spacing: 1.2px;
   }
@@ -2993,18 +2974,26 @@ body:not(.intro-active) .rail-item {
 #gateway.has-matter .gateway-action {
   top: auto;
   bottom: max(18px, 4.5vh, env(safe-area-inset-bottom));
+  /* Cabe la fila de logos de los socios, que es más ancha que los textos. */
+  width: min(520px, calc(100% - 34px));
 }
+/* Los dos textos, como en el Figma «Universo Quantum» (nodo 1:554): mismo color, 12 px
+   entre ellos, la indicación en Regular —la única excepción al Light del sitio, así está en
+   el diseño— y la ayuda en Light, algo más pequeña y sin punto final. */
 #gateway.has-matter .gateway-caption {
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: var(--weight);
-  letter-spacing: 2.6px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: #eef0ff;
+  color: #cac6da;
 }
 #gateway.has-matter #birth-hint {
   margin-top: 0;
-  color: #9aa3c8;
+  font-size: 14px;
+  font-weight: var(--weight);
+  letter-spacing: -0.04em;
+  color: #cac6da;
 }
 #gateway.has-matter #birth-status {
   min-height: 17px;
@@ -3036,8 +3025,10 @@ body:not(.intro-active) .rail-item {
     inset: -12px;
   }
   #gateway.has-matter .gateway-caption {
-    font-size: 12px;
-    letter-spacing: 2px;
+    font-size: 15px;
+  }
+  #gateway.has-matter #birth-hint {
+    font-size: 13px;
   }
 }
 /* Mientras la materia se reúne al cargar, aparece lo demás: primero el nombre, luego el

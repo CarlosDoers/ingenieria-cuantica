@@ -356,6 +356,25 @@ fuente.
   `@fontsource-variable/jetbrains-mono`), no desde Google Fonts: funcionan sin red, no hay
   petición a Google al abrir la página y el navegador solo baja los alfabetos que usa.
 
+**Logos de socios y textos de la entrada** (25/09/2026, del Figma «Universo Quantum», nodo
+1:548 de diseño). Bajo «Mantén pulsado para comenzar» va la fila de socios —EHU, Tecnalia,
+GAIA y Euskampus— a su tamaño de diseño, 25 px entre ellos y al 70 %; en móvil la fila se
+reduce en bloque (`zoom: 0.72`) para caber. Los archivos están en `src/assets/partners/` y
+salen tal cual del Figma: EHU y GAIA son sus vectores; Tecnalia, su exportación, a la que
+solo se le quitaron los dos fondos y la opacidad que Figma mete del marco del diseño (se
+veían como un recuadro oscuro sobre las partículas); Euskampus es una imagen en el Figma y
+va en PNG a 3×. Los dos textos siguen el diseño: la indicación en Inter **Regular** 16 px
+(la única excepción al Light del sitio) y la ayuda en Light 14 px, los dos en #cac6da, a
+12 px, y la ayuda sin punto final.
+
+**Logotipo** (25/09/2026, del mismo Figma, nodo 1:762): la «Q» de puntos, en la cabecera
+de la intro y en la de la web, en lugar de la mini esfera de Bloch animada que había.
+`src/assets/brand/logo-q.png` es la imagen fuente del Figma, con fondo transparente (la
+exportación del nodo traía horneado el fondo del marco). Se muestra a 60 px como en el
+diseño (52 px en pantallas estrechas); la imagen trae aire alrededor de la Q, y unos
+márgenes negativos lo recogen para que la Q quede a ras del contenido y a unos 10 px del
+nombre, como en el Figma.
+
 **Para probar otra fuente** (p. ej. Manrope en lugar de Inter): `npm install
 @fontsource-variable/manrope`, cambiar la importación de `fonts.css` y poner `--font-main:
 "Manrope Variable"`. Los pasos están también en el comentario de `fonts.css`.
@@ -492,7 +511,7 @@ Los ejes de Bloch usan la conversión `(x_B, y_B, z_B) = (x, z, -y)` del motor: 
 
 ## Intro y audio
 
-`beginHold()` inicia una carga de 1.800 ms. Soltar o perder el foco cancela la carga; completarla llama a `beginBirth()` y finalmente a `finishIntro()`. Hay entrada directa y soporte de teclado.
+`beginHold()` inicia una carga de 1.800 ms. Soltar o perder el foco cancela la carga; completarla llama a `beginBirth()` y finalmente a `finishIntro()`. Funciona con ratón, dedo o la tecla espacio. El enlace «Entrar directamente» se quitó el 25/09/2026 a petición del cliente (no está en el diseño de Figma).
 
 **La materia de la entrada** (24/09/2026, a petición del cliente: «algo más llamativo»). La
 referencia es el fondo de [aaronjcunningham.com](https://www.aaronjcunningham.com/), una bola

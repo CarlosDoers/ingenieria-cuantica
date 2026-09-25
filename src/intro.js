@@ -483,10 +483,6 @@ window.addEventListener("pointermove", (e) => {
 document.documentElement.addEventListener("pointerleave", () => {
   flow.inside = false;
 });
-$("#skip-intro").addEventListener("click", () => {
-  sound("select");
-  finishIntro();
-});
 $("#intro-sound").addEventListener("click", () => {
   $("#sound").click();
   $("#intro-sound").setAttribute("aria-pressed", String(soundEnabled));

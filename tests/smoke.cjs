@@ -490,7 +490,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
   );
   assert.equal(
     d.querySelector("#birth-hint").textContent.trim(),
-    "Pulsa con el ratón o manteniendo la tecla espacio."
+    "Pulsa con el ratón o manteniendo la tecla espacio"
   );
   d.querySelectorAll(".orbit-node")[2].click();
   w.eval("stepCamera(1);draw()");
@@ -534,10 +534,17 @@ function check(reducedMotion = false, canvasAvailable = true) {
     "…and the menu closes"
   );
   assert.equal(errors.length, 0, errors.join("\n"));
-  assert.equal(
-    d.querySelectorAll('script[src],link[rel="stylesheet"],img[src],iframe')
-      .length,
-    0
+  // Nada de fuera: ni scripts, ni hojas, ni marcos. Las imágenes, solo las del propio build
+  // (los logos de los socios de la entrada), nunca una URL de otro sitio.
+  assert.equal(d.querySelectorAll('script[src],link[rel="stylesheet"],iframe').length, 0);
+  assert(
+    [...d.querySelectorAll("img[src]")].every((img) => !/^(https?:)?\/\//.test(img.getAttribute("src"))),
+    "Images are served from the build, never from another site"
+  );
+  // Los logos de los socios en la entrada, con su nombre para quien no los ve.
+  assert.deepEqual(
+    [...d.querySelectorAll(".gateway-partners img")].map((img) => img.alt),
+    ["EHU, Universidad del País Vasco", "Tecnalia", "GAIA", "Euskampus"]
   );
   console.log(
     `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, mobile menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles.`
