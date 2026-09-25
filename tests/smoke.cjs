@@ -520,6 +520,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(sheetEl.hasAttribute("open"), "The mobile menu opens");
   assert.equal(trigger.getAttribute("aria-expanded"), "true");
   assert.equal(d.querySelectorAll(".sheet-link").length, 6, "First level plus five territories");
+  assert.equal(sheetEl.querySelectorAll(".sheet-link svg").length, 0, "Mobile menu rows are text only");
   assert(d.querySelector(".sheet-home").classList.contains("active"), "It shows where you are");
   d.querySelector('.sheet-link[data-sheet="3"]').click();
   assert.equal(

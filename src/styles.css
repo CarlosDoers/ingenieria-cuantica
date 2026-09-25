@@ -2697,8 +2697,8 @@ body:not(.intro-active) .rail-item {
 
 /* ---------- Menú de móvil ---------- */
 /* A partir del de aaronjcunningham.com (petición de diseño): un botón abajo, al alcance del
-   pulgar, que abre la navegación a pantalla completa. Filas con el icono del territorio, el
-   nombre enorme en peso fino y una flecha; cada fila con su color de territorio en la línea
+   pulgar, que abre la navegación a pantalla completa. Filas solo con el nombre, enorme, y
+   una flecha (sin icono, como el de escritorio); cada fila con su color de territorio en la línea
    de debajo —una rayita en reposo, entera en la activa—. En escritorio no se ve. */
 .nav-dock {
   display: none;
@@ -2865,7 +2865,7 @@ body:not(.intro-active) .rail-item {
 .sheet-link {
   position: relative;
   display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   min-height: clamp(62px, 11vh, 92px);
@@ -2905,16 +2905,6 @@ body:not(.intro-active) .rail-item {
   transform-origin: left center;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
 }
-.sheet-glyph {
-  display: inline-flex;
-  color: var(--row);
-  opacity: 0.55;
-  transition: opacity 0.3s;
-}
-.sheet-glyph svg {
-  width: 20px;
-  height: 20px;
-}
 /* El nombre, enorme, en la tipografía y el peso de todo el sitio. Antes iba en peso 100 con
    su propia pila (Helvetica Neue, SF, Roboto); se unificó con el resto. */
 .sheet-name {
@@ -2949,10 +2939,6 @@ body:not(.intro-active) .rail-item {
 .sheet-link:focus-visible .sheet-name,
 .sheet-link:active .sheet-name {
   transform: translateX(10px);
-}
-.sheet-link.active .sheet-glyph,
-.sheet-link:focus-visible .sheet-glyph {
-  opacity: 1;
 }
 .sheet-link.active .sheet-go,
 .sheet-link:focus-visible .sheet-go {

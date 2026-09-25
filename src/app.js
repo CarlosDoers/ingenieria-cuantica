@@ -220,7 +220,7 @@ function syncRail() {
 /**
  * Menú de móvil (petición de diseño, a partir del de aaronjcunningham.com): en vez del menú
  * lateral, un botón **abajo**, al alcance del pulgar, que abre la navegación a pantalla
- * completa. Filas con el icono del territorio, el nombre enorme en peso fino y una flecha;
+ * completa. Filas solo con el nombre, enorme, y una flecha —sin icono, como el de escritorio—;
  * cada fila con **su color de territorio** en la línea de debajo, que se alarga entera en la
  * activa. Entran escalonadas y salen al revés.
  *
@@ -232,14 +232,11 @@ const sheet = $("#nav-sheet"),
   trigger = $("#nav-trigger");
 const UNIVERSE_COLOR = "#9aa9ff";
 sheetLinks.innerHTML =
-  `<button class="sheet-link sheet-home" type="button" style="--i:0;--row:${UNIVERSE_COLOR}"><span class="sheet-glyph">${icon(
-    "universe"
-  )}</span><span class="sheet-name">Universo Quantum</span><span class="sheet-go" aria-hidden="true">↗</span></button>` +
+  // Solo texto, como el menú de escritorio (petición de diseño): sin el icono delante.
+  `<button class="sheet-link sheet-home" type="button" style="--i:0;--row:${UNIVERSE_COLOR}"><span class="sheet-name">Universo Quantum</span><span class="sheet-go" aria-hidden="true">↗</span></button>` +
   DATA.map(
     (d, i) =>
-      `<button class="sheet-link" type="button" data-sheet="${i}" style="--i:${i + 1};--row:${d.color}"><span class="sheet-glyph">${icon(
-        d.icon
-      )}</span><span class="sheet-name">${d.name}</span><span class="sheet-go" aria-hidden="true">↗</span></button>`
+      `<button class="sheet-link" type="button" data-sheet="${i}" style="--i:${i + 1};--row:${d.color}"><span class="sheet-name">${d.name}</span><span class="sheet-go" aria-hidden="true">↗</span></button>`
   ).join("");
 let sheetTimer = 0;
 function openSheet() {

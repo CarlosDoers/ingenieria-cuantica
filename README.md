@@ -276,8 +276,9 @@ de diseño, a partir del menú de aaronjcunningham.com). El botón es un círcul
 anillo y un punto de luz; abierto, el punto se vuelve una cruz en el mismo sitio.
 
 El panel lleva arriba «// Navegación» y abajo un pie, en monoespaciada, sobre una retícula
-tenue. Cada fila tiene el icono del territorio, el nombre **enorme y en mayúsculas**, en la
-tipografía del sitio (ver «Tipografía»), y una flecha. La línea de debajo de cada fila va en **el color de
+tenue. Cada fila tiene el nombre **enorme y en mayúsculas**, en la tipografía del sitio (ver
+«Tipografía»), y una flecha. Sin icono delante: se quitó el 25/09/2026 para que quede más
+limpio y en sintonía con el menú de escritorio, que tampoco lo lleva. La línea de debajo de cada fila va en **el color de
 su territorio**: una rayita en reposo y entera en la activa, que además desplaza el nombre.
 Las filas entran escalonadas desde abajo y salen al revés. «Universo Quantum» va el primero
 y algo menor, porque su nombre es más largo.
