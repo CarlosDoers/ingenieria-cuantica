@@ -275,6 +275,13 @@ derecha**, al alcance del pulgar, que abre la navegación **a pantalla completa*
 de diseño, a partir del menú de aaronjcunningham.com). El botón es un círculo fino con un
 anillo y un punto de luz; abierto, el punto se vuelve una cruz en el mismo sitio.
 
+El pie de la pantalla se ordena a partir de ese botón (petición de diseño, 25/09/2026):
+«Donostia / San Sebastián» va a su altura, a la izquierda y a la misma distancia del borde,
+con su centro alineado con el del círculo; y la indicación de la escena («Toca un punto para
+conectar / Gira para descubrir…») va **centrada**, 16 px por encima de esa fila. Todo se
+calcula con `--dock-bottom`, `--dock-side` y `--orb-size`, así que si el botón se mueve, lo
+demás lo acompaña.
+
 El panel lleva arriba «// Navegación», en monoespaciada, sobre fondo liso. El pie de
 textos y la retícula de fondo se quitaron el 25/09/2026 (petición de diseño). Cada fila tiene el nombre **enorme y en mayúsculas**, en la tipografía del sitio (ver
 «Tipografía»), y una flecha. Sin icono delante: se quitó el 25/09/2026 para que quede más

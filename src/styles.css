@@ -2626,24 +2626,41 @@ body:not(.intro-active) .rail-item {
   display: none;
 }
 @media (max-width: 760px) {
+  /* Dónde va el botón de menú: lo demás del pie se coloca a partir de él. */
+  :root {
+    --dock-bottom: max(18px, env(safe-area-inset-bottom) + 12px);
+    --dock-side: 18px;
+    --orb-size: 52px;
+  }
   .nav-dock {
     position: fixed;
-    right: max(18px, env(safe-area-inset-right) + 12px);
-    bottom: max(18px, env(safe-area-inset-bottom) + 12px);
+    right: max(var(--dock-side), env(safe-area-inset-right) + 12px);
+    bottom: var(--dock-bottom);
     z-index: 30;
     display: flex;
     align-items: center;
     gap: 12px;
   }
-  /* Hueco al final de la página para que el botón no tape el pie. */
+  /* «Donostia / San Sebastián» a la altura del botón (petición de diseño): a la izquierda,
+     a la misma distancia del borde que el botón por la derecha y con su centro alineado con
+     el del círculo. */
   .site-footer {
-    padding-right: 96px;
+    position: fixed;
+    left: max(var(--dock-side), env(safe-area-inset-left) + 12px);
+    bottom: calc(var(--dock-bottom) + var(--orb-size) / 2);
+    transform: translateY(50%);
+    padding: 0;
+    z-index: 29;
   }
-  /* La indicación de la escena se aparta del botón: alineada a la izquierda y, si no cabe,
-     en dos líneas. */
+  /* La indicación de la escena, centrada (petición de diseño) y por encima de la fila del
+     menú, que ahora ocupa el pie entero. Antes iba a la izquierda, al lado del botón. */
   .scene-footer {
-    right: 100px;
-    justify-content: flex-start;
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(var(--dock-bottom) + var(--orb-size) + 16px);
+    justify-content: center;
+    text-align: center;
     flex-wrap: wrap;
     row-gap: 4px;
   }
