@@ -17,6 +17,12 @@ export const canvas = $("#universe"),
  * ajuste de movimiento reducido del sistema.
  */
 let paused = reduced.matches;
+/** La página de tercer nivel tapa la escena entera: mientras está abierta no se dibuja. */
+let sceneHidden = false;
+export function setSceneHidden(on) {
+  sceneHidden = on;
+  syncMotion();
+}
 export let W = 0,
   H = 0,
   R = 0,
@@ -1909,7 +1915,7 @@ function moving() {
 }
 function tick(now) {
   raf = 0;
-  if (introState.active || document.hidden || reduced.matches) return;
+  if (introState.active || document.hidden || reduced.matches || sceneHidden) return;
   if (moving() || now - lastFrame >= 30) {
     const dt = Math.min((now - lastFrame) / 1000, 0.05);
     lastFrame = now;
@@ -1931,6 +1937,7 @@ function tick(now) {
 export function syncMotion() {
   cancelAnimationFrame(raf);
   raf = 0;
+  if (sceneHidden) return;
   if (!document.hidden && !reduced.matches) {
     lastFrame = performance.now();
     raf = requestAnimationFrame(tick);

@@ -14,6 +14,7 @@ import {
   unfocusCamera,
 } from './sphere.js';
 import { positionCard } from './card.js';
+import { closePage, openPage, pageState, setPageHooks } from './page.js';
 import { sound } from './audio.js';
 
 /**
@@ -74,6 +75,9 @@ function renderTab(index, focus = false) {
   if (typeof positionCard === "function") positionCard();
 }
 function selectTerritory(index, { focus = true, audible = true } = {}) {
+  // Desde una página de tercer nivel, elegir otro territorio vuelve al campo de cúbits y
+  // vuela hasta él.
+  closePage();
   selected = index;
   activeTab = 0;
   visited.add(index);
@@ -130,7 +134,11 @@ function selectTerritory(index, { focus = true, audible = true } = {}) {
     .map((t, i) => `<button class="field-sub" type="button" data-tab="${i}" aria-pressed="false">${t.name}</button>`)
     .join("");
   $$(".field-sub").forEach((b, i) => {
-    b.addEventListener("click", () => renderTab(i));
+    // Tercer nivel: pulsar un subitem —su etiqueta o su esfera— abre su página.
+    b.addEventListener("click", () => {
+      renderTab(i);
+      openPage(index, i);
+    });
     // Señalar una pestaña señala su cúbit en el chip, como en campo-cubits.
     b.addEventListener("pointerenter", () => hoverFieldTab(index, i));
     b.addEventListener("pointerleave", () => hoverFieldTab(-1, -1));
@@ -174,7 +182,11 @@ rail.innerHTML =
   `<div class="rail-children">` +
   DATA.map(
     (d, i) =>
-      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1}"><span class="rail-name">${d.name}</span></button>`
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1}"><span class="rail-name">${d.name}</span></button>` +
+      // Sus subitems: solo se despliegan en el tercer nivel, bajo el territorio abierto.
+      `<div class="rail-subs" data-subs="${i}">${d.tabs
+        .map((t, j) => `<button class="rail-sub" type="button" data-sub="${j}">${t.name}</button>`)
+        .join("")}</div>`
   ).join("") +
   `</div>`;
 $$(".rail-item[data-rail]").forEach((b) => {
@@ -184,14 +196,26 @@ $$(".rail-item[data-rail]").forEach((b) => {
       setFieldPreview(on ? i : -1);
     };
   b.addEventListener("click", () => {
-    // Pulsar el territorio que ya está abierto recoloca la cámara si se había girado.
+    // Pulsar el territorio que ya está abierto recoloca la cámara si se había girado; desde
+    // una página de tercer nivel, vuelve a su campo de cúbits.
     if (selected !== i) selectTerritory(i, { focus: false });
-    else recenterField();
+    else {
+      closePage();
+      recenterField();
+    }
   });
   b.addEventListener("pointerenter", () => mark(true));
   b.addEventListener("pointerleave", () => mark(false));
   b.addEventListener("focus", () => mark(true));
   b.addEventListener("blur", () => mark(false));
+});
+$$(".rail-subs").forEach((g) => {
+  const i = Number(g.dataset.subs);
+  g.querySelectorAll(".rail-sub").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (pageState.territory !== i || pageState.tab !== Number(b.dataset.sub)) openPage(i, Number(b.dataset.sub));
+    })
+  );
 });
 $(".rail-home").addEventListener("click", () => {
   if (selected >= 0) resetExperience(false);
@@ -207,6 +231,17 @@ function syncRail() {
     } else b.removeAttribute("aria-current");
   });
   rail.classList.toggle("has-selection", selected >= 0);
+  // Subitems del territorio abierto, desplegados solo en su página, con la actual marcada.
+  $$(".rail-subs").forEach((g) => {
+    const mine = pageState.open && Number(g.dataset.subs) === pageState.territory;
+    g.classList.toggle("is-open", mine);
+    g.querySelectorAll(".rail-sub").forEach((b) => {
+      if (mine && Number(b.dataset.sub) === pageState.tab) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+  });
+  // La página deja el hueco del menú lateral a su izquierda.
+  $("#page").style.setProperty("--rail-right", Math.round(rail.getBoundingClientRect().right) + "px");
   syncSheet();
   if (!current) return;
   // La marca se coloca con las medidas del elemento activo, no con un índice: así no se
@@ -288,7 +323,10 @@ $$(".sheet-link[data-sheet]").forEach((b) =>
     // La transformación arranca ya, detrás del menú mientras se desvanece.
     const i = Number(b.dataset.sheet);
     if (selected !== i) selectTerritory(i, { focus: false });
-    else recenterField();
+    else {
+      closePage();
+      recenterField();
+    }
     closeSheet();
   })
 );
@@ -312,6 +350,7 @@ syncRail();
  * automática por inactividad, que son las dos veces que de verdad empieza otra persona.
  */
 function resetExperience(focus = false, { restart = false } = {}) {
+  closePage();
   selected = -1;
   if (restart) visited.clear();
   document.documentElement.style.setProperty("--accent", "#89b5ff");
@@ -364,13 +403,11 @@ $$("dialog:not(.nav-sheet)").forEach((d) => {
 });
 document.addEventListener("keydown", (e) => {
   activity();
-  if (
-    e.key === "Escape" &&
-    !document.querySelector("dialog[open]") &&
-    selected >= 0
-  ) {
-    resetExperience(true);
-  }
+  // Un diálogo que ya se está cerrando (el menú de móvil, en su salida animada) no cuenta.
+  if (e.key !== "Escape" || document.querySelector("dialog[open]:not(.is-closing)")) return;
+  // En una página de tercer nivel, Escape vuelve a su campo de cúbits; en el campo, al universo.
+  if (pageState.open) closePage();
+  else if (selected >= 0) resetExperience(true);
 });
 document.addEventListener(
   "click",
@@ -379,7 +416,7 @@ document.addEventListener(
       selected < 0 ||
       // Cualquier botón queda fuera de esto: los suyos ya deciden qué hacer, y pulsar
       // pausa o sonido desde el chip no es «pulsar en vacío» —devolvía a la esfera—.
-      e.target.closest?.("#detail,#detail-close,.orbit-node,.field-sub,.rail,dialog,button")
+      e.target.closest?.("#detail,#detail-close,.orbit-node,.field-sub,.rail,.page-view,dialog,button")
     )
       return;
     if (e.target === canvas && consumeCanvasClick()) return;
@@ -390,6 +427,17 @@ document.addEventListener(
 document.addEventListener("pointerdown", activity, { passive: true });
 document.addEventListener("pointermove", activity, { passive: true });
 document.addEventListener("scroll", activity, { passive: true });
+// La página de tercer nivel hace scroll dentro de sí misma, y ese scroll no llega al documento.
+$("#page").addEventListener("scroll", activity, { passive: true });
+setPageHooks({
+  home: () => resetExperience(true),
+  // Adelante del navegador hacia una página de otro territorio: primero se abre su campo.
+  territory: (i) => selected !== i && selectTerritory(i, { focus: false, audible: false }),
+  change: () => {
+    syncRail();
+    if (pageState.open) announce(`${DATA[pageState.territory].tabs[pageState.tab].name}. ${DATA[pageState.territory].name}.`);
+  },
+});
 function setKiosk(on) {
   kioskMode = on;
   document.body.classList.toggle("kiosk", on);

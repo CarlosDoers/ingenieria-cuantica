@@ -5,6 +5,7 @@
  */
 import './fonts.css';
 import './styles.css';
+import './page.css';
 import { $ } from './dom.js';
 import './app.js';
 import { canvas, ctx, draw, emitWave, resize, syncMotion } from './sphere.js';

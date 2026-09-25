@@ -78,54 +78,57 @@ export const DATA = [
     summary:
       "A escala cuántica, la naturaleza se comporta de formas que desafían nuestra intuición. Comprenderlas abre nuevas preguntas y tecnologías.",
     tabs: [
+      // Las tres tecnologías son los subitems del territorio en el campo de cúbits, y cada una
+      // lleva a su página de tercer nivel (petición de diseño, 25/09/2026). La de computación
+      // es la del diseño; las otras dos, de prueba mientras llegan sus contenidos.
       {
-        name: "Descripción",
+        name: "Computación cuántica",
         items: [
           [
-            "Superposición",
-            "Un estado cuántico puede combinar distintos resultados posibles de una medida.",
+            "Qubits",
+            "Un qubit puede representar varias posibilidades a la vez hasta que se mide.",
           ],
           [
-            "Interferencia",
-            "Las amplitudes de probabilidad pueden reforzarse o cancelarse.",
+            "Algoritmos",
+            "Operaciones que crean superposición y entrelazamiento para resolver ciertos problemas.",
           ],
           [
-            "Entrelazamiento",
-            "Dos sistemas pueden compartir correlaciones cuánticas que no tienen equivalente clásico.",
+            "Hardware real",
+            "Algoritmos que se diseñan, se simulan y se ejecutan en plataformas accesibles en la nube.",
           ],
         ],
       },
       {
-        name: "Tecnologías",
+        name: "Comunicaciones cuánticas",
         items: [
-          [
-            "Computación cuántica",
-            "Una forma diferente de procesar información, con potencial para determinados tipos de problemas.",
-          ],
           [
             "Comunicación cuántica",
             "El estudio y uso de estados cuánticos para transmitir información.",
           ],
           [
-            "Sensores y metrología",
-            "Propiedades cuánticas al servicio de medidas de alta precisión.",
-          ],
-        ],
-      },
-      {
-        name: "Aplicaciones",
-        items: [
-          [
-            "Moléculas y materiales",
-            "Estudiar sistemas cuya descripción resulta compleja.",
+            "Entrelazamiento",
+            "Dos sistemas pueden compartir correlaciones cuánticas que no tienen equivalente clásico.",
           ],
           [
             "Información y seguridad",
             "Explorar nuevas formas de comunicar y proteger información.",
           ],
+        ],
+      },
+      {
+        name: "Sensórica cuántica y metrología",
+        items: [
+          [
+            "Sensores y metrología",
+            "Propiedades cuánticas al servicio de medidas de alta precisión.",
+          ],
           [
             "Medir el entorno",
             "Investigar sensores para detectar señales muy pequeñas.",
+          ],
+          [
+            "Superposición",
+            "Un estado cuántico puede combinar distintos resultados posibles de una medida.",
           ],
         ],
         note: "Ámbitos de investigación y desarrollo. El grado de madurez depende de cada tecnología.",

@@ -31,6 +31,8 @@ function check(reducedMotion = false, canvasAvailable = true) {
   const vc = new VirtualConsole();
   vc.on("jsdomError", (e) => errors.push(e.message));
   const dom = new JSDOM(html, {
+    // Con dirección: las páginas de tercer nivel cambian el `#` y en about:blank no se puede.
+    url: "http://localhost/",
     runScripts: "dangerously",
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -533,6 +535,38 @@ function check(reducedMotion = false, canvasAvailable = true) {
     reducedMotion ? !sheetEl.hasAttribute("open") : sheetEl.classList.contains("is-closing"),
     "…and the menu closes"
   );
+  // Tercer nivel: pulsar un subitem del campo abre su página, con su dirección, y el menú
+  // lateral despliega los subitems del territorio con el actual marcado.
+  d.querySelector('[data-rail="1"]').click();
+  w.eval("stepCamera(1);draw()");
+  d.querySelectorAll(".field-sub")[0].click();
+  assert(d.body.classList.contains("in-page"), "A subitem opens its page");
+  assert.equal(w.location.hash, "#/ciencia/computacion-cuantica");
+  assert(d.querySelector("#page .fig-frame img"), "Computación cuántica carries the designer's content");
+  assert.equal(d.querySelectorAll(".rail-subs.is-open .rail-sub").length, 3, "The side menu lists the subitems");
+  assert.equal(d.querySelector(".rail-sub[aria-current]").textContent, "Computación cuántica");
+  assert.equal(w.eval("pageState.open"), true);
+  // «Siguiente» lleva al subitem siguiente, que de momento es una página de prueba.
+  d.querySelector("#page .pg-next").click();
+  assert.equal(w.location.hash, "#/ciencia/comunicaciones-cuanticas");
+  assert(/Página de prueba/.test(d.querySelector("#page").textContent), "Subitems without content get a test page");
+  // La miga del territorio vuelve a su campo de cúbits, que sigue abierto.
+  d.querySelector('#page [data-crumb="territory"]').click();
+  assert(!d.body.classList.contains("in-page"), "The territory crumb closes the page");
+  assert.equal(d.querySelector(".rail-item.active").dataset.rail, "1", "…and stays in its field");
+  assert.equal(d.querySelectorAll(".rail-subs.is-open").length, 0, "Subitems fold away outside the page");
+  // Escape desde la página vuelve al campo, no al universo.
+  d.querySelectorAll(".field-sub")[2].click();
+  d.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert(!d.body.classList.contains("in-page"), "Escape closes the page");
+  assert.equal(d.querySelector(".rail-item.active").dataset.rail, "1");
+  // «Universo» vuelve a la esfera, y pulsar dentro de la página no cuenta como pulsar fuera.
+  d.querySelectorAll(".field-sub")[1].click();
+  d.querySelector("#page h1").dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  assert(d.body.classList.contains("in-page"), "Clicking inside the page keeps it open");
+  d.querySelector('#page [data-crumb="home"]').click();
+  assert(!d.body.classList.contains("in-page"));
+  assert(d.querySelector(".rail-home").classList.contains("active"), "The Universo crumb returns to the sphere");
   assert.equal(errors.length, 0, errors.join("\n"));
   // Nada de fuera: ni scripts, ni hojas, ni marcos. Las imágenes, solo las del propio build
   // (los logos de los socios de la entrada), nunca una URL de otro sitio.

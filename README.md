@@ -207,6 +207,34 @@ Pulsarla la señala: su cúbit se enciende del todo y las otras dos ceden un poc
 respuesta visible mientras no haya un tercer nivel. La luz del territorio recorre el camino
 real del chip —sección, puente, fila— hasta ellas.
 
+## Tercer nivel: las páginas de los subitems
+
+Añadido el 25/09/2026 a partir de la maqueta de la diseñadora (`computacion-cuantica-desktop`
+y `-mobile.html`, en la carpeta de arriba). Pulsar un subitem en el campo de cúbits —su
+etiqueta o su esfera— abre su página **con un fundido**, por encima de la escena. El primer y
+el segundo nivel no cambian.
+
+- **Contenido.** Solo «Computación cuántica» tiene página propia: sus secciones son las del
+  diseño tal cual (`src/pages/computacion-cuantica.js`), con la infografía extraída del HTML a
+  `src/assets/computacion-mapa.jpg`. El resto de subitems tienen una **página de prueba** con
+  la misma maqueta y los textos que ya había en `content.js`. Para darle página propia a otro
+  subitem: un archivo en `src/pages/` y su entrada en `PAGES`, en `src/page.js`.
+- **Subitems de Tecnologías Cuánticas.** Pasan a ser «Computación cuántica», «Comunicaciones
+  cuánticas» y «Sensórica cuántica y metrología», como en el diseño (antes: Descripción,
+  Tecnologías, Aplicaciones).
+- **Estilos.** `src/page.css` es el CSS del diseño acotado a `.page-view`, para que no toque
+  nada fuera de la página, con nuestras tipografías (también en las etiquetas de la esfera de
+  Bloch) y el color de cada territorio como color de sección. La cabecera y el menú de móvil
+  son los nuestros: el diseño trae los suyos, pero son los mismos.
+- **Menú lateral.** En la página sube arriba y despliega los subitems del territorio, con el
+  actual marcado. Pulsar el territorio vuelve a su campo de cúbits; otro territorio, al suyo.
+- **Navegación.** Cada página tiene su dirección (`#/ciencia/computacion-cuantica`). Atrás
+  en el navegador vuelve al campo y adelante la reabre. En las migas, «Universo» vuelve a
+  la esfera y el territorio, a su campo. Escape también vuelve al campo. «Siguiente» lleva
+  al siguiente subitem del territorio.
+- **Rendimiento.** Mientras la página está abierta la escena no se dibuja (`setSceneHidden`,
+  en `sphere.js`): el chip pasaba a 60 fps por detrás de algo que lo tapa entero.
+
 ## Sin controles en la esquina
 
 Fuera los cuatro botones de abajo a la derecha —girar a un lado y a otro, pausa y reiniciar—
@@ -402,6 +430,9 @@ No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `index.html` | Estructura, iconos SVG, accesibilidad, intro y controles |
+| `src/page.js` | Tercer nivel: páginas de los subitems, navegación y esfera de Bloch de la página |
+| `src/page.css` | Estilos de la página de tercer nivel (los del diseño, acotados a `.page-view`) |
+| `src/pages/` | Contenido propio de cada página de tercer nivel |
 | `src/fonts.css` | Tipografías: qué fuentes se cargan y las variables `--font`, `--mono` y `--weight` |
 | `src/styles.css` | Diseño, tamaños, responsive, resplandores y hover |
 | `src/content.js` | `DATA`: textos, colores, iconos y pestañas de los cinco territorios |
