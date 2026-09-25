@@ -520,7 +520,7 @@ sin archivos:
 - Todo pasa por un limitador: el nacimiento es fuerte a propósito y no debe saturar.
 - Niveles calibrados sin altavoces con `__audioLevels(kind)` en desarrollo, que renderiza el
   sonido con `OfflineAudioContext`. Picos: nacimiento 0,33; carga 0,28; territorio 0,10;
-  pulso 0,03; hover 0,02; ambiente RMS 0,02. En RMS el nacimiento (0,11) sigue por encima
+  pulso 0,03; hover 0,02; ambiente RMS 0,014. En RMS el nacimiento (0,11) sigue por encima
   del final de la carga (0,08).
 
 El navegador habilita Web Audio tras una interacción. El hover de la intro puede estar en silencio antes de que el usuario active el contexto; no es un fallo de recursos. El control de sonido silencia tanto música como efectos. Las tabs y el botón Explorar de la ficha permanecen sin sonido por decisión de diseño.

@@ -347,7 +347,7 @@ let ambience = null;
 function ambienceChord(at) {
   ambience.chord = (ambience.chord + 1) % CHORDS.length;
   for (const hz of CHORDS[ambience.chord])
-    pipe(hz, at, CHORD_SECONDS - 6, 0.016, {
+    pipe(hz, at, CHORD_SECONDS - 6, 0.011, {
       wave: A.flute,
       attack: 5,
       release: 6,
