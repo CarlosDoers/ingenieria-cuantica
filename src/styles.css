@@ -2728,9 +2728,8 @@ body:not(.intro-active) .rail-item {
   padding: max(64px, env(safe-area-inset-top) + 52px) 22px max(96px, env(safe-area-inset-bottom) + 86px);
   border: 0;
   color: var(--text);
+  /* Sin la retícula de fondo que tenía (petición de diseño): solo el tono y el brillo. */
   background: radial-gradient(circle at 78% 14%, rgba(137, 181, 255, 0.08), transparent 38%),
-    linear-gradient(rgba(238, 240, 255, 0.028) 1px, transparent 1px) 0 0 / 44px 44px,
-    linear-gradient(90deg, rgba(238, 240, 255, 0.028) 1px, transparent 1px) 0 0 / 44px 44px,
     rgba(3, 4, 13, 0.97);
   opacity: 0;
   transform: translateY(10px);
@@ -2758,8 +2757,7 @@ body:not(.intro-active) .rail-item {
 .nav-sheet-panel {
   width: 100%;
 }
-.nav-sheet-meta,
-.nav-sheet-foot {
+.nav-sheet-meta {
   display: flex;
   justify-content: space-between;
   gap: 18px;
@@ -2776,9 +2774,6 @@ body:not(.intro-active) .rail-item {
 }
 .nav-sheet-meta span:first-child {
   color: var(--accent);
-}
-.nav-sheet-foot {
-  padding-top: 20px;
 }
 .nav-sheet-links {
   display: grid;
