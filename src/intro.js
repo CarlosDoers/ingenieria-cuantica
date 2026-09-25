@@ -1,24 +1,191 @@
 import { $, icon, reduced } from './dom.js';
 import { activity, announce, nodeEls } from './app.js';
-import { canvas, clearWaves, emitWave, introState, resize, syncMotion } from './sphere.js';
+import { clearWaves, emitWave, introState, points, sphereFrame, syncMotion } from './sphere.js';
 import { audioContext, sound, soundEnabled, stopCharge } from './audio.js';
+import { createMatter } from './matter.js';
 
 // Entrada independiente: el motor de la esfera permanece detenido hasta completar la carga.
-const gateway = $("#gateway"),
-  birthCanvas = $("#birth-canvas"),
-  birthCtx = birthCanvas.getContext("2d");
+const gateway = $("#gateway");
+const HOLD_MS = 1800; // lo que hay que mantener pulsado
+const BURST_MS = 1300; // de soltar la carga a la esfera ya formada
+let birthCanvas = $("#birth-canvas");
+/**
+ * La materia (WebGL2) es la entrada de verdad; el dibujo 2D queda de respaldo para los
+ * navegadores sin WebGL2. Un lienzo que ya pidió un contexto WebGL no admite después uno 2D,
+ * así que si la materia no arranca se cambia por uno limpio.
+ */
+const matter = createMatter(birthCanvas, points, {
+  compact: matchMedia("(max-width: 760px), (pointer: coarse)").matches,
+});
+if (!matter) {
+  const fresh = birthCanvas.cloneNode(false);
+  birthCanvas.replaceWith(fresh);
+  birthCanvas = fresh;
+}
+const birthCtx = matter ? null : birthCanvas.getContext("2d");
+gateway.classList.toggle("has-matter", !!matter);
 let birthW = 0,
   birthH = 0,
   birthRAF = 0,
-  birthLast = 0;
+  birthLast = 0,
+  painted = 0;
 export function resizeBirth() {
   birthW = innerWidth;
   birthH = innerHeight;
   const dpr = Math.min(devicePixelRatio || 1, 1.5);
+  if (matter) {
+    matter.resize(birthW, birthH, dpr);
+    placeCore();
+    paintMatter(performance.now());
+    return;
+  }
   birthCanvas.width = Math.round(birthW * dpr);
   birthCanvas.height = Math.round(birthH * dpr);
   if (birthCtx) birthCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   paintBirth(performance.now());
+}
+
+/**
+ * Estado de la materia. Los tiempos siguen el bucle del original: paso acotado entre 1/240
+ * y 1/30 s, la carga y la velocidad del puntero amortiguadas (λ 5) y el paralaje de cámara
+ * siguiendo al puntero a 0,16 en horizontal y 0,1 en vertical (λ 3).
+ *
+ * El puntero se sigue dos veces: `a` lo alcanza casi al instante y `b` es un rastro lento.
+ * Cada partícula reacciona a su propia mezcla de los dos (ver el shader), que es lo que le da
+ * el retraso orgánico.
+ */
+const GATHER_SECONDS = 3.4; // lo que tarda la materia dispersa en reunirse al cargar
+const flow = {
+  last: 0,
+  time: 14, // arranca con el flujo ya desarrollado, no desde la semilla
+  spin: 0,
+  charge: 0,
+  gather: reduced.matches ? 1 : 0,
+  x: -1e4,
+  y: -1e4,
+  ax: -1e4,
+  ay: -1e4,
+  bx: -1e4,
+  by: -1e4,
+  moveX: 0,
+  moveY: 0,
+  vx: 0,
+  vy: 0,
+  presence: 0,
+  inside: false,
+  tiltY: 0,
+  tiltX: 0,
+};
+const damp = (a, b, lambda, dt) => a + (b - a) * (1 - Math.exp(-lambda * dt));
+const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
+let frame = { x: 0, y: 0, r: 1, ry: 0, rx: 0 };
+/** Aspecto de la materia: tamaño de la nube, grano, brillo y bloom. */
+const LOOK = {
+  cloud: 1.36, // radio de la nube, en radios de la esfera
+  pointSize: 2.2,
+  gain: 0.75,
+  threshold: 0.05,
+  bloom: 0.8,
+  bloomRadius: 0.75,
+  exposure: 1.2, // la del renderer del original
+  pointerRadius: 175, // alcance del puntero, px con la esfera a su tamaño de escritorio
+  pointerForce: 24, // empuje con el puntero quieto, px
+  pointerSpeed: 0.06, // empuje extra por px/s de velocidad
+  pointerMax: 110, // tope de ese empuje extra, px
+  trail: 2.4, // lo que tarda el rastro en alcanzar al puntero (λ; menos es más lento)
+};
+// En desarrollo, `__matter` permite afinar el aspecto en vivo y congelar una fase de la
+// entrada con `__matter.pose = { charge, burst, gather }` para mirarla con calma.
+if (import.meta.env.DEV) window.__matter = LOOK;
+
+/** El botón de carga va en el corazón de la nube, que es el centro de la esfera. */
+let placed = "";
+function placeCore() {
+  frame = sphereFrame();
+  // Solo se escribe si cambia: se llama en cada fotograma y un estilo reescrito, aunque sea
+  // igual, obliga al navegador a recalcular.
+  const at = frame.x + "," + frame.y;
+  if (at === placed) return;
+  placed = at;
+  const button = $("#hold-start");
+  button.style.left = frame.x + "px";
+  button.style.top = frame.y + "px";
+}
+
+function paintMatter(now) {
+  const dt = flow.last ? Math.min(Math.max((now - flow.last) / 1000, 1 / 240), 1 / 30) : 1 / 60;
+  flow.last = now;
+  const still = reduced.matches;
+  const pose = import.meta.env.DEV ? LOOK.pose : null;
+  const charge = pose ? pose.charge : introState.bursting ? 1 : introState.progress;
+  flow.charge = still ? charge : damp(flow.charge, charge, 5, dt);
+  if (!still) {
+    flow.time += dt;
+    flow.spin += dt * (0.05 + 1.3 * flow.charge * flow.charge);
+  }
+  // Si se empieza a cargar antes de que la nube esté reunida, se reúne más deprisa.
+  const hurry = introState.holding || introState.bursting ? 2.5 : 1;
+  flow.gather = still ? 1 : Math.min(1, flow.gather + (dt / GATHER_SECONDS) * hurry);
+  flow.ax = damp(flow.ax, flow.x, 16, dt);
+  flow.ay = damp(flow.ay, flow.y, 16, dt);
+  flow.bx = damp(flow.bx, flow.x, LOOK.trail, dt);
+  flow.by = damp(flow.by, flow.y, LOOK.trail, dt);
+  // Velocidad del puntero: lo recorrido en este fotograma, suavizado.
+  flow.vx = damp(flow.vx, flow.moveX / dt, 5, dt);
+  flow.vy = damp(flow.vy, flow.moveY / dt, 5, dt);
+  flow.moveX = flow.moveY = 0;
+  flow.presence = damp(flow.presence, flow.inside ? 1 : 0, 4, dt);
+  const nx = flow.inside ? (flow.x / birthW) * 2 - 1 : 0,
+    ny = flow.inside ? (flow.y / birthH) * 2 - 1 : 0;
+  flow.tiltY = damp(flow.tiltY, nx * 0.16, 3, dt);
+  flow.tiltX = damp(flow.tiltX, -ny * 0.1, 3, dt);
+
+  const burst = pose
+    ? pose.burst
+    : introState.bursting
+    ? clamp01((now - introState.burstStart) / BURST_MS)
+    : 0;
+  // Destello al llegar: la materia se posa en sus puntos y se enciende un instante.
+  const arrive = Math.exp(-Math.pow((burst - 0.6) / 0.09, 2));
+  const speed = Math.hypot(flow.vx, flow.vy),
+    scale = frame.r / 260;
+  matter.render(
+    {
+      cx: frame.x,
+      cy: frame.y,
+      r: frame.r,
+      ry: frame.ry,
+      rx: frame.rx,
+      tiltY: still ? 0 : flow.tiltY,
+      tiltX: still ? 0 : flow.tiltX,
+      time: flow.time,
+      spin: flow.spin,
+      charge: flow.charge,
+      burst,
+      cloud: LOOK.cloud,
+      pointSize: LOOK.pointSize,
+      gain: LOOK.gain,
+      gather: pose?.gather ?? flow.gather,
+      px: flow.ax,
+      py: flow.ay,
+      tx: flow.bx,
+      ty: flow.by,
+      pr: LOOK.pointerRadius * scale,
+      pf: still
+        ? 0
+        : (LOOK.pointerForce + Math.min(speed * LOOK.pointerSpeed, LOOK.pointerMax)) *
+          scale *
+          flow.presence,
+      vx: still ? 0 : flow.vx,
+      vy: still ? 0 : flow.vy,
+      threshold: LOOK.threshold,
+      bloom: LOOK.bloom,
+      bloomRadius: LOOK.bloomRadius,
+      exposure: LOOK.exposure * (1 + 0.9 * arrive),
+      fade: 1 - clamp01((burst - 0.62) / 0.38),
+    },
+    now
+  );
 }
 function beginHold() {
   if (!introState.active || introState.bursting || introState.holding) return;
@@ -39,7 +206,8 @@ function cancelHold() {
   $("#birth-status").textContent = "Mantén pulsado hasta completar el círculo.";
   $("#birth-progress").setAttribute("aria-valuenow", "0");
   $("#hold-start").style.setProperty("--charge", "0%");
-  paintBirth(performance.now());
+  if (!matter) paintBirth(performance.now());
+  else scheduleBirth();
 }
 function beginBirth(now) {
   if (introState.bursting || !introState.active) return;
@@ -66,6 +234,8 @@ function finishIntro() {
   birthRAF = 0;
   stopCharge();
   gateway.hidden = true;
+  // La entrada no vuelve: se suelta la GPU para que la esfera la tenga entera.
+  matter?.dispose();
   document.body.classList.remove("intro-active", "universe-forming");
   const shell = $(".shell");
   shell.inert = false;
@@ -86,25 +256,31 @@ export function scheduleBirth() {
 function frameBirth(now) {
   birthRAF = 0;
   if (!introState.active || document.hidden) return;
-  if (now - birthLast >= 30) {
+  if (introState.holding) {
+    introState.progress = Math.min(1, (now - introState.started) / HOLD_MS);
+    $("#hold-start").style.setProperty("--charge", `${introState.progress * 100}%`);
+    $("#birth-progress").setAttribute(
+      "aria-valuenow",
+      String(Math.round(introState.progress * 100))
+    );
+    if (introState.progress >= 1) beginBirth(now);
+  }
+  if (introState.bursting && now - introState.burstStart >= BURST_MS) {
+    finishIntro();
+    return;
+  }
+  if (matter) {
+    // Tope de 60 fps: en pantallas de 120 Hz se pintaría el doble para verse igual. El
+    // margen deja pasar cada refresco a 60 y 90 Hz y uno de cada dos a 120 y 144.
+    if (now - painted >= 10 || introState.bursting) {
+      painted = now;
+      // La esfera puede recolocarse (cambio de tamaño, barra del navegador en móvil).
+      placeCore();
+      paintMatter(now);
+    }
+  } else if (now - birthLast >= 30) {
     birthLast = now;
-    if (introState.holding) {
-      introState.progress = Math.min(1, (now - introState.started) / 1800);
-      $("#hold-start").style.setProperty(
-        "--charge",
-        `${introState.progress * 100}%`
-      );
-      $("#birth-progress").setAttribute(
-        "aria-valuenow",
-        String(Math.round(introState.progress * 100))
-      );
-      if (introState.progress >= 1) beginBirth(now);
-    }
     paintBirth(now);
-    if (introState.bursting && now - introState.burstStart >= 1300) {
-      finishIntro();
-      return;
-    }
   }
   if (!reduced.matches || introState.holding || introState.bursting)
     scheduleBirth();
@@ -118,7 +294,7 @@ function paintBirth(now) {
     t = reduced.matches ? 0 : now / 1000,
     charge = introState.progress;
   const burst = introState.bursting
-    ? Math.min(1, (now - introState.burstStart) / 1300)
+    ? Math.min(1, (now - introState.burstStart) / BURST_MS)
     : 0;
   c.clearRect(0, 0, birthW, birthH);
   if (introState.bursting) {
@@ -275,6 +451,38 @@ holdButton.addEventListener("keyup", (e) => {
   }
 });
 holdButton.addEventListener("blur", cancelHold);
+/**
+ * Mantener pulsado vale en cualquier sitio de la entrada, no solo en el botón: la nube
+ * entera es lo que se toca. El botón sigue ahí para el teclado y como indicación.
+ */
+gateway.addEventListener("pointerdown", (e) => {
+  if (e.button !== 0 || e.target !== gateway) return;
+  e.preventDefault();
+  gateway.setPointerCapture?.(e.pointerId);
+  beginHold();
+});
+["pointerup", "pointercancel", "lostpointercapture"].forEach((name) =>
+  gateway.addEventListener(name, cancelHold)
+);
+// El puntero perturba la materia al pasar: la aparta, la arremolina y la arrastra.
+window.addEventListener("pointermove", (e) => {
+  if (!matter || !introState.active) return;
+  if (flow.inside) {
+    flow.moveX += e.clientX - flow.x;
+    flow.moveY += e.clientY - flow.y;
+  } else {
+    // Al entrar, los dos seguidores saltan al puntero: si no, cruzarían la pantalla desde
+    // donde se quedaron.
+    flow.ax = flow.bx = e.clientX;
+    flow.ay = flow.by = e.clientY;
+  }
+  flow.x = e.clientX;
+  flow.y = e.clientY;
+  flow.inside = true;
+});
+document.documentElement.addEventListener("pointerleave", () => {
+  flow.inside = false;
+});
 $("#skip-intro").addEventListener("click", () => {
   sound("select");
   finishIntro();

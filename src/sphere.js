@@ -85,7 +85,7 @@ export const ANCHORS = [
   y,
   z: Math.sqrt(1 - y * y) * Math.cos(longitude),
 }));
-const points = Object.freeze(
+export const points = Object.freeze(
   Array.from({ length: N }, (_, i) => {
     const y = 1 - (2 * (i + 0.5)) / N,
       r = Math.sqrt(1 - y * y),
@@ -1192,6 +1192,14 @@ export function resize() {
   sizeBloom();
   positionNodes();
   draw();
+}
+/**
+ * Dónde está la esfera en la ventana: centro y radio en píxeles CSS y su giro. La entrada
+ * proyecta su nube con esto para que cada partícula caiga donde este lienzo pinta su punto.
+ */
+export function sphereFrame() {
+  const r = canvas.getBoundingClientRect();
+  return { x: r.left + CX, y: r.top + CY, r: R, ry: rotationY, rx: rotationX };
 }
 // Transparencia: los puntos posteriores siguen visibles y seleccionables, con menor brillo.
 export function positionNodes() {

@@ -105,6 +105,10 @@ function check(reducedMotion = false, canvasAvailable = true) {
   // revienta aquí en vez de pasar desapercibido hasta el build de producción.
   const raw = w.eval.bind(w);
   w.eval = (code) => raw("with (window.__engine) {" + code + "\n}");
+  // Sin WebGL2 (jsdom) la materia no arranca y la entrada vuelve a su dibujo 2D, en un
+  // lienzo limpio: uno que ya pidió contexto WebGL no admite después uno 2D.
+  assert(!d.querySelector("#gateway").classList.contains("has-matter"));
+  assert.equal(d.querySelectorAll("#birth-canvas").length, 1);
   // Initial gateway gates the scene, then cancellation and successful hold are verified.
   assert(w.eval("introState.active"));
   assert.equal(d.querySelector(".shell").getAttribute("aria-hidden"), "true");
@@ -211,7 +215,8 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(d.querySelector(".rail-home").classList.contains("active"));
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
   assert.equal(d.querySelector(".rail-home").textContent.trim(), "Universo Quantum");
-  assert(d.querySelector(".rail-home .rail-glyph svg"), "The first level carries its sphere icon");
+  // Menú solo de texto (petición de diseño): sin iconos delante de los nombres.
+  assert.equal(d.querySelectorAll("#rail svg").length, 0, "The side menu is text only");
   assert.equal(
     d.querySelectorAll(".rail-children .rail-item[data-rail]").length,
     5,

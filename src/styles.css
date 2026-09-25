@@ -2569,7 +2569,8 @@ body {
   align-items: center;
   gap: 14px;
   text-align: left;
-  padding: 12px 0;
+  /* Más aire entre filas ahora que son solo texto. */
+  padding: 17px 0;
   border: 0;
   background: transparent;
   color: rgba(238, 240, 255, 0.82);
@@ -2581,16 +2582,6 @@ body {
 }
 .rail-item[data-rail] {
   border-bottom: 1px solid var(--rule);
-}
-.rail-glyph {
-  display: inline-flex;
-  color: var(--node-color);
-  opacity: 0.55;
-  transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out);
-}
-.rail-glyph svg {
-  width: 17px;
-  height: 17px;
 }
 /* Entrada escalonada al terminar la intro: el menú se presenta de arriba abajo en vez de
    estar ya ahí. `--i` lo pone el guion al construirlo. */
@@ -2624,10 +2615,6 @@ body:not(.intro-active) .rail-item {
   color: var(--text);
   outline: none;
 }
-.rail-item:hover .rail-glyph,
-.rail-item:focus-visible .rail-glyph {
-  opacity: 0.85;
-}
 .rail-item:focus-visible .rail-name {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -2639,42 +2626,29 @@ body:not(.intro-active) .rail-item {
   padding-left: 12px;
   color: var(--text);
 }
-.rail-item[data-rail].active .rail-glyph {
-  opacity: 1;
-  filter: drop-shadow(0 0 4px var(--node-color));
-}
 .rail-item[data-rail].active .rail-name {
   --scale: 1.08;
 }
 /* «Universo Quantum» es el primer nivel —la esfera— y los territorios cuelgan de él. Va como
-   una fila más del menú pero con más peso: su esfera por icono, el nombre algo mayor y su
-   línea de abajo, que hace de línea de arriba de la lista. Cuando se está en él, su icono va
-   encendido y la marca se queda bajo su fila; con un territorio abierto, es la vuelta. */
+   una fila más del menú pero con más peso: el nombre algo mayor y su línea de abajo, que
+   hace de línea de arriba de la lista. Cuando se está en él, la marca se queda bajo su fila;
+   con un territorio abierto, es la vuelta. */
 .rail-home {
   font-size: 19px;
   letter-spacing: -0.015em;
   color: var(--text);
   border-bottom: 1px solid var(--rule);
 }
-.rail-home .rail-glyph svg {
-  width: 20px;
-  height: 20px;
-}
-.rail:not(.has-selection) .rail-home .rail-glyph {
-  opacity: 1;
-  filter: drop-shadow(0 0 4px var(--node-color));
-}
 .rail.has-selection .rail-home {
   color: rgba(238, 240, 255, 0.82);
 }
-/* Los territorios, sangrados bajo el primer nivel y unidos a él por una línea vertical que
-   baja desde el centro de su esfera: se lee como un árbol de dos niveles. */
+/* Los territorios, sangrados bajo el primer nivel: el sangrado basta para leer los dos
+   niveles. Iban unidos a él por una línea vertical de árbol, que se quitó (petición de
+   diseño) junto con los iconos. */
 .rail-children {
   display: flex;
   flex-direction: column;
-  margin-left: 10px;
-  padding-left: 16px;
-  border-left: 1px solid var(--rule);
+  padding-left: 18px;
 }
 /* Señalar un territorio en el menú lo destaca en la escena, como el hover sobre el punto. */
 .orbit-node.is-hover:after {
@@ -2986,4 +2960,175 @@ body:not(.intro-active) .rail-item {
   bottom: max(18px, env(safe-area-inset-bottom) + 12px);
   align-items: center;
   gap: 12px;
+}
+
+/* ── Entrada con materia (WebGL2) ──────────────────────────────────────────────────────
+   Solo cuando la materia arranca (`.has-matter`); sin WebGL2 la entrada sigue como era.
+   Capas como las del fondo de referencia: el lienzo de partículas, encima una aurora, una
+   rejilla de 72 px que se apaga hacia los bordes y una viñeta. La aurora del original va en
+   `mix-blend-mode: screen`, y aquí no: sobre un lienzo que cambia en cada fotograma obliga a
+   recomponer la pantalla entera, y con alfas tan bajas se ve igual. Por lo mismo el botón no
+   lleva `backdrop-filter`: su fondo ya es casi opaco. */
+#gateway.has-matter {
+  background: #020208;
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s;
+}
+#gateway.has-matter:before,
+#gateway.has-matter:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 0.7s ease 0.2s;
+}
+#gateway.has-matter:before {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 66% 32%, #6c78e61f, #0000 28%),
+    radial-gradient(circle at 37% 76%, #6c5ee612, #0000 34%),
+    linear-gradient(#ffffff06 1px, #0000 0) 0 0 / 72px 72px,
+    linear-gradient(90deg, #ffffff05 1px, #0000 0) 0 0 / 72px 72px;
+  -webkit-mask: radial-gradient(circle, #000, #0000 78%);
+  mask: radial-gradient(circle, #000, #0000 78%);
+}
+#gateway.has-matter:after {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 48%, #0000 46%, #020208c7 100%),
+    linear-gradient(#0000 62%, #020208b3);
+}
+#gateway.has-matter #birth-canvas {
+  z-index: 0;
+}
+#gateway.has-matter .gateway-top,
+#gateway.has-matter .gateway-action,
+#gateway.has-matter #hold-start {
+  z-index: 2;
+}
+/* Al soltar la carga se retira el fondo: la esfera aparece por detrás de las partículas. */
+#gateway.has-matter.bursting {
+  background-color: #02020800;
+}
+#gateway.has-matter.bursting:before,
+#gateway.has-matter.bursting:after {
+  opacity: 0;
+}
+
+/* El botón es el corazón de la nube: un núcleo oscuro que deja leer el icono sobre el
+   blanco de la materia, con la carga en su anillo. */
+#gateway.has-matter #hold-start {
+  top: 48%;
+  width: 84px;
+  height: 84px;
+  min-height: 84px;
+  border: 1px solid #e3e7ff5c;
+  background: radial-gradient(circle, #04051ae6 0 52%, #04051a8c 70%, #04051a00 100%);
+  box-shadow: 0 0 40px #0205189e, inset 0 0 18px #9aa6ff1f;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, opacity 0.18s;
+}
+#gateway.has-matter #hold-start:before {
+  inset: -14px;
+  border-color: #dfe3ff2e;
+  box-shadow: none;
+}
+#gateway.has-matter #hold-start:after {
+  inset: -14px;
+  background: conic-gradient(#f3f5ff var(--charge), #dfe3ff00 var(--charge));
+  filter: drop-shadow(0 0 6px #c9d1ff);
+}
+#gateway.has-matter #hold-start svg {
+  width: 24px;
+  height: 24px;
+  opacity: 0.9;
+  filter: none;
+}
+#gateway.has-matter #hold-start:hover {
+  border-color: #f3f5ffa8;
+}
+#gateway.has-matter.charging #hold-start {
+  transform: translate(-50%, -50%) scale(0.9);
+  background: radial-gradient(circle, #04051af2 0 52%, #04051a99 70%, #04051a00 100%);
+  box-shadow: 0 0 46px #020518c4, inset 0 0 18px #c7ceff33;
+}
+
+/* Los textos bajan al pie: el centro es de la materia. */
+#gateway.has-matter .gateway-action {
+  top: auto;
+  bottom: max(18px, 4.5vh, env(safe-area-inset-bottom));
+}
+#gateway.has-matter .gateway-caption {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+  color: #eef0ff;
+}
+#gateway.has-matter #birth-hint {
+  margin-top: 0;
+  color: #9aa3c8;
+}
+#gateway.has-matter #birth-status {
+  min-height: 17px;
+  margin: 4px 0 2px;
+}
+
+/* La esfera sale ya en su sitio, sin escalar ni desenfocar: las partículas caen justo
+   sobre sus puntos y solo hay que fundirla, cuando ya están llegando. */
+.intro-active.universe-forming #gateway.has-matter ~ .shell {
+  animation: universe-appear 1.3s linear both;
+}
+@keyframes universe-appear {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@media (max-width: 650px) {
+  #gateway.has-matter #hold-start {
+    width: 72px;
+    height: 72px;
+    min-height: 72px;
+  }
+  #gateway.has-matter #hold-start:before,
+  #gateway.has-matter #hold-start:after {
+    inset: -12px;
+  }
+  #gateway.has-matter .gateway-caption {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+}
+/* Mientras la materia se reúne al cargar, aparece lo demás: primero el nombre, luego el
+   núcleo cuando la nube ya tiene cuerpo y al final la indicación. Solo `backwards`: al
+   terminar la animación deja de mandar y las reglas de `.bursting` apagan cada cosa. */
+@keyframes matter-ui-in {
+  from {
+    opacity: 0;
+  }
+}
+#gateway.has-matter .gateway-top {
+  animation: matter-ui-in 1.2s ease 0.3s backwards;
+}
+#gateway.has-matter #hold-start {
+  animation: matter-ui-in 1s ease 1.5s backwards;
+}
+#gateway.has-matter .gateway-action {
+  animation: matter-ui-in 1.2s ease 1.9s backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  #gateway.has-matter,
+  #gateway.has-matter:before,
+  #gateway.has-matter:after,
+  #gateway.has-matter #hold-start {
+    transition: none;
+  }
+  #gateway.has-matter .gateway-top,
+  #gateway.has-matter #hold-start,
+  #gateway.has-matter .gateway-action {
+    animation: none;
+  }
 }

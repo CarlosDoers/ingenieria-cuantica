@@ -225,22 +225,22 @@ menú lo destaca también en la escena. Desde el chip se salta directamente a ot
 y la cámara se desplaza por el chip hasta él.
 
 Tiene forma de **índice en filas**, a la manera de studiors.be (petición de diseño): una
-línea fina arriba de la lista y otra bajo cada fila, delante del nombre **el mismo icono y el
-mismo color que lleva su punto en la esfera** —el menú y la escena se leen como la misma
-cosa—, y la fila entera que se desplaza hacia dentro al señalarla (0,4 s, curva de salida
-larga). Se presenta de arriba abajo al terminar la intro. El territorio abierto se queda
-desplazado, con el nombre algo mayor —se escala, no cambia de cuerpo, así el menú no se
-recoloca— y su icono encendido; y la marca del activo es **la línea bajo su
+línea fina arriba de la lista y otra bajo cada fila, **solo texto** —los iconos de cada
+territorio que llevaba delante del nombre se quitaron el 24/09/2026, a petición de diseño,
+y se dio más aire entre filas (17 px arriba y abajo)—, y la fila entera que se desplaza hacia
+dentro al señalarla (0,4 s, curva de salida larga). Se presenta de arriba abajo al terminar
+la intro. El territorio abierto se queda desplazado, con el nombre algo mayor —se escala, no
+cambia de cuerpo, así el menú no se recoloca—; y la marca del activo es **la línea bajo su
 fila, encendida, que se desliza** de una fila a otra, en vez de un borde que se enciende y se
 apaga: cuenta de dónde vienes y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
 dejar a la vista el territorio abierto y la vuelta se queda fija a la izquierda.
 
 Arriba va **«Universo Quantum»**, el primer nivel —la esfera—, y los cinco territorios
-**cuelgan de él**: es una fila del menú como las demás pero con más peso (su esfera por
-icono y el nombre algo mayor), y los territorios van sangrados debajo, unidos por una línea
-de árbol que baja desde el centro de su esfera. Antes era una etiqueta pequeña en versaleta
-encima de la lista y no se leía como el nivel de arriba. Cuando se está en él, su icono va
-encendido y la marca se queda bajo su fila; con un territorio abierto, pulsarlo vuelve a la
+**cuelgan de él**: es una fila del menú como las demás pero con más peso (el nombre algo
+mayor), y los territorios van sangrados debajo. Iban unidos a él por una línea vertical de
+árbol, que se quitó con los iconos: el sangrado basta para leer los dos niveles. Antes era
+una etiqueta pequeña en versaleta encima de la lista y no se leía como el nivel de arriba.
+Cuando se está en él, la marca se queda bajo su fila; con un territorio abierto, pulsarlo vuelve a la
 esfera. Sin la ficha desapareció su X y hacía falta una vuelta visible: en un kiosco táctil
 no basta con Escape ni con adivinar que se puede pulsar en vacío (las dos cosas siguen
 funcionando). En móvil va fijo a la izquierda del menú horizontal.
@@ -339,6 +339,7 @@ No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en 
 | `src/audio.js` | Efectos, música procedural, silencio y estado del audio |
 | `src/background.js` | Shader WebGL y actualización de sus uniforms |
 | `src/intro.js` | Mantener pulsado, carga, explosión y entrada al universo |
+| `src/matter.js` | Materia de la entrada: nube de partículas en WebGL2 con bloom y ACES, que se condensa en la esfera |
 | `src/main.js` | Inicialización final del conjunto |
 
 ### De ámbito global a módulos
@@ -445,6 +446,82 @@ Los ejes de Bloch usan la conversión `(x_B, y_B, z_B) = (x, z, -y)` del motor: 
 ## Intro y audio
 
 `beginHold()` inicia una carga de 1.800 ms. Soltar o perder el foco cancela la carga; completarla llama a `beginBirth()` y finalmente a `finishIntro()`. Hay entrada directa y soporte de teclado.
+
+**La materia de la entrada** (24/09/2026, a petición del cliente: «algo más llamativo»). La
+referencia es el fondo de [aaronjcunningham.com](https://www.aaronjcunningham.com/), una bola
+de partículas en three.js/WebGPU. Está en `src/matter.js`, con WebGL2 directo:
+
+- **126.500 partículas** en escritorio y 50.600 en móvil (se bajó de 207.000 y 82.800: más aireada y más ligera). Cada una se calcula en el vertex
+  shader a partir de su semilla, el tiempo y el puntero, sin estado: un flujo de ruido simplex
+  lento, un remolino que gira más deprisa por dentro y la perturbación del puntero, que aparta,
+  arremolina y arrastra con su estela.
+- **Entrada al cargar.** La materia empieza dispersa por toda la pantalla, como polvo, y se
+  reúne desde el caos en unos 3,4 s. Cada partícula nace en un punto al azar, sin relación
+  con su sitio en la nube, y viaja por su propio camino: un ruido la desvía sobre todo a
+  mitad de viaje y la deja posarse al final (antes se reunían en espiral y se veía rígido).
+  Sale con su propio retraso y frena al llegar, así que la nube se rellena poco a poco. Si se empieza a cargar antes, se reúne 2,5
+  veces más deprisa. Mientras tanto aparecen el nombre, el núcleo y la indicación, por ese
+  orden. Con movimiento reducido la nube ya sale reunida.
+- **Puntero con retraso.** Se sigue dos veces: una posición rápida y un rastro lento (λ 2,4)
+  que la persigue. Cada partícula reacciona a su propia mezcla de las dos (`w²`: la mayoría
+  responde al instante y una parte se queda rezagada). Así el hueco deja estela, se rellena
+  poco a poco al parar y lo que queda entre el puntero y su rastro se arrastra con el
+  movimiento. El empuje y el alcance tienen variación por partícula y un leve pulso en el
+  tiempo, para que el borde no sea un círculo limpio. Fuerza, alcance y retraso están en
+  `LOOK` (`pointerForce`, `pointerSpeed`, `pointerMax`, `pointerRadius`, `trail`).
+- **Post-procesado del original, portado tal cual:** bloom de cinco niveles (núcleos 3…11,
+  factores 1,0…0,2, `lerpBloomFactor`, umbral de luminancia), tone mapping ACES a exposición
+  1,2 y salida sRGB, con la misma calidad adaptativa: si el fotograma medio pasa de 21,5 ms,
+  la resolución de render baja hasta el 70 %.
+- **Rendimiento.** Medido en un Apple M3 con pantalla retina, repitiendo cada fase diez
+  veces por fotograma para aislar su coste: partículas 0,72 ms, bloom 0,56 ms, y 1,65 ms de
+  base (limpiar, componer y la sincronización de la propia medida). Lo que pesaba no eran
+  las partículas, sino las pasadas a pantalla completa. Por eso:
+  - Toda la materia se hace a píxel CSS (`SCENE_DPR = 1`) aunque la pantalla sea retina, y
+    el navegador escala el lienzo. El grano queda un poco más suave, casi imperceptible.
+  - El umbral del bloom va dentro del primer desenfoque y no en una pasada propia: son 12
+    pasadas por fotograma en vez de 14.
+  - La vibración de la carga (tres ruidos por partícula) solo se calcula mientras se carga.
+  - La entrada se pinta a 60 fps como máximo. En pantallas de 120 Hz es la mitad de trabajo.
+  - Nada de `mix-blend-mode` ni `backdrop-filter` sobre el lienzo animado, y la posición
+    del botón solo se escribe cuando cambia.
+- **Las partículas acaban siendo los 1.150 puntos de la esfera.** Cada una tiene asignado un
+  punto (`i % 1150`) y nace cerca de su dirección. Al mantener pulsado, la materia se recoge
+  sobre la superficie y aparece el borde de la esfera. Al completar la carga, cada partícula
+  vuelve en espiral a su punto y cristaliza. La nube se proyecta con la misma cámara que
+  `sphere.js` (`sphereFrame()`), así que cae exactamente donde el lienzo pinta cada punto, y la
+  esfera real aparece por debajo mientras las partículas se apagan.
+- Se puede mantener pulsado en cualquier sitio de la entrada, no solo en el botón, que ahora
+  es el núcleo oscuro de la nube. Los textos van al pie.
+- Sin WebGL2 la entrada vuelve a su dibujo 2D de antes. Al terminar, la materia libera la GPU.
+- En desarrollo, `window.__matter` permite afinar el aspecto en vivo, y `__matter.pose =
+  { charge, burst, gather }` congela una fase para revisarla.
+
+**Sonido con *Interstellar* como referencia** (24/09/2026). Se toma el sonido de la
+película, no su música: ninguna melodía de Zimmer. Todo sigue sintetizado en `src/audio.js`,
+sin archivos:
+
+- **Órgano de tubos.** Cada nota son dos tubos con el mismo timbre (armónicos de un registro
+  de principal) desafinados unos cents, que baten como un órgano real. Las voces suaves usan
+  un registro de flauta. **Minimalista:** pocas notas, quintas abiertas y motivos cortos.
+- **Reverberación de catedral** de 5,5 s, generada con ruido que se apaga y se oscurece.
+- **Carga:** crescendo de órgano de tres notas (la grave con su 16', su octava y la quinta). Los tubos entran del pedal hacia arriba y el registro se
+  abre de oscuro a brillante mientras un **reloj** hace tic-tac cada vez más deprisa.
+  Soltar lo corta entero.
+- **Nacimiento:** sub-grave suave, una quinta abierta de órgano (la-mi, dos notas) y, a
+  los 0,78 s, cuando las partículas se posan en sus puntos, el tic del reloj. La nota aguda
+  que sonaba ahí se quitó a petición del cliente. Se
+  apaga en menos de 2 s. Antes era el acorde entero con ráfaga de aire y una cola de más de
+  3 s, y tapaba la llegada a la esfera.
+- **Territorio:** dos notas alternas, a una quinta, sobre un pedal grave; cada territorio
+  tiene su nota. **Pulso de la esfera:** el tic del reloj y una nota de flauta.
+- **Ambiente:** acordes de dos notas a una décima, de órgano en flauta (la m, fa, do, sol), que se funden cada 15 s. No
+  suena en la intro; entra 3,5 s después del nacimiento.
+- Todo pasa por un limitador: el nacimiento es fuerte a propósito y no debe saturar.
+- Niveles calibrados sin altavoces con `__audioLevels(kind)` en desarrollo, que renderiza el
+  sonido con `OfflineAudioContext`. Picos: nacimiento 0,33; carga 0,28; territorio 0,10;
+  pulso 0,03; hover 0,02; ambiente RMS 0,02. En RMS el nacimiento (0,11) sigue por encima
+  del final de la carga (0,08).
 
 El navegador habilita Web Audio tras una interacción. El hover de la intro puede estar en silencio antes de que el usuario active el contexto; no es un fallo de recursos. El control de sonido silencia tanto música como efectos. Las tabs y el botón Explorar de la ficha permanecen sin sonido por decisión de diseño.
 

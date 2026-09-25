@@ -169,20 +169,13 @@ rail.innerHTML =
   // borde que se enciende y se apaga: el menú cuenta así de dónde vienes y a dónde vas.
   `<span class="rail-marker" aria-hidden="true"></span>` +
   // «Universo Quantum» es **el primer nivel**, la esfera, y los cinco territorios cuelgan de
-  // él: va como un elemento más del menú —con su esfera por icono y algo mayor— y los
-  // territorios, sangrados debajo y unidos por una línea de árbol. Antes era una etiqueta
-  // pequeña en versaleta encima de la lista, y no se leía como el nivel de arriba.
-  `<button class="rail-item rail-home" type="button" style="--i:0;--node-color:#9aa9ff"><span class="rail-glyph">${icon(
-    "universe"
-  )}</span><span class="rail-name">Universo Quantum</span></button>` +
-  // Cada territorio con el mismo icono y el mismo color que lleva su punto en la esfera: el
-  // menú y la escena se leen como la misma cosa.
+  // él: va como un elemento más del menú, algo mayor, y los territorios sangrados debajo.
+  // Solo texto (petición de diseño): sin los iconos de la esfera ni la línea de árbol.
+  `<button class="rail-item rail-home" type="button" style="--i:0"><span class="rail-name">Universo Quantum</span></button>` +
   `<div class="rail-children">` +
   DATA.map(
     (d, i) =>
-      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${
-        d.color
-      }"><span class="rail-glyph">${icon(d.icon)}</span><span class="rail-name">${d.name}</span></button>`
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1}"><span class="rail-name">${d.name}</span></button>`
   ).join("") +
   `</div>`;
 $$(".rail-item[data-rail]").forEach((b) => {
