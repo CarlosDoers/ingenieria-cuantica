@@ -351,24 +351,6 @@ p {
   height: 100%;
   isolation: isolate;
 }
-.stage-top {
-  position: absolute;
-  top: 25px;
-  left: 15px;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--muted);
-  font: var(--mono-weight) 11px/1.4 var(--mono);
-  letter-spacing: 1px;
-  pointer-events: none;
-}
-.live {
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-}
 .scene {
   position: absolute;
   inset: 30px -20px 36px -20px;
@@ -861,13 +843,6 @@ noscript p {
   .scene {
     inset: 55px -14px 65px;
   }
-  .stage-top {
-    left: 15px;
-    font-size: 10px;
-  }
-  .stage-top > span:last-child {
-    display: none;
-  }
   .copy {
     max-width: 350px;
   }
@@ -988,16 +963,6 @@ noscript p {
     margin: 8px -13px 15px;
     flex-shrink: 0;
   }
-  .stage-top {
-    top: 15px;
-    left: 14px;
-    right: 12px;
-    font-size: 9px;
-  }
-  .stage-top > span:last-child {
-    display: block;
-    font-size: 9px;
-  }
   .scene {
     inset: 15px 0 30px;
   }
@@ -1070,9 +1035,6 @@ noscript p {
   }
   .experience.has-selection .scene {
     inset: 8px 0 25px;
-  }
-  .experience.has-selection .stage-top {
-    top: 0;
   }
   .detail h2 {
     font-size: 34px;
@@ -1238,19 +1200,6 @@ header {
 }
 .scene:after {
   display: none;
-}
-.stage-top {
-  top: 8px;
-  left: 0;
-  right: 0;
-  font: var(--mono-weight) 10px var(--mono);
-  letter-spacing: 1.6px;
-}
-.stage-top > span:last-child {
-  display: none;
-}
-.stage-top .dot {
-  background: #687eff;
 }
 .scene-footer {
   bottom: 0;
@@ -1495,10 +1444,6 @@ dialog::backdrop {
     font-size: 11px;
   }
 
-  .stage-top {
-    font-size: 9px;
-    top: 5px;
-  }
 }
 @media (max-width: 600px) {
   .shell {
@@ -1528,10 +1473,6 @@ dialog::backdrop {
   }
   .scene {
     inset: 20px -8px 66px;
-  }
-  .stage-top {
-    left: 0;
-    font-size: 9px;
   }
   .scene-footer {
     left: 0;

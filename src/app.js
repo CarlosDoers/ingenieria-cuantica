@@ -122,7 +122,6 @@ function selectTerritory(index, { focus = true, audible = true } = {}) {
   );
   renderTab(0);
   $("#detail").scrollTop = 0;
-  $("#scene-state").textContent = `EXPLORANDO / ${d.name.toUpperCase()}`;
   focusCamera(index);
   selectLight(index);
   // Segundo nivel: la esfera se transforma en el campo de cúbits. Las pestañas de la ficha
@@ -325,7 +324,6 @@ function resetExperience(focus = false, { restart = false } = {}) {
   $("#point-signal").style.display = "none";
   $$("[data-index]").forEach((b) => b.setAttribute("aria-pressed", "false"));
   syncRail();
-  $("#scene-state").textContent = "EXPLORA LAS CONEXIONES";
   selectLight(-1);
   activity();
   announce("Has vuelto al universo. Elige uno de los cinco puntos.");

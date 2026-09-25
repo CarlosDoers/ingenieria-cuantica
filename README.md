@@ -347,8 +347,11 @@ fuente.
   de la esfera («z · |0⟩», antes en Georgia). Los pesos 400, 500 y 600 que había repartidos,
   y el 100 de los nombres del menú de móvil, pasaron todos a `--weight`.
 - **JetBrains Mono (400)** en los rótulos pequeños en mayúsculas: los del menú de móvil
-  («// Navegación», el pie, «Menú»/«Cerrar») y, por ser el mismo tipo de texto, «Explora las
-  conexiones», el rótulo del circuito del chip y el subtítulo de la intro.
+  («// Navegación», el pie, «Menú»/«Cerrar») y, por ser el mismo tipo de texto, el rótulo
+  del circuito del chip y el subtítulo de la intro.
+- El aviso de arriba a la izquierda de la escena («Explora las conexiones» / «Explorando /
+  territorio») se quitó el 25/09/2026 a petición del cliente: el menú lateral ya dice dónde
+  se está.
 - Se sirven desde el propio proyecto con Fontsource (`@fontsource-variable/inter` y
   `@fontsource-variable/jetbrains-mono`), no desde Google Fonts: funcionan sin red, no hay
   petición a Google al abrir la página y el navegador solo baja los alfabetos que usa.
