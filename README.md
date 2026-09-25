@@ -253,9 +253,8 @@ de diseño, a partir del menú de aaronjcunningham.com). El botón es un círcul
 anillo y un punto de luz; abierto, el punto se vuelve una cruz en el mismo sitio.
 
 El panel lleva arriba «// Navegación» y abajo un pie, en monoespaciada, sobre una retícula
-tenue. Cada fila tiene el icono del territorio, el nombre **enorme en peso fino y en
-mayúsculas** —la pila de fuentes busca el más fino de cada sistema: Helvetica Neue y SF en
-iOS, Roboto en Android— y una flecha. La línea de debajo de cada fila va en **el color de
+tenue. Cada fila tiene el icono del territorio, el nombre **enorme y en mayúsculas**, en la
+tipografía del sitio (ver «Tipografía»), y una flecha. La línea de debajo de cada fila va en **el color de
 su territorio**: una rayita en reposo y entera en la activa, que además desplaza el nombre.
 Las filas entran escalonadas desde abajo y salen al revés. «Universo Quantum» va el primero
 y algo menor, porque su nombre es más largo.
@@ -314,6 +313,26 @@ npm test           # build de pruebas + smoke test
 npm run package    # build + ZIP para Netlify
 ```
 
+## Tipografía
+
+Unificada el 25/09/2026 (petición del cliente). **Todo sale de `src/fonts.css`**: el resto
+del CSS y el lienzo de la esfera usan `--font`, `--mono` y `--weight`, nunca un nombre de
+fuente.
+
+- **Inter Light (300)** en todo el sitio: textos, títulos, menús y las etiquetas de los ejes
+  de la esfera («z · |0⟩», antes en Georgia). Los pesos 400, 500 y 600 que había repartidos,
+  y el 100 de los nombres del menú de móvil, pasaron todos a `--weight`.
+- **JetBrains Mono (400)** en los rótulos pequeños en mayúsculas: los del menú de móvil
+  («// Navegación», el pie, «Menú»/«Cerrar») y, por ser el mismo tipo de texto, «Explora las
+  conexiones», el rótulo del circuito del chip y el subtítulo de la intro.
+- Se sirven desde el propio proyecto con Fontsource (`@fontsource-variable/inter` y
+  `@fontsource-variable/jetbrains-mono`), no desde Google Fonts: funcionan sin red, no hay
+  petición a Google al abrir la página y el navegador solo baja los alfabetos que usa.
+
+**Para probar otra fuente** (p. ej. Manrope en lugar de Inter): `npm install
+@fontsource-variable/manrope`, cambiar la importación de `fonts.css` y poner `--font-main:
+"Manrope Variable"`. Los pasos están también en el comentario de `fonts.css`.
+
 ## Tecnologías
 
 - HTML5 semántico, CSS responsive y JavaScript nativo.
@@ -323,13 +342,14 @@ npm run package    # build + ZIP para Netlify
 - Web Audio API para sintetizar efectos y música ambiental mediante osciladores, filtros y envolventes.
 - Pointer Events, requestAnimationFrame, ResizeObserver y Fullscreen API.
 
-No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución, fuentes remotas ni archivos de música. **En tiempo de ejecución no hay ninguna dependencia**: lo que se publica son un HTML, un CSS y un JS. Vite y jsdom son solo herramientas de desarrollo.
+No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución, fuentes remotas ni archivos de música. **En tiempo de ejecución no hay ninguna dependencia**: lo que se publica son un HTML, un CSS, un JS y los archivos de las dos tipografías, que Vite copia al build desde Fontsource. Vite, jsdom y Fontsource son solo herramientas de desarrollo.
 
 ## Dónde editar
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `index.html` | Estructura, iconos SVG, accesibilidad, intro y controles |
+| `src/fonts.css` | Tipografías: qué fuentes se cargan y las variables `--font`, `--mono` y `--weight` |
 | `src/styles.css` | Diseño, tamaños, responsive, resplandores y hover |
 | `src/content.js` | `DATA`: textos, colores, iconos y pestañas de los cinco territorios |
 | `src/dom.js` | `$`, `$$`, `icon` y `reduced`: lo único que comparten todos sin depender de nadie |

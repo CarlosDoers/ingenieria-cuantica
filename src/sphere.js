@@ -1739,6 +1739,14 @@ function stepCamera(dt) {
 // Ejes ortonormales de Bloch; giran con la misma cámara que la esfera.
 // Conversión Bloch -> motor: (x_B, y_B, z_B) = (x, z, -y).
 // Source: https://quantum.cloud.ibm.com/learning/en/modules/quantum-mechanics/superposition-with-qiskit
+let fontStack = "";
+/** `--font` de fonts.css, leída una vez: el lienzo no ve las variables de CSS por sí solo. */
+function siteFont() {
+  if (!fontStack)
+    fontStack =
+      getComputedStyle(document.documentElement).getPropertyValue("--font").trim() || "sans-serif";
+  return fontStack;
+}
 function drawCoordinates() {
   if (!ctx) return;
   ctx.save();
@@ -1748,7 +1756,8 @@ function drawCoordinates() {
     { v: { x: 0, y: 0, z: 1 }, name: "y" },
     { v: { x: 0, y: -1, z: 0 }, name: "z · |0⟩", negative: "|1⟩" },
   ];
-  ctx.font = (W < 500 ? "13" : "15") + "px Georgia, serif";
+  // La tipografía del sitio, la misma variable que el CSS (fonts.css).
+  ctx.font = `${W < 500 ? 13 : 15}px ${siteFont()}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   for (const axis of axes) {

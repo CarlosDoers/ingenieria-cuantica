@@ -3,6 +3,7 @@
  * ejecuta cuando todos están ya montados, que es lo que antes garantizaba ser el último
  * `<script>` de la página.
  */
+import './fonts.css';
 import './styles.css';
 import { $ } from './dom.js';
 import './app.js';

@@ -1,0 +1,30 @@
+/*
+ * Tipografías del sitio. **Todo sale de aquí**: el resto del CSS y el lienzo de la esfera
+ * usan `--font`, `--mono` y `--weight`, nunca un nombre de fuente.
+ *
+ * Se sirven desde el propio proyecto (Fontsource), no desde Google Fonts: funcionan sin
+ * red, no hay petición a Google al abrir la página y cargan con el resto.
+ *
+ * Para probar otra fuente, p. ej. Manrope en lugar de Inter:
+ *   1. npm install @fontsource-variable/manrope
+ *   2. cambiar la importación de abajo por  @import "@fontsource-variable/manrope";
+ *   3. cambiar  --font-main  por  "Manrope Variable"
+ * El nombre exacto de cada fuente está en fontsource.org. Si la fuente no tiene versión
+ * variable, el paquete es @fontsource/<nombre> y el nombre va sin «Variable».
+ */
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root {
+  /* Texto de todo el sitio. */
+  --font-main: "Inter Variable";
+  /* Rótulos pequeños en mayúsculas: el menú de móvil y los rótulos técnicos. */
+  --font-mono: "JetBrains Mono Variable";
+  /* Peso del texto de todo el sitio: 300 es Light. */
+  --weight: 300;
+  /* Peso de los rótulos monoespaciados: a 9-11 px, el Light se quedaba sin cuerpo. */
+  --mono-weight: 400;
+
+  --font: var(--font-main), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
