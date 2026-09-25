@@ -106,7 +106,32 @@ export const points = Object.freeze(
  * de la esfera a donde lo pone la cámara del campo. Así la esfera puede seguir girando
  * con su propia lógica y el chip tiene su propia cámara, sin pelearse por `rotationY/X`.
  */
-const FIELD_SECONDS = 2.8; // duración de la transformación completa
+/**
+ * **Orden de la transformación** (petición de dirección, 25/09/2026): primero la cámara se
+ * acerca a la esfera, hacia el punto pulsado, y después los puntos se despliegan en el campo.
+ * Antes era al revés: la esfera se desplegaba y luego la cámara entraba en el territorio.
+ * Con `false` vuelve el orden anterior tal cual.
+ */
+const ZOOM_FIRST = true;
+const FIELD_SECONDS = ZOOM_FIRST ? 3.2 : 2.8; // duración de la transformación completa
+/**
+ * Con el zoom primero: el acercamiento ocupa el primer 40 % y el despliegue empieza un poco
+ * antes de que acabe (32 %), para que se lean como un solo movimiento y no como dos. Lo que
+ * depende de haber llegado —pestañas, camino encendido, color final de las esferas— entra en
+ * el último tramo del despliegue.
+ */
+const ZOOM_END = 0.4,
+  UNFOLD_START = 0.32,
+  ARRIVE_START = 0.62;
+/** Separación media entre los puntos de la esfera (1.150 puntos en la esfera unidad). */
+const SPHERE_SPACING = Math.sqrt((4 * Math.PI) / N);
+/**
+ * Cuánto del camino hasta la escala de los cúbits hace el zoom (en exponente): 0,55 es algo
+ * menos de la mitad del aumento. El resto lo hacen los puntos al desplegarse, que así **se
+ * expanden** de verdad. Con el aumento entero la pantalla se quedaba casi vacía entre el
+ * zoom y el despliegue, y los cúbits llegaban desde fuera del encuadre.
+ */
+const ZOOM_REACH = 0.55;
 /**
  * Lo que se espera antes de desplegar. Va muy corto a propósito: la transformación tiene que
  * arrancar **con el clic**, no después de un compás de espera; con medio segundo parecía que
@@ -181,6 +206,11 @@ const orbit = { yaw: 0, pitch: 0, zoom: 1, yawTo: 0, pitchTo: 0, zoomTo: 1 };
 /** Cámara del fotograma: giro y picado ya en senos y cosenos, y la escala `k = 3,8 / dist`. */
 const view = { cy: 1, sy: 0, cp: Math.cos(FIELD_START.pitch), sp: Math.sin(FIELD_START.pitch), k: 1, pan: 0 };
 const { qubitSource, pointQubit, territories } = assignSources(points, ANCHORS);
+// Cada territorio se asienta sobre el punto real de la esfera que se convierte en su sección
+// (el más cercano a su ancla, ver `claimNearest`). Se mueve menos de medio hueco entre puntos
+// —no se nota en la esfera— y así el anillo, la luz que converge y el zoom caen justo sobre
+// el punto que luego es la esfera grande del campo.
+territories.forEach((t, i) => Object.assign(ANCHORS[i], points[qubitSource[t.hub]]));
 // Papel de cada cúbit en el menú: sección (hub) o pestaña (hija) de qué territorio.
 const hubOf = new Int8Array(chip.nodes.length).fill(-1);
 const childOf = new Int8Array(chip.nodes.length).fill(-1);
@@ -214,7 +244,24 @@ let hoverQ = -1,
 const pointDelay = new Float32Array(N);
 let fieldRaw = 0, // avance del despliegue, 0..1
   fe = 0, // despliegue suavizado, para lo que es global (decorados, acopladores)
-  ff = 0; // entrada de la cámara en el territorio
+  ff = 0, // llegada al territorio: pestañas, camino encendido, color final
+  fc = 0, // entrada de la cámara del campo (con el zoom primero, ya está dentro: 1)
+  zz = 0; // acercamiento a la esfera, antes del despliegue
+/**
+ * Zoom sobre la esfera: una ampliación en espacio de cámara alrededor del punto pulsado, que
+ * a la vez viaja hasta donde quedará su sección en el campo. Crece hasta que los puntos de la
+ * esfera están tan separados como los cúbits, así que al desplegarse cada uno se recoloca
+ * cerca en vez de cruzar la pantalla.
+ */
+const zoom = { scale: 1, ax: 0, ay: 0, az: 0, tx: 0, ty: 0, tz: 0, from: -1 };
+function zoomed(p) {
+  if (zoom.scale === 1) return p;
+  return {
+    x: zoom.tx + (p.x - zoom.ax) * zoom.scale,
+    y: zoom.ty + (p.y - zoom.ay) * zoom.scale,
+    z: zoom.tz + (p.z - zoom.az) * zoom.scale,
+  };
+}
 const smooth = (t) => t * t * (3 - 2 * t);
 /**
  * Curva de las etapas grandes. Con `smooth` la velocidad arranca en cero pero la
@@ -248,7 +295,7 @@ const fieldOrigin = { x: 0, y: 0, z: 0 };
 function chipCam(x, h, z) {
   const dx = x - field.aim.x,
     dz = z - field.aim.z,
-    free = 1 - ff,
+    free = 1 - fc,
     k = view.k,
     x1 = dx * view.cy + dz * view.sy,
     z1 = -dx * view.sy + dz * view.cy;
@@ -285,7 +332,7 @@ function fieldCam(node) {
 }
 /** Punto de la escena en pantalla, esté en la esfera, en el chip o a medio camino. */
 function blended(sphereLocal, qubit, e) {
-  const s = transform(sphereLocal);
+  const s = zoomed(transform(sphereLocal));
   if (e <= 0 || qubit < 0) return s;
   const f = fieldCam(chip.nodes[qubit]);
   return { x: s.x + (f.x - s.x) * e, y: s.y + (f.y - s.y) * e, z: s.z + (f.z - s.z) * e };
@@ -345,6 +392,8 @@ export function enterField(index) {
     orbit.yaw = orbit.pitch = 0;
     orbit.zoom = 1;
     field.wait = reduced.matches ? 0 : FIELD_DELAY;
+    // El zoom va al punto pulsado aunque se elija otro territorio a medio camino.
+    zoom.from = index;
     const a = ANCHORS[index];
     for (let i = 0; i < N; i++) pointDelay[i] = (Math.acos(dot(points[i], a)) / Math.PI) * FIELD_SPREAD;
   }
@@ -509,23 +558,34 @@ function updateFieldStages() {
   // solape había un valle de velocidad entre los dos y se leían como dos movimientos, y
   // además la cámara —que es el movimiento grande— tardaba medio segundo en arrancar, así
   // que la transformación parecía empezar más tarde de lo que se había pulsado.
-  fieldRaw = clamp01(field.mix / 0.7);
-  fe = soft(fieldRaw);
-  ff = soft(clamp01((field.mix - 0.12) / 0.88));
-  const yaw = FIELD_START.yaw + (FIELD_VIEW.yaw + orbit.yaw + field.turn - FIELD_START.yaw) * ff,
-    pitch = FIELD_START.pitch + (FIELD_VIEW.pitch + orbit.pitch - FIELD_START.pitch) * ff,
+  if (ZOOM_FIRST) {
+    // Primero el zoom, luego el despliegue. La cámara del campo ya está en su encuadre desde
+    // el principio: el acercamiento lo hace la esfera.
+    zz = soft(clamp01(field.mix / ZOOM_END));
+    fieldRaw = clamp01((field.mix - UNFOLD_START) / (1 - UNFOLD_START));
+    fe = soft(fieldRaw);
+    ff = soft(clamp01((field.mix - ARRIVE_START) / (1 - ARRIVE_START)));
+    fc = 1;
+  } else {
+    zz = 0;
+    fieldRaw = clamp01(field.mix / 0.7);
+    fe = soft(fieldRaw);
+    ff = fc = soft(clamp01((field.mix - 0.12) / 0.88));
+  }
+  const yaw = FIELD_START.yaw + (FIELD_VIEW.yaw + orbit.yaw + field.turn - FIELD_START.yaw) * fc,
+    pitch = FIELD_START.pitch + (FIELD_VIEW.pitch + orbit.pitch - FIELD_START.pitch) * fc,
     small = compact.matches,
     end = FIELD_VIEW.dist * (small ? 0.8 : 1) * orbit.zoom;
   // Desplazamiento lateral de la cámara, en unidades de espacio de cámara a la distancia
   // del objetivo (donde una unidad mide `R` píxeles).
   // En escritorio el territorio se corre un poco a la derecha, lejos del menú lateral; en
   // estrecho, algo más, para que la sección no se salga por la izquierda.
-  view.pan = R > 0 ? ((W * (small ? 0.12 : 0.07)) / R) * ff : 0;
+  view.pan = R > 0 ? ((W * (small ? 0.12 : 0.07)) / R) * fc : 0;
   view.cy = Math.cos(yaw);
   view.sy = Math.sin(yaw);
   view.cp = Math.cos(pitch);
   view.sp = Math.sin(pitch);
-  view.k = FIELD_START.dist / (FIELD_START.dist * Math.pow(end / FIELD_START.dist, ff));
+  view.k = FIELD_START.dist / (FIELD_START.dist * Math.pow(end / FIELD_START.dist, fc));
   // Desplazamiento que lleva la sección a su punto en la esfera, con la cámara de partida.
   if (field.focus >= 0) {
     const a = transform(ANCHORS[field.focus]),
@@ -535,6 +595,20 @@ function updateFieldStages() {
     fieldOrigin.x = a.x - hx;
     fieldOrigin.y = a.y + hz * Math.sin(FIELD_START.pitch);
     fieldOrigin.z = a.z - hz * Math.cos(FIELD_START.pitch);
+  }
+  // El zoom: el punto pulsado viaja a su sección en el campo mientras la esfera se amplía
+  // hasta que sus puntos quedan tan separados como los cúbits.
+  zoom.scale = 1;
+  if (zz > 0 && zoom.from >= 0) {
+    const a = transform(ANCHORS[zoom.from]),
+      h = fieldCam(chip.nodes[territories[zoom.from].hub]);
+    zoom.scale = Math.pow((SCALE * view.k) / SPHERE_SPACING, zz * ZOOM_REACH);
+    zoom.ax = a.x;
+    zoom.ay = a.y;
+    zoom.az = a.z;
+    zoom.tx = a.x + (h.x - a.x) * zz;
+    zoom.ty = a.y + (h.y - a.y) * zz;
+    zoom.tz = a.z + (h.z - a.z) * zz;
   }
 }
 
@@ -1480,7 +1554,8 @@ export function draw() {
   ctx.clearRect(0, 0, W, H);
   // El armazón de la esfera —halo, ejes de Bloch, órbita, ecuador y meridianos— se
   // desvanece mientras la esfera se despliega: en el chip no significa nada.
-  const sphereAlpha = 1 - fe;
+  // Con el zoom primero se van ya durante el acercamiento: no se amplían con la esfera.
+  const sphereAlpha = (1 - fe) * (1 - clamp01(zz / 0.4));
   if (sphereAlpha > 0.01) {
   ctx.globalAlpha = sphereAlpha;
   const halo = ctx.createRadialGradient(CX, CY, R * 0.1, CX, CY, R * 1.5);
@@ -1533,7 +1608,7 @@ export function draw() {
   }
   for (let i = 0; i < N; i++) {
     const q = projected[i],
-      r = transform(q.p);
+      r = zoomed(transform(q.p));
     let x = r.x,
       y = r.y,
       z = r.z;
@@ -1556,7 +1631,8 @@ export function draw() {
     // Con la cámara del chip tan cerca, algo puede quedar detrás de ella a mitad de
     // vuelta a la esfera: se deja de dibujar como punto y la perspectiva no se desboca.
     const depth = 3.8 - z;
-    if (depth < 0.3) q.fade = 0;
+    // Lo que el zoom trae hasta la cámara se apaga antes de llegar, no de golpe.
+    q.fade = clamp01((depth - 0.3) / 0.8);
     const perspective = 3.8 / Math.max(depth, 0.05);
     q.x = CX + x * R * perspective;
     q.y = CY + y * R * perspective;
@@ -1619,7 +1695,9 @@ export function draw() {
       ? 1
       : 0.84 + 0.16 * Math.sin(elapsed * 1.25 + q.p.y * 3);
     light += idle * 0.075 + wavePower * 0.7 * breathe;
-    let radius = Math.max(0.1, (0.65 + depth * 1.3 + wavePower * 1.8) * q.scale),
+    // Con el zoom los puntos crecen algo más que por la perspectiva, que ya los agranda al
+    // acercarse: con la ampliación entera crecían dos veces y llenaban la pantalla.
+    let radius = Math.max(0.1, (0.65 + depth * 1.3 + wavePower * 1.8) * q.scale * Math.sqrt(zoom.scale)),
       sat = 45 + wavePower * 45,
       lum = 53 + depth * 17 + wavePower * 25,
       alpha = Math.min(1, light),
@@ -1629,7 +1707,8 @@ export function draw() {
       wp = wavePower;
     // Un punto que viaja al chip se funde en su esfera de cúbit (`drawField`) según avanza.
     alpha *= keep;
-    haloAlpha *= keep;
+    // Los anillos de los puntos, ampliados, llenaban la pantalla de círculos.
+    haloAlpha *= keep * (1 - zz * 0.8);
     // El halo se salta cuando su alfa cae por debajo de lo que un píxel puede mostrar:
     // son una elipse y un trazo por punto que no pintaban nada.
     if (q.z > -0.3 && haloAlpha > 0.012) {
@@ -1643,8 +1722,9 @@ export function draw() {
     ctx.beginPath();
     ctx.arc(q.x, q.y, radius, 0, Math.PI * 2);
     ctx.fill();
-    if (wp > 0.18 && q.z > 0) {
-      ctx.fillStyle = hsla(hue, 95, 70, wp * 0.18 * keep);
+    // El resplandor de la luz convergente se apaga con el zoom: ampliado, eran discos enormes.
+    if (wp > 0.18 && q.z > 0 && zz < 0.99) {
+      ctx.fillStyle = hsla(hue, 95, 70, wp * 0.18 * keep * (1 - zz));
       ctx.beginPath();
       ctx.arc(q.x, q.y, radius * 5.5, 0, Math.PI * 2);
       ctx.fill();
@@ -1653,7 +1733,7 @@ export function draw() {
   ctx.globalCompositeOperation = "source-over";
   // Thin linking chords make the sphere read as an interconnected object.
   ctx.lineWidth = 0.4;
-  for (let i = 0; fe < 0.99 && i < 20; i++) {
+  for (let i = 0; fe < 0.99 && zz < 0.99 && i < 20; i++) {
     const a = projected[Math.floor(((i + 0.2) * N) / 21)],
       b = projected[Math.floor(((i + 0.6) * N) / 21)];
     if (a && b) {

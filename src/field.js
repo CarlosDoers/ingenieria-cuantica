@@ -165,7 +165,55 @@ export function assignSources(points, anchors) {
       pointQubit[p] = node.index;
     });
   }
-  return { qubitSource, pointQubit, territories: buildTerritories(anchors, qubitSource, points) };
+  const territories = buildTerritories(anchors, qubitSource, points);
+  claimNearest(territories, anchors, points, qubitSource, pointQubit);
+  return { qubitSource, pointQubit, territories };
+}
+
+/**
+ * **El punto que se pulsa es el que se convierte en la sección.** La sección tiene que caer
+ * lejos de los bordes de la oblea, y el punto que le tocaba por el desenrollado podía estar
+ * lejísimos de su ancla: 28° en dos territorios, casi cinco puntos de distancia. Con el zoom
+ * primero se veía entero: la esfera de la sección entraba al anillo desde otro sitio.
+ *
+ * Así que, ya elegidas, cada sección recibe el punto más cercano a su ancla y sus pestañas
+ * los siguientes, en orden de oeste a este como sus columnas. Los puntos que tenían se los
+ * quedan los nodos que se quedan sin el suyo: es un intercambio uno a uno, así que ningún
+ * punto se pierde ni se repite. Son diez puntos de 1.150.
+ */
+function claimNearest(territories, anchors, points, qubitSource, pointQubit) {
+  const claimed = new Set();
+  const give = (node, p) => {
+    const old = qubitSource[node],
+      other = pointQubit[p];
+    if (old === p) return;
+    qubitSource[node] = p;
+    pointQubit[p] = node;
+    if (other >= 0) {
+      qubitSource[other] = old;
+      pointQubit[old] = other;
+    } else pointQubit[old] = -1;
+  };
+  territories.forEach((t, i) => {
+    const a = anchors[i],
+      near = points
+        .map((p, k) => [k, p.x * a.x + p.y * a.y + p.z * a.z])
+        .filter(([k]) => !claimed.has(k))
+        .sort((u, v) => v[1] - u[1])
+        .slice(0, 1 + t.children.length)
+        .map(([k]) => k);
+    give(t.hub, near[0]);
+    const lon = Math.atan2(a.x, a.z),
+      west = (k) => {
+        const d = Math.atan2(points[k].x, points[k].z) - lon;
+        return Math.atan2(Math.sin(d), Math.cos(d));
+      };
+    near
+      .slice(1)
+      .sort((u, v) => west(u) - west(v))
+      .forEach((k, j) => give(t.children[j], k));
+    near.forEach((k) => claimed.add(k));
+  });
 }
 
 /**

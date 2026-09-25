@@ -19,6 +19,29 @@ heavy-hex del IBM Heron está en `src/field.js` y es la misma; lo que cambia es 
 la oblea, para que quepan en ella todos los puntos de la esfera (ver abajo). `core` marca
 dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlos.
 
+- **Primero el zoom, luego el despliegue** (petición de dirección, 25/09/2026). Al elegir
+  un territorio, la cámara se acerca primero a la esfera, hacia el punto pulsado (0–40 % de
+  la transición), y después los puntos se expanden en el campo (32–100 %, con un poco de
+  solape para que se lea como un solo movimiento). Antes era al revés: la esfera se
+  desplegaba y luego la cámara entraba en el territorio. El zoom es una ampliación en
+  espacio de cámara alrededor del punto pulsado, que a la vez viaja a donde quedará su
+  sección en el campo. Hace algo menos de la mitad del aumento hasta la escala de los
+  cúbits (`ZOOM_REACH = 0,55`) y el resto lo hacen los puntos al desplegarse: así se
+  expanden de verdad. Con el aumento entero, la pantalla se quedaba casi vacía entre las dos
+  fases. Los ejes y el ecuador se desvanecen en el primer tramo del zoom, y el resplandor
+  de la luz convergente se apaga con él. Pestañas, camino encendido y color final llegan en
+  el último tramo (62–100 %). La transición dura 3,2 s (antes 2,8) y al volver a la esfera
+  se deshace en orden inverso. **Para volver al orden anterior: `ZOOM_FIRST = false`** en
+  `sphere.js`.
+- **El punto que se pulsa es el que se convierte en la sección.** La sección tiene que caer
+  lejos de los bordes de la oblea, y el punto que le tocaba por el desenrollado podía estar
+  lejos de su anillo: 28° en «Del laboratorio a la Industria» y en «Casos Industriales», casi
+  cinco puntos. Con el zoom primero se veía la esfera de la sección entrar al anillo desde
+  otro sitio. Ahora, ya elegidas las secciones, `claimNearest` (en `field.js`) da a cada una
+  el punto más cercano a su anillo y a sus pestañas los siguientes, de oeste a este como sus
+  columnas, intercambiando destinos con los nodos que los tenían (diez puntos de 1.150, uno
+  a uno, sin perder ni repetir ninguno). Y el anillo se asienta exactamente sobre ese punto:
+  se mueve menos de medio hueco y en la esfera no se nota.
 - **Cada punto de la esfera es un cúbit, y no se disuelve ninguno.** Los 1.150 puntos
   viajan y se colocan en la retícula: la transformación es una sola materia que se
   recoloca, no una cosa que se va y otra que aparece. Para que quepan todos, la retícula es

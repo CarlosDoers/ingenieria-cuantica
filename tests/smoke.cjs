@@ -314,6 +314,16 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(w.eval("[...pointQubit].every((q) => q >= 0)"), "No sphere point dissolves");
   assert.equal(w.eval("new Set(pointQubit).size"), w.eval("points.length"), "Each point lands on its own node");
   assert.equal(w.eval("chip.nodes.length"), w.eval("points.length"), "The lattice holds every point");
+  // El punto que se pulsa es el que se convierte en la sección: el anillo de cada territorio
+  // se asienta sobre el punto de origen de su sección, y sus pestañas nacen de los puntos
+  // vecinos. Antes, por el margen con el borde, dos secciones nacían a 28° de su anillo y
+  // con el zoom primero su esfera entraba al anillo desde otro sitio.
+  assert(
+    w.eval(`territories.every((t, i) =>
+      Math.acos(dot(points[qubitSource[t.hub]], ANCHORS[i])) < 1e-6 &&
+      t.children.every((c) => Math.acos(dot(points[qubitSource[c]], ANCHORS[i])) < 0.2))`),
+    "Each section is born from the point under its ring, and its tabs from its neighbours"
+  );
   // Y el reparto es un desenrollado: la fila 0 —la del fondo, arriba en pantalla— se queda
   // el casquete de |0⟩ (y negativa en este motor) y la última, el de |1⟩. Al revés, las dos
   // mitades de la esfera se cruzaban por el medio.
