@@ -22,8 +22,8 @@
  * converger cada partícula cae exactamente donde el lienzo de la esfera pinta su punto.
  */
 
-const PER_POINT_DESKTOP = 110; // 1.150 × 110 = 126.500 partículas
-const PER_POINT_COMPACT = 44; // 50.600 en móvil
+const PER_POINT_DESKTOP = 90; // 1.150 × 90 = 103.500 partículas (antes 126.500)
+const PER_POINT_COMPACT = 36; // 41.400 en móvil (antes 50.600)
 /** Núcleos y factores de los cinco niveles del bloom de three (`BloomNode`). */
 const KERNELS = [3, 5, 7, 9, 11];
 /**

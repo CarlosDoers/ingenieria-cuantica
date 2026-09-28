@@ -33,6 +33,12 @@ dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlo
   el último tramo (62–100 %). La transición dura 3,2 s (antes 2,8) y al volver a la esfera
   se deshace en orden inverso. **Para volver al orden anterior: `ZOOM_FIRST = false`** en
   `sphere.js`.
+- **La vuelta sale del territorio en el que estás** (arreglo, 28/09/2026). El zoom y el orden
+  en que se despliegan los puntos se anclaban solo al entrar desde la esfera. Si luego saltabas
+  a otro territorio, la vuelta deshacía el zoom hacia el primero, que con la cámara ya en otro
+  sitio quedaba fuera de la pantalla, y el campo se salía (hasta 13.000 px, medido) y volvía.
+  Ahora `anchorTransition` los reancla a cada territorio nuevo en cuanto el campo está abierto
+  del todo; con todos los puntos ya en su cúbit, el cambio no se ve.
 - **El punto que se pulsa es el que se convierte en la sección.** La sección tiene que caer
   lejos de los bordes de la oblea, y el punto que le tocaba por el desenrollado podía estar
   lejos de su anillo: 28° en «Del laboratorio a la Industria» y en «Casos Industriales», casi
@@ -555,7 +561,7 @@ Los ejes de Bloch usan la conversión `(x_B, y_B, z_B) = (x, z, -y)` del motor: 
 referencia es el fondo de [aaronjcunningham.com](https://www.aaronjcunningham.com/), una bola
 de partículas en three.js/WebGPU. Está en `src/matter.js`, con WebGL2 directo:
 
-- **126.500 partículas** en escritorio y 50.600 en móvil (se bajó de 207.000 y 82.800: más aireada y más ligera). Cada una se calcula en el vertex
+- **103.500 partículas** en escritorio y 41.400 en móvil (se bajó primero de 207.000/82.800 a 126.500/50.600 y el 25/09/2026 a estas, a la vez que la nube se hizo un 15 % más pequeña: radio 1,15 veces el de la esfera, antes 1,36). Cada una se calcula en el vertex
   shader a partir de su semilla, el tiempo y el puntero, sin estado: un flujo de ruido simplex
   lento, un remolino que gira más deprisa por dentro y la perturbación del puntero, que aparta,
   arremolina y arrastra con su estela.

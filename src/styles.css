@@ -1775,28 +1775,19 @@ body {
   pointer-events: none;
   touch-action: auto;
 }
+/* Ocupa la misma caja que la cabecera de la esfera (arriba del todo, su alto y sus
+   márgenes), así la marca no se mueve al entrar. */
 .gateway-top {
   position: absolute;
-  top: 30px;
-  left: 36px;
-  right: 36px;
+  top: 0;
+  height: 78px;
+  left: 32px;
+  right: 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 18px;
   letter-spacing: -0.4px;
-}
-.gateway-brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
-.gateway-top small {
-  display: block;
-  margin-top: 8px;
-  font: var(--mono-weight) 9px var(--mono);
-  letter-spacing: 2px;
-  color: #9faad0;
 }
 .gateway-action {
   position: absolute;
@@ -1926,13 +1917,22 @@ body {
     filter: blur(0);
   }
 }
-@media (max-width: 650px) {
+/* Los mismos tramos que la cabecera: márgenes de 22 px hasta 1000 px de ancho y cabecera
+   de 66 px con márgenes de 16 a partir de 600. */
+@media (max-width: 1000px) {
   .gateway-top {
-    top: 23px;
-    left: 23px;
-    right: 23px;
-    font-size: 17px;
+    left: 22px;
+    right: 22px;
   }
+}
+@media (max-width: 600px) {
+  .gateway-top {
+    height: 66px;
+    left: 16px;
+    right: 16px;
+  }
+}
+@media (max-width: 650px) {
   .gateway-action {
     top: 65%;
   }
@@ -2111,17 +2111,6 @@ body {
 
 }
 @media (max-width: 650px) {
-  /* El nombre completo más la ciudad no caben en una línea de móvil con el espaciado de
-     escritorio. */
-  .gateway-brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
-.gateway-top small {
-    font-size: 8.5px;
-    letter-spacing: 1.2px;
-  }
   #hold-start {
     width: 94px;
     height: 94px;

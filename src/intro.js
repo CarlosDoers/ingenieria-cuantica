@@ -81,7 +81,7 @@ const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
 let frame = { x: 0, y: 0, r: 1, ry: 0, rx: 0 };
 /** Aspecto de la materia: tamaño de la nube, grano, brillo y bloom. */
 const LOOK = {
-  cloud: 1.36, // radio de la nube, en radios de la esfera
+  cloud: 1.15, // radio de la nube, en radios de la esfera (antes 1,36; más pequeña, 25/09)
   pointSize: 2.2,
   gain: 0.75,
   threshold: 0.05,
