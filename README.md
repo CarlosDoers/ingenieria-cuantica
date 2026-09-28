@@ -658,7 +658,7 @@ Los ejes de Bloch usan la conversión `(x_B, y_B, z_B) = (x, z, -y)` del motor: 
 referencia es el fondo de [aaronjcunningham.com](https://www.aaronjcunningham.com/), una bola
 de partículas en three.js/WebGPU. Está en `src/matter.js`, con WebGL2 directo:
 
-- **103.500 partículas** en escritorio y 41.400 en móvil (se bajó primero de 207.000/82.800 a 126.500/50.600 y el 25/09/2026 a estas, a la vez que la nube se hizo un 15 % más pequeña: radio 1,15 veces el de la esfera, antes 1,36). Cada una se calcula en el vertex
+- **86.250 partículas** en escritorio y 34.500 en móvil (se bajó primero de 207.000/82.800 a 126.500/50.600, el 25/09/2026 a 103.500/41.400, a la vez que la nube se hizo un 15 % más pequeña —radio 1,15 veces el de la esfera, antes 1,36—, y el 28/09/2026 a estas). Desde el 28/09 la nube en reposo está también **más dispersa**: reparto casi uniforme en vez de concentrado en el centro, borde difuminado, un 15 % de partículas sueltas por fuera (antes un 6 %) y un flujo de ruido más amplio (0,14; antes 0,09). Los valores anteriores están en los comentarios de `seeds()` y del shader. Cada partícula se calcula en el vertex
   shader a partir de su semilla, el tiempo y el puntero, sin estado: un flujo de ruido simplex
   lento, un remolino que gira más deprisa por dentro y la perturbación del puntero, que aparta,
   arremolina y arrastra con su estela.

@@ -22,8 +22,8 @@
  * converger cada partícula cae exactamente donde el lienzo de la esfera pinta su punto.
  */
 
-const PER_POINT_DESKTOP = 90; // 1.150 × 90 = 103.500 partículas (antes 126.500)
-const PER_POINT_COMPACT = 36; // 41.400 en móvil (antes 50.600)
+const PER_POINT_DESKTOP = 75; // 1.150 × 75 = 86.250 partículas (antes 103.500; 28/09)
+const PER_POINT_COMPACT = 30; // 34.500 en móvil (antes 41.400)
 /** Núcleos y factores de los cinco niveles del bloom de three (`BloomNode`). */
 const KERNELS = [3, 5, 7, 9, 11];
 /**
@@ -116,7 +116,7 @@ void main() {
 
   // Nube: la semilla, empujada por un flujo de ruido lento.
   vec3 p = aSeed.xyz * uCloud;
-  float amp = 0.09 * (1.0 - 0.55 * uCharge);
+  float amp = 0.14 * (1.0 - 0.7 * uCharge); // antes 0,09 (28/09): más suelta en reposo
   vec3 q = aSeed.xyz * 1.15;
   float t = uTime * 0.07;
   p += amp * vec3(
@@ -313,10 +313,11 @@ function seeds(targets, perPoint) {
       y = t.y + gauss() * 0.42,
       z = t.z + gauss() * 0.42;
     const n = Math.hypot(x, y, z) || 1;
-    // Bola más densa hacia el centro, con un 6 % de partículas sueltas que deshilachan el
-    // borde.
-    let r = Math.pow(rand(), 0.5);
-    if (rand() < 0.06) r *= 1.05 + rand() * 0.22;
+    // Bola casi uniforme, algo más densa hacia el centro, con el borde difuminado y un 15 %
+    // de partículas sueltas que lo deshilachan. Antes (hasta el 28/09) era más compacta:
+    // exponente 0,5, borde neto y un 6 % de sueltas hasta 1,27.
+    let r = Math.pow(rand(), 0.4) * (1 + gauss() * 0.07);
+    if (rand() < 0.15) r *= 1.05 + rand() * 0.5;
     x = (x / n) * r;
     y = (y / n) * r;
     z = (z / n) * r;
