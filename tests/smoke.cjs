@@ -535,6 +535,26 @@ function check(reducedMotion = false, canvasAvailable = true) {
     reducedMotion ? !sheetEl.hasAttribute("open") : sheetEl.classList.contains("is-closing"),
     "…and the menu closes"
   );
+  // Cambiar de territorio dentro del campo reancla la transformación al nuevo: la vuelta a la
+  // esfera sale de él. Si se quedaba en el primero, el campo se salía de la pantalla al volver.
+  d.querySelector(".rail-home").click();
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
+  d.querySelector('[data-rail="0"]').click();
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
+  d.querySelector('[data-rail="3"]').click();
+  w.eval("stepCamera(1);stepCamera(1)");
+  assert.equal(w.eval("zoom.from"), 3, "Switching territory re-anchors the return to the sphere");
+  // A mitad de la entrada, el reanclaje espera a que el campo esté abierto del todo.
+  d.querySelector(".rail-home").click();
+  w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
+  d.querySelector('[data-rail="1"]').click();
+  if (!reducedMotion) {
+    w.eval("stepCamera(0.05)");
+    d.querySelector('[data-rail="4"]').click();
+    assert.equal(w.eval("zoom.from"), 1, "…not in the middle of a transition");
+    w.eval("for (let k = 0; k < 6; k++) stepCamera(1)");
+  }
+  assert.equal(w.eval("zoom.from"), reducedMotion ? 1 : 4, "…but as soon as it has finished");
   // Tercer nivel: pulsar un subitem del campo abre su página, con su dirección, y el menú
   // lateral despliega los subitems del territorio con el actual marcado.
   d.querySelector('[data-rail="1"]').click();

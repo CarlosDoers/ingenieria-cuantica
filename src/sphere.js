@@ -259,7 +259,7 @@ let fieldRaw = 0, // avance del despliegue, 0..1
  * esfera están tan separados como los cúbits, así que al desplegarse cada uno se recoloca
  * cerca en vez de cruzar la pantalla.
  */
-const zoom = { scale: 1, ax: 0, ay: 0, az: 0, tx: 0, ty: 0, tz: 0, from: -1 };
+const zoom = { scale: 1, ax: 0, ay: 0, az: 0, tx: 0, ty: 0, tz: 0, from: -1, pending: -1 };
 function zoomed(p) {
   if (zoom.scale === 1) return p;
   return {
@@ -378,6 +378,22 @@ function startFlight() {
   // poco en vez de saltar a cero.
   flight.turn0 = field.turn;
 }
+/**
+ * Ancla la transformación a un territorio: el punto hacia el que va el zoom y el orden en que
+ * se despliegan (y se recogen) los puntos, desde el suyo hacia fuera.
+ *
+ * Al entrar desde la esfera se ancla al territorio pulsado. **Al cambiar de territorio dentro
+ * del campo se reancla al nuevo**: si no, la vuelta a la esfera deshacía el zoom hacia el
+ * primer territorio, que con la cámara ya en otro está fuera de la pantalla, y el campo se
+ * salía y volvía a entrar. Con el campo del todo abierto, todos los puntos están ya en su
+ * cúbit y el reanclaje no se ve; a mitad de una transición se deja pendiente hasta que acabe.
+ */
+function anchorTransition(index) {
+  zoom.from = index;
+  zoom.pending = -1;
+  const a = ANCHORS[index];
+  for (let i = 0; i < N; i++) pointDelay[i] = (Math.acos(dot(points[i], a)) / Math.PI) * FIELD_SPREAD;
+}
 /** Entra en el campo (o cambia de territorio dentro de él). */
 export function enterField(index) {
   const fromSphere = field.target === 0 && field.mix === 0;
@@ -398,12 +414,14 @@ export function enterField(index) {
     orbit.yaw = orbit.pitch = 0;
     orbit.zoom = 1;
     field.wait = reduced.matches ? 0 : FIELD_DELAY;
-    // El zoom va al punto pulsado aunque se elija otro territorio a medio camino.
-    zoom.from = index;
-    const a = ANCHORS[index];
-    for (let i = 0; i < N; i++) pointDelay[i] = (Math.acos(dot(points[i], a)) / Math.PI) * FIELD_SPREAD;
+    anchorTransition(index);
+  } else {
+    startFlight();
+    // Se ha cambiado de territorio dentro del campo: la vuelta a la esfera tiene que salir
+    // de este, no del primero. Ver `anchorTransition`.
+    zoom.pending = index;
+    if (field.mix === 1) anchorTransition(index);
   }
-  else startFlight();
   field.target = 1;
   if (reduced.matches) {
     // Sin animación no hay vuelo: se salta directamente al encuadre del territorio.
@@ -475,6 +493,7 @@ function stepField(dt) {
     const step = dt / FIELD_SECONDS;
     field.mix = field.target > field.mix ? Math.min(field.target, field.mix + step) : Math.max(field.target, field.mix - step);
   }
+  if (zoom.pending >= 0 && field.mix === 1) anchorTransition(zoom.pending);
   // Un paso de un segundo o más es un salto (movimiento reducido, pruebas): sin suavizado.
   const instant = reduced.matches || dt >= 1;
   if (flight.active && !instant) {
@@ -2134,5 +2153,6 @@ if (import.meta.env.MODE === "test") {
     view,
     territories,
     qubitScreen,
+    zoom,
   });
 }
