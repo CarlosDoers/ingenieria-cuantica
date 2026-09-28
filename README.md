@@ -21,8 +21,10 @@ dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlo
 
 - **Primero el zoom, luego el despliegue** (petición de dirección, 25/09/2026). Al elegir
   un territorio, la cámara se acerca primero a la esfera, hacia el punto pulsado (0–40 % de
-  la transición), y después los puntos se expanden en el campo (32–100 %, con un poco de
-  solape para que se lea como un solo movimiento). Antes era al revés: la esfera se
+  la transición), y los puntos empiezan a expandirse en el campo **con el zoom a un tercio**
+  (14–100 %; el 28/09/2026 se adelantó desde el 32 %, cuando el zoom ya casi había acabado,
+  primero al 20 % y luego a este, para que no parezcan dos movimientos seguidos:
+  `UNFOLD_START` en `sphere.js`). Antes era al revés: la esfera se
   desplegaba y luego la cámara entraba en el territorio. El zoom es una ampliación en
   espacio de cámara alrededor del punto pulsado, que a la vez viaja a donde quedará su
   sección en el campo. Hace algo menos de la mitad del aumento hasta la escala de los
@@ -33,6 +35,12 @@ dónde caen los 156 cúbits de la máquina real, por si hiciera falta señalarlo
   el último tramo (62–100 %). La transición dura 3,2 s (antes 2,8) y al volver a la esfera
   se deshace en orden inverso. **Para volver al orden anterior: `ZOOM_FIRST = false`** en
   `sphere.js`.
+- **Sin el saltito al hacer clic** (28/09/2026). Al elegir un territorio, la escena se
+  ampliaba un 23 % con su propia curva, rápida (un resto de cuando había ficha al lado de la
+  esfera), que se adelantaba a la transición: se veía un pequeño zoom antes de empezar, y
+  al volver uno hacia fuera (medido: 40 px en 150 ms al entrar, 80 px en 300 ms al volver).
+  Ahora esa ampliación va con el zoom de la transición (`cameraLayout`, `m = zz`); los
+  encuadres de la esfera en reposo y del campo abierto son los mismos.
 - **La vuelta sale del territorio en el que estás** (arreglo, 28/09/2026). El zoom y el orden
   en que se despliegan los puntos se anclaban solo al entrar desde la esfera. Si luego saltabas
   a otro territorio, la vuelta deshacía el zoom hacia el primero, que con la cámara ya en otro

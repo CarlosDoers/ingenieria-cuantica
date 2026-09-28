@@ -121,13 +121,14 @@ export const points = Object.freeze(
 const ZOOM_FIRST = true;
 const FIELD_SECONDS = ZOOM_FIRST ? 3.2 : 2.8; // duración de la transformación completa
 /**
- * Con el zoom primero: el acercamiento ocupa el primer 40 % y el despliegue empieza un poco
- * antes de que acabe (32 %), para que se lean como un solo movimiento y no como dos. Lo que
- * depende de haber llegado —pestañas, camino encendido, color final de las esferas— entra en
- * el último tramo del despliegue.
+ * Con el zoom primero: el acercamiento ocupa el primer 40 % y el despliegue **empieza con el
+ * zoom a un tercio** (14 %), para que se lean como un solo movimiento y no como dos (petición
+ * de dirección, 28/09/2026: primero se adelantó del 32 %, con el zoom casi acabado, al 20 %,
+ * la mitad; y luego un poco más, a este). Lo que depende de haber llegado —pestañas, camino
+ * encendido, color final de las esferas— entra en el último tramo del despliegue.
  */
 const ZOOM_END = 0.4,
-  UNFOLD_START = 0.32,
+  UNFOLD_START = 0.14,
   ARRIVE_START = 0.62;
 /** Separación media entre los puntos de la esfera (1.150 puntos en la esfera unidad). */
 const SPHERE_SPACING = Math.sqrt((4 * Math.PI) / N);
@@ -1775,7 +1776,12 @@ export function draw() {
 
 // Zoom de cámara: jamás modifica las posiciones locales de las partículas.
 function cameraLayout() {
-  const m = camera.mix,
+  // Con el zoom primero, la ampliación de la escena va **con el zoom de la transición**
+  // (`zz`), no por su cuenta. Por su cuenta era una curva rápida que arrancaba con el clic y
+  // se adelantaba a la transición, que empieza despacio: se veía un pequeño zoom previo al
+  // entrar y otro hacia fuera al volver (petición de dirección, 28/09/2026). El encuadre de
+  // la esfera en reposo y el del campo abierto no cambian: son los mismos extremos.
+  const m = ZOOM_FIRST ? zz : camera.mix,
     wide = W >= 900,
     base = Math.min(W * 0.35, H * 0.35);
   const zoom = wide
