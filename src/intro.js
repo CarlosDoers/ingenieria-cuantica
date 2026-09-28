@@ -2,7 +2,7 @@ import { $, icon, reduced } from './dom.js';
 import { activity, announce, nodeEls } from './app.js';
 import { clearWaves, emitWave, introState, points, sphereFrame, syncMotion } from './sphere.js';
 import { audioContext, sound, soundEnabled, stopCharge } from './audio.js';
-import { createMatter } from './matter.js';
+import { WAKE, createMatter } from './matter.js';
 
 // Entrada independiente: el motor de la esfera permanece detenido hasta completar la carga.
 const gateway = $("#gateway");
@@ -76,6 +76,12 @@ const flow = {
   tiltY: 0,
   tiltX: 0,
 };
+/**
+ * Estela del puntero: los últimos puntos de su recorrido, del más nuevo al más viejo, con su
+ * momento y su fuerza. El shader los une en tramos y abre la materia a lo largo del camino.
+ */
+const wake = [],
+  wakeData = new Float32Array(WAKE * 4);
 const damp = (a, b, lambda, dt) => a + (b - a) * (1 - Math.exp(-lambda * dt));
 const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
 let frame = { x: 0, y: 0, r: 1, ry: 0, rx: 0 };
@@ -93,6 +99,9 @@ const LOOK = {
   pointerSpeed: 0.06, // empuje extra por px/s de velocidad
   pointerMax: 110, // tope de ese empuje extra, px
   trail: 2.4, // lo que tarda el rastro en alcanzar al puntero (λ; menos es más lento)
+  wakeForce: 0.035, // empuje de la estela por px/s de velocidad al pasar
+  wakeMax: 60, // tope de ese empuje, px
+  wakeStep: 0.07, // cada cuánto se apunta un punto del recorrido, s
 };
 // En desarrollo, `__matter` permite afinar el aspecto en vivo y congelar una fase de la
 // entrada con `__matter.pose = { charge, burst, gather }` para mirarla con calma.
@@ -149,6 +158,28 @@ function paintMatter(now) {
   const arrive = Math.exp(-Math.pow((burst - 0.6) / 0.09, 2));
   const speed = Math.hypot(flow.vx, flow.vy),
     scale = frame.r / 260;
+  // La estela: un punto del recorrido cada 70 ms mientras el puntero se mueve. El primero es
+  // el propio puntero, así el camino sale de él sin hueco.
+  const wakeForce = still ? 0 : Math.min(speed * LOOK.wakeForce, LOOK.wakeMax) * scale;
+  if (flow.inside && !still) {
+    const last = wake[0];
+    if (!last || (flow.time - last.t >= LOOK.wakeStep && Math.hypot(flow.ax - last.x, flow.ay - last.y) > 3)) {
+      wake.unshift({ x: flow.ax, y: flow.ay, t: flow.time, s: wakeForce });
+      if (wake.length > WAKE - 1) wake.pop();
+    }
+  }
+  wakeData[0] = flow.ax;
+  wakeData[1] = flow.ay;
+  wakeData[2] = 0;
+  wakeData[3] = wakeForce * flow.presence;
+  for (let k = 1; k < WAKE; k++) {
+    const p = wake[k - 1],
+      o = k * 4;
+    wakeData[o] = p ? p.x : 0;
+    wakeData[o + 1] = p ? p.y : 0;
+    wakeData[o + 2] = p ? flow.time - p.t : 99;
+    wakeData[o + 3] = p ? p.s * flow.presence : 0;
+  }
   matter.render(
     {
       cx: frame.x,
@@ -178,6 +209,8 @@ function paintMatter(now) {
           flow.presence,
       vx: still ? 0 : flow.vx,
       vy: still ? 0 : flow.vy,
+      wake: wakeData,
+      wakeOn: !still && wake.length > 0 && flow.time - wake[0].t < 1.25,
       threshold: LOOK.threshold,
       bloom: LOOK.bloom,
       bloomRadius: LOOK.bloomRadius,
@@ -475,6 +508,7 @@ window.addEventListener("pointermove", (e) => {
     // donde se quedaron.
     flow.ax = flow.bx = e.clientX;
     flow.ay = flow.by = e.clientY;
+    wake.length = 0;
   }
   flow.x = e.clientX;
   flow.y = e.clientY;

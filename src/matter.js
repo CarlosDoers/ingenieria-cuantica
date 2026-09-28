@@ -33,9 +33,12 @@ const KERNELS = [3, 5, 7, 9, 11];
  */
 const SCENE_DPR = 1;
 const FACTORS = [1.0, 0.8, 0.6, 0.4, 0.2];
+/** Puntos de la estela del puntero: el puntero y su recorrido de algo más de un segundo. */
+export const WAKE = 12;
 
 const PARTICLE_VS = `#version 300 es
 precision highp float;
+#define WAKE ${WAKE}
 layout(location = 0) in vec4 aSeed;   // xyz: posición en la bola unidad · w: azar
 layout(location = 1) in vec4 aTarget; // xyz: su punto de la esfera · w: azar
 uniform vec2 uView;       // tamaño del lienzo en px CSS
@@ -46,6 +49,10 @@ uniform float uTime, uSpin, uCharge, uBurst, uCloud, uPx, uSize, uGain, uGather;
 uniform vec4 uPointer;    // x, y (px CSS) del puntero, radio (px), fuerza (px)
 uniform vec2 uTrail;      // rastro lento del puntero, px CSS
 uniform vec2 uVel;        // velocidad amortiguada del puntero, px/s
+// Estela del puntero: su recorrido reciente, del más nuevo (el puntero) al más viejo. Cada
+// punto es x, y (px CSS), edad (s) y fuerza (px). uWakeOn es 0 si no hay estela viva.
+uniform vec4 uWake[WAKE];
+uniform float uWakeOn;
 out vec3 vColor;
 out float vAlpha;
 
@@ -170,12 +177,47 @@ void main() {
   vec2 d = screen - ptr;
   float d2 = dot(d, d);
   float rad = uPointer.z * (0.8 + 0.4 * w2);
-  float f = exp(-d2 / (rad * rad)) * (1.0 - e) * (0.8 + 0.2 * sin(uTime * 1.7 + w2 * 6.2832));
+  float f = exp(-d2 / (rad * rad)) * (0.8 + 0.2 * sin(uTime * 1.7 + w2 * 6.2832));
   vec2 dir = d * inversesqrt(d2 + 1.0);
-  screen += (dir * (0.6 + 0.5 * w) + vec2(-dir.y, dir.x) * (w2 - 0.5) * 1.1) * uPointer.w * f;
+  vec2 push = (dir * (0.6 + 0.5 * w) + vec2(-dir.y, dir.x) * (w2 - 0.5) * 1.1) * uPointer.w * f;
   // Arrastre: lo que hay entre el puntero y su rastro se va con el movimiento y vuelve a su
   // sitio cuando el rastro le alcanza.
-  screen += ((uPointer.xy - uTrail) * 0.3 + uVel * 0.035) * f * (0.4 + w);
+  push += ((uPointer.xy - uTrail) * 0.3 + uVel * 0.035) * f * (0.4 + w);
+  // Estela (28/09): el camino del puntero queda abierto como el agua tras una barca. Cada
+  // tramo aparta a los lados lo que tiene cerca y lo arrastra un poco en su sentido; con la
+  // edad se ensancha, se cierra y al cerrarse se pasa un poco, así que la materia vuelve en
+  // una ola suave y no toda a la vez. Sin estela viva, ni se entra en el bucle.
+  // Los tramos se solapan: lo que tiene cerca varios a la vez no suma sus empujes, cuenta
+  // como uno solo (se divide por el peso de todos los que le tocan).
+  if (uWakeOn > 0.0 && e < 1.0) {
+    vec2 wp = vec2(0.0);
+    float ws = 0.0;
+    for (int k = 0; k < WAKE - 1; k++) {
+      vec4 a = uWake[k], b = uWake[k + 1];
+      if (a.z > 1.25) break;
+      vec2 ab = a.xy - b.xy, pb = screen - b.xy;
+      float t = clamp(dot(pb, ab) / max(dot(ab, ab), 1.0), 0.0, 1.0);
+      vec2 q = pb - ab * t;
+      float age = mix(b.z, a.z, t);
+      float wr = uPointer.z * (0.45 + 0.7 * age) * (0.8 + 0.4 * w2);
+      float g = exp(-dot(q, q) / (wr * wr));
+      float life = exp(-age * 2.6) * cos(age * 2.8) * smoothstep(1.25, 0.8, age);
+      wp += (q * inversesqrt(dot(q, q) + 1.0) * (0.7 + 0.6 * w) +
+             ab * inversesqrt(dot(ab, ab) + 1.0) * 0.45) * g * life * mix(b.w, a.w, t);
+      ws += g;
+    }
+    push += wp / max(ws, 1.0);
+  }
+  // Remolinos: cerca del puntero el empuje gira según un ruido lento, distinto en cada zona,
+  // así que el hueco no es un círculo limpio sino un borde irregular que se arremolina. Solo
+  // en las partículas que se mueven de verdad (un par de miles): el resto no paga el ruido.
+  if (dot(push, push) > 0.25) {
+    float n = snoise(vec3(screen * 0.0045, uTime * 0.3));
+    float ang = n * 1.1 + (w2 - 0.5) * 0.7;
+    float ca = cos(ang), sa = sin(ang);
+    push = vec2(push.x * ca - push.y * sa, push.x * sa + push.y * ca) * (0.85 + 0.35 * n);
+  }
+  screen += push * (1.0 - e);
 
   gl_Position = vec4(screen.x / uView.x * 2.0 - 1.0, 1.0 - screen.y / uView.y * 2.0, 0.0, 1.0);
   gl_PointSize = max(1.0, uSize * uPx * persp * (0.55 + 0.9 * w2) * mix(1.0, 0.8, e));
@@ -547,6 +589,8 @@ export function createMatter(canvas, targets, { compact = false } = {}) {
     gl.uniform4f(u.uPointer, s.px, s.py, s.pr, s.pf);
     gl.uniform2f(u.uTrail, s.tx, s.ty);
     gl.uniform2f(u.uVel, s.vx, s.vy);
+    gl.uniform4fv(u.uWake, s.wake);
+    gl.uniform1f(u.uWakeOn, s.wakeOn ? 1 : 0);
     gl.bindVertexArray(res.vao);
     gl.drawArrays(gl.POINTS, 0, count);
     gl.disable(gl.BLEND);

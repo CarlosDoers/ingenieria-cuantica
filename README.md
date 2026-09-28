@@ -676,6 +676,16 @@ de partículas en three.js/WebGPU. Está en `src/matter.js`, con WebGL2 directo:
   movimiento. El empuje y el alcance tienen variación por partícula y un leve pulso en el
   tiempo, para que el borde no sea un círculo limpio. Fuerza, alcance y retraso están en
   `LOOK` (`pointerForce`, `pointerSpeed`, `pointerMax`, `pointerRadius`, `trail`).
+- **Estela y remolinos** (28/09/2026, «más orgánico»). El recorrido del puntero se apunta
+  cada 70 ms (12 puntos, algo más de un segundo) y el shader lo une en tramos: el camino queda
+  abierto como el agua tras una barca, se ensancha con la edad y se cierra pasándose un poco,
+  así que la materia vuelve en una ola suave. Donde se solapan varios tramos cuentan como uno
+  (si no, el canal se hacía enorme). Además, cerca del puntero el empuje gira según un ruido
+  lento, así que el hueco no es un círculo sino un borde irregular que se arremolina. Coste:
+  el bucle de la estela solo corre si el puntero se ha movido en el último segundo, y el ruido
+  de los remolinos solo en las partículas que se desplazan; medido, el fotograma no cambia.
+  Fuerza y ritmo en `LOOK` (`wakeForce`, `wakeMax`, `wakeStep`); con `wakeForce: 0` se
+  quita la estela.
 - **Post-procesado del original, portado tal cual:** bloom de cinco niveles (núcleos 3…11,
   factores 1,0…0,2, `lerpBloomFactor`, umbral de luminancia), tone mapping ACES a exposición
   1,2 y salida sRGB, con la misma calidad adaptativa: si el fotograma medio pasa de 21,5 ms,
