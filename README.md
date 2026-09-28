@@ -228,18 +228,21 @@ y `-mobile.html`, en la carpeta de arriba). Pulsar un subitem en el campo de cú
 etiqueta o su esfera— abre su página **con un fundido**, por encima de la escena. El primer y
 el segundo nivel no cambian.
 
-- **Contenido.** Solo «Computación cuántica» tiene página propia: sus secciones son las del
-  diseño tal cual (`src/pages/computacion-cuantica.js`), con la infografía extraída del HTML a
-  `src/assets/computacion-mapa.jpg`. El resto de subitems tienen una **página de prueba** con
-  la misma maqueta y los textos que ya había en `content.js`. Para darle página propia a otro
-  subitem: un archivo en `src/pages/` y su entrada en `PAGES`, en `src/page.js`.
+- **Contenido.** Desde el 28/09/2026 cada página es un **documento de bloques** (ver abajo),
+  pensado para que el cliente lo edite desde un backoffice. «Computación cuántica» tiene el
+  suyo (`src/paginas/computacion-cuantica.json`), con los textos y la infografía del diseño.
+  El resto de subitems enseñan una **página de prueba** con todos los tipos de bloque, los
+  textos que ya había en `content.js` y capturas del propio proyecto. Las visualizaciones a
+  medida del diseño (esfera de Bloch, paneles bit/qubit, barras 2ⁿ) se han quitado: en la
+  página solo va lo que el cliente pueda subir, textos, imágenes y vídeos.
 - **Subitems de Tecnologías Cuánticas.** Pasan a ser «Computación cuántica», «Comunicaciones
   cuánticas» y «Sensórica cuántica y metrología», como en el diseño (antes: Descripción,
   Tecnologías, Aplicaciones).
 - **Estilos.** `src/page.css` es el CSS del diseño acotado a `.page-view`, para que no toque
-  nada fuera de la página, con nuestras tipografías (también en las etiquetas de la esfera de
-  Bloch) y el color de cada territorio como color de sección. La cabecera y el menú de móvil
-  son los nuestros: el diseño trae los suyos, pero son los mismos.
+  nada fuera de la página, con nuestras tipografías y el color de cada territorio como color
+  de sección, más lo que el diseño no tenía: cabecera con imagen o vídeo, marcos de vídeo,
+  texto en Markdown y la imagen a la izquierda. La cabecera y el menú de móvil son los
+  nuestros: el diseño trae los suyos, pero son los mismos.
 - **Menú lateral.** En la página sube arriba y despliega los subitems del territorio, con el
   actual marcado. Pulsar el territorio vuelve a su campo de cúbits; otro territorio, al suyo.
 - **Navegación.** Cada página tiene su dirección (`#/ciencia/computacion-cuantica`). Atrás
@@ -247,7 +250,90 @@ el segundo nivel no cambian.
   la esfera y el territorio, a su campo. Escape también vuelve al campo. «Siguiente» lleva
   al siguiente subitem del territorio.
 - **Rendimiento.** Mientras la página está abierta la escena no se dibuja (`setSceneHidden`,
-  en `sphere.js`): el chip pasaba a 60 fps por detrás de algo que lo tapa entero.
+  en `sphere.js`): el chip pasaba a 60 fps por detrás de algo que lo tapa entero. Los
+  vídeos se paran al salir de la página.
+
+### Bloques
+
+Una página es un JSON con esta forma (el de Computación cuántica sirve de ejemplo completo):
+
+```json
+{
+  "territorio": "ciencia",
+  "subitem": "computacion-cuantica",
+  "titulo": "Computación cuántica",
+  "entradilla": "Texto bajo el título.",
+  "miga": "Computación",
+  "etiqueta": "Texto pequeño sobre el título",
+  "cabecera": { "tipo": "video", "src": "/media/cabecera.mp4", "poster": "/media/cabecera.jpg", "automatico": true },
+  "bloques": [
+    { "tipo": "texto", "titulo": "…", "texto": "Markdown" }
+  ]
+}
+```
+
+`territorio` es el `id` del territorio en `content.js` y `subitem`, el nombre de la pestaña
+en minúsculas, sin tildes y con guiones: juntos forman la dirección de la página. `miga`,
+`etiqueta` y `cabecera` son opcionales. Los tipos de bloque (`src/bloques.js`):
+
+| Tipo | Campos | Qué es |
+| --- | --- | --- |
+| `texto` | `titulo`, `texto` (Markdown) | Título a la izquierda y texto a la derecha; sin título, a todo el ancho |
+| `texto-imagen` | `titulo`, `texto`, `media`, `pie`, `credito`, `lado` | Texto con imagen o vídeo; `"lado": "izquierda"` pone la imagen delante |
+| `imagen-video` | `titulo`, `texto`, `media`, `pie`, `credito` | Una imagen o un vídeo; sin título ni texto, a todo el ancho |
+| `tarjetas` | `titulo`, `texto`, `elementos: [{ titulo, texto }]` | Hasta tres tarjetas por fila |
+| `pasos` | `titulo`, `texto`, `pasos: [{ titulo, texto }]` | Secuencia numerada; el último paso se enciende |
+| `datos` | `titulo`, `texto`, `filas: [{ nombre, valor }]` | Filas de nombre y valor |
+| `markdown` | `titulo`, `texto` (un documento Markdown entero) | A todo el ancho: lo que se pega o se sube como `.md`, tal cual |
+
+En todos, `titulo` y `texto` son opcionales. `media`, en la cabecera y en los bloques, es
+una de estas tres cosas:
+
+- `{ "tipo": "imagen", "src", "alt", "ancho", "alto" }`: `ancho` y `alto` (en píxeles) evitan
+  que la página salte al cargar la imagen.
+- `{ "tipo": "video", "src", "poster", "automatico" }`: vídeo subido. Con `automatico`
+  arranca solo, en silencio y en bucle (para cabeceras); si no, lleva controles. Con
+  movimiento reducido nunca arranca solo.
+- `{ "tipo": "enlace", "url" }`: un enlace de YouTube o Vimeo tal y como se copia del
+  navegador (también `youtu.be`, *shorts* y vídeos no listados de Vimeo). Se incrusta con el
+  dominio sin cookies de YouTube y con «no rastrear» en Vimeo. **Necesita internet**: en un
+  quiosco sin conexión, mejor subir el vídeo.
+
+Las figuras se numeran solas («Fig. 01 · pie»). Un bloque de tipo desconocido se salta, sin
+romper la página.
+
+**El Markdown.** Se guarda como texto y se convierte al pintar la página, así que «subir un
+`.md`» en el backoffice es solo leer el archivo y guardar su texto en el campo. El bloque
+`texto` está pensado para textos cortos junto a su título; para un documento entero con
+títulos, imágenes y tablas está el bloque `markdown`, que ocupa todo el ancho: el texto se
+queda a unos 65 caracteres por línea para que se lea bien, y las imágenes, las tablas y los
+separadores usan todo el bloque. Además:
+
+- Los títulos bajan un nivel para no competir con el de la página: en el bloque `markdown`,
+  `#` es un título de sección (como los de los bloques), `##` un subtítulo y `###` uno menor.
+  Dentro de un bloque con título, `#` ya es subtítulo.
+- Una imagen sola en su párrafo se pinta como las figuras de los bloques, con marco y pie
+  numerado si lo trae: `![texto alternativo](/media/foto.jpg "Pie de foto")`.
+- Las tablas llevan el estilo de la lista de datos y, si no caben en móvil, se desplazan de
+  lado dentro de su caja.
+- Citas (`>`), separadores (`---`) y código también tienen estilo.
+
+**Todo lo que escribe el cliente se trata como no fiable.** Los textos simples se escapan;
+los campos de Markdown (`texto` de los bloques, y el de tarjetas y pasos en una línea) se
+convierten con `marked` y se sanean con DOMPurify: ni scripts, ni atributos `on…`, ni
+iframes, ni enlaces `javascript:`. Los enlaces externos se abren en otra pestaña. Las
+direcciones de imágenes y vídeos, también las del Markdown, solo pueden ser del sitio (`/…`)
+o `http(s)`; si no, el elemento no se pinta. Los tests lo comprueban.
+
+### Conectar Supabase
+
+Solo cambia `src/fuente-paginas.js`, que hoy lee los JSON de `src/paginas/` y los mete en el
+build. Con Supabase, `getPage(territorio, subitem)` hará la consulta y devolverá una promesa:
+`page.js` ya acepta las dos cosas, y mientras llega enseña la página con su título. La forma
+más directa es una tabla `paginas` con `territorio`, `subitem` y el documento en una columna
+`jsonb`; si el backoffice lo pide, los bloques pueden ir en su propia tabla con un `orden`.
+Las imágenes y los vídeos subidos, en Supabase Storage: `src` pasa a ser su dirección
+pública (`https://…`), que ya se admite. Mientras tanto viven en `public/media/`.
 
 ## Sin controles en la esquina
 
@@ -437,16 +523,19 @@ nombre, como en el Figma.
 - Web Audio API para sintetizar efectos y música ambiental mediante osciladores, filtros y envolventes.
 - Pointer Events, requestAnimationFrame, ResizeObserver y Fullscreen API.
 
-No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución, fuentes remotas ni archivos de música. **En tiempo de ejecución no hay ninguna dependencia**: lo que se publica son un HTML, un CSS, un JS y los archivos de las dos tipografías, que Vite copia al build desde Fontsource. Vite, jsdom y Fontsource son solo herramientas de desarrollo.
+No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución, fuentes remotas ni archivos de música. Lo que se publica son un HTML, un CSS, un JS, los archivos de las dos tipografías, que Vite copia al build desde Fontsource, y las imágenes y vídeos de `public/media/`. Desde el 28/09/2026 el JS lleva dentro dos librerías para las páginas de tercer nivel: `marked` (Markdown a HTML) y DOMPurify (saneado). Vite, jsdom y Fontsource son solo herramientas de desarrollo.
 
 ## Dónde editar
 
 | Archivo | Responsabilidad |
 | --- | --- |
 | `index.html` | Estructura, iconos SVG, accesibilidad, intro y controles |
-| `src/page.js` | Tercer nivel: páginas de los subitems, navegación y esfera de Bloch de la página |
+| `src/page.js` | Tercer nivel: abrir y cerrar las páginas, cabecera, navegación y página de prueba |
+| `src/bloques.js` | Tercer nivel: los tipos de bloque, Markdown saneado e imágenes y vídeos |
+| `src/fuente-paginas.js` | De dónde salen las páginas: hoy `src/paginas/`, mañana Supabase |
+| `src/paginas/` | Las páginas de tercer nivel, una por JSON |
+| `public/media/` | Imágenes y vídeos de las páginas (con Supabase, irán a su Storage) |
 | `src/page.css` | Estilos de la página de tercer nivel (los del diseño, acotados a `.page-view`) |
-| `src/pages/` | Contenido propio de cada página de tercer nivel |
 | `src/fonts.css` | Tipografías: qué fuentes se cargan y las variables `--font`, `--mono` y `--weight` |
 | `src/styles.css` | Diseño, tamaños, responsive, resplandores y hover |
 | `src/content.js` | `DATA`: textos, colores, iconos y pestañas de los cinco territorios |
@@ -683,7 +772,7 @@ Para revisión manual: completar la intro con ratón y espacio, girar la esfera,
 
 ## Exportar a Netlify
 
-`dist/` es la web completa y lista para publicar: un HTML, un CSS y un JS, sin variables de entorno ni claves.
+`dist/` es la web completa y lista para publicar: un HTML, un CSS, un JS y la carpeta `media/` de las páginas, sin variables de entorno ni claves.
 
 ```sh
 npm run package
@@ -695,6 +784,6 @@ En una integración con Git: comando de compilación `npm run build`, directorio
 
 ## Alcance de la entrega
 
-Los contenidos siguen siendo provisionales y necesitan validación del cliente, especialmente la oferta académica, directorios y entidades. El código usa HTML interpolado para datos locales: si se conecta a un CMS, habrá que validar/sanitizar ese contenido. No se incluyen PDFs, capturas o vídeos de referencia, ni se depende de ellos para ejecutar la web.
+Los contenidos siguen siendo provisionales y necesitan validación del cliente, especialmente la oferta académica, directorios y entidades. El código usa HTML interpolado para datos locales. Las páginas de tercer nivel, que son las que editará el cliente, ya escapan y sanean lo que reciben (ver «Bloques»); si otros textos (`content.js`) pasan también a un CMS, habrá que hacer lo mismo con ellos. No se incluyen PDFs, capturas o vídeos de referencia. Las imágenes y el vídeo de la página de prueba (`public/media/muestra-*`) son capturas del propio proyecto y se pueden borrar cuando todas las páginas tengan contenido real.
 
 `ORIGEN.json` identifica mediante SHA-256 el HTML del que se extrajo esta entrega. El HTML autónomo original de Laura se conserva sin modificar; a partir de aquí, la fuente de trabajo es `src/`.

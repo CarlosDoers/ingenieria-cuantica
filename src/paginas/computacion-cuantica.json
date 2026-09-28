@@ -1,0 +1,73 @@
+{
+  "territorio": "ciencia",
+  "subitem": "computacion-cuantica",
+  "miga": "Computación",
+  "titulo": "Computación cuántica",
+  "entradilla": "La computación cuántica aprovecha la superposición y el entrelazamiento para procesar información de una forma distinta a un ordenador clásico.",
+  "bloques": [
+    {
+      "tipo": "tarjetas",
+      "titulo": "Un qubit no elige entre 0 y 1",
+      "texto": "Utiliza bits cuánticos o qubits en lugar de bits clásicos. Un qubit puede representar varias posibilidades a la vez hasta que se mide.",
+      "elementos": [
+        { "titulo": "Ordenador clásico", "texto": "Cada bit vale 0 **o** 1. Evalúa los estados de forma secuencial: con 3 bits, solo uno de los 8 estados a la vez." },
+        { "titulo": "Ordenador cuántico", "texto": "Cada qubit puede estar en 0 **y** 1 a la vez. Representa simultáneamente varias posibilidades en superposición." }
+      ]
+    },
+    {
+      "tipo": "datos",
+      "titulo": "El espacio de estados crece exponencialmente",
+      "texto": "Cada qubit añadido duplica los estados posibles: con *n* qubits, 2ⁿ.",
+      "filas": [
+        { "nombre": "1 qubit", "valor": "2 estados" },
+        { "nombre": "2 qubits", "valor": "4 estados" },
+        { "nombre": "3 qubits", "valor": "8 estados" },
+        { "nombre": "10 qubits", "valor": "1.024 estados" },
+        { "nombre": "20 qubits", "valor": "1.048.576 estados" },
+        { "nombre": "30 qubits", "valor": "1.073.741.824 estados" }
+      ]
+    },
+    {
+      "tipo": "pasos",
+      "titulo": "Cómo funciona un algoritmo cuántico",
+      "pasos": [
+        { "titulo": "Inicialización", "texto": "Preparamos los qubits en un estado inicial: |0⟩ |0⟩ … |0⟩" },
+        { "titulo": "Puertas cuánticas", "texto": "Aplicamos operaciones que crean superposición y entrelazamiento." },
+        { "titulo": "Evolución cuántica", "texto": "El sistema evoluciona en un espacio de estados enorme de forma paralela." },
+        { "titulo": "Medición", "texto": "Medimos los qubits y obtenemos el resultado con mayor probabilidad: un resultado clásico." }
+      ]
+    },
+    {
+      "tipo": "tarjetas",
+      "titulo": "Qué puede aportar a la industria",
+      "texto": "Resolver problemas complejos que superan las capacidades de la computación clásica en ciertos ámbitos.",
+      "elementos": [
+        { "titulo": "Optimización", "texto": "Redes eléctricas, rutas logísticas, planificación." },
+        { "titulo": "Simulación", "texto": "Moléculas, materiales y procesos industriales." },
+        { "titulo": "Análisis de datos", "texto": "Patrones en grandes volúmenes de datos." }
+      ]
+    },
+    {
+      "tipo": "imagen-video",
+      "media": {
+        "tipo": "imagen",
+        "src": "/media/computacion-mapa.jpg",
+        "alt": "Infografía de computación cuántica: qubits, algoritmos, desarrollo y simulación, ejecución en hardware cuántico, aplicaciones e impacto.",
+        "ancho": 1000,
+        "alto": 667
+      },
+      "pie": "Mapa de la computación cuántica",
+      "credito": "GIE"
+    },
+    {
+      "tipo": "datos",
+      "titulo": "Ejecución en hardware cuántico real",
+      "texto": "Diseñamos, simulamos y probamos algoritmos cuánticos, y los ejecutamos en plataformas reales accesibles en la nube.",
+      "filas": [
+        { "nombre": "IBM Quantum", "valor": "Superconductores" },
+        { "nombre": "IonQ", "valor": "Iones atrapados" },
+        { "nombre": "Rigetti", "valor": "Superconductores" }
+      ]
+    }
+  ]
+}

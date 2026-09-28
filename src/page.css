@@ -110,50 +110,9 @@
 .page-view .crumbs [aria-current]{color:var(--q-accent)}
 .page-view .crumb-dot{width:.3rem;height:.3rem;border-radius:50%;background:var(--q-accent);box-shadow:0 0 8px var(--q-accent);display:inline-block}
 .page-view .hero{padding-block:var(--sp-8) var(--sp-4);display:grid;gap:var(--sp-5)}
-.page-view .sphere-wrap{position:relative;
-  margin-inline:calc(var(--gutter) * -1);
-  aspect-ratio:1/0.92;
-  max-width:calc(100% + var(--gutter) * 2);}
-.page-view .pg-bloch{width:100%;height:100%;display:block}
-.page-view .sphere-caption{position:absolute;left:var(--gutter);bottom:0;}
 .page-view .section{padding-block:var(--section-gap) 0;display:grid;gap:var(--sp-6)}
 .page-view .section-head{display:grid;gap:var(--sp-3);align-content:start}
 .page-view .section-body{display:grid;gap:var(--sp-6);min-width:0}
-.page-view .compare{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
-.page-view .panel{background:var(--q-surface-1);
-  border:1px solid var(--q-line);
-  border-radius:var(--radius-md);
-  padding:var(--sp-4);
-  display:grid;gap:var(--sp-3);align-content:start;}
-.page-view .panel--q{background:
-    radial-gradient(90% 70% at 80% 0%, color-mix(in srgb, var(--q-violet-600) 45%, transparent), transparent 70%),
-    var(--q-surface-2);
-  border-color:color-mix(in srgb, var(--q-violet-400) 35%, transparent);}
-.page-view .big-state{font-family:var(--mono);font-size:var(--fs-xl);color:var(--q-text-1);letter-spacing:-.02em;line-height:1.1}
-.page-view .big-state small{font-size:var(--fs-sm);color:var(--q-text-4);margin-inline:.35em}
-.page-view .panel p{font-size:var(--fs-sm);line-height:1.5;color:var(--q-text-3)}
-.page-view .amp{display:grid;gap:var(--sp-2)}
-.page-view .amp-row{display:grid;grid-template-columns:2.6rem 1fr;align-items:center;gap:var(--sp-2);font-family:var(--mono);font-size:var(--fs-xs);color:var(--q-text-2);font-variant-numeric:tabular-nums}
-.page-view .amp-bar{height:.3rem;border-radius:var(--radius-pill);background:var(--q-line);overflow:hidden}
-.page-view .amp-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--q-violet-400),var(--q-glow))}
-.page-view .bits{display:flex;gap:var(--sp-1)}
-.page-view .bits span{width:1.6rem;height:1.6rem;display:grid;place-items:center;
-  font-family:var(--mono);font-size:var(--fs-sm);
-  border:1px solid var(--q-line-strong);border-radius:var(--radius-sm);color:var(--q-text-3)}
-.page-view .bits span.on{color:var(--q-text-1);border-color:var(--q-text-3)}
-.page-view .scale{border-top:1px solid var(--q-line)}
-.page-view .scale-row{display:grid;grid-template-columns:4.25rem 1fr;align-items:center;gap:var(--sp-3);
-  padding-block:var(--sp-3);
-  border-bottom:1px solid var(--q-line);
-  font-variant-numeric:tabular-nums;}
-.page-view .scale-row .n{font-family:var(--mono);font-size:var(--fs-xs);color:var(--q-text-3)}
-.page-view .scale-row .n b{color:var(--q-text-1);font-weight:500;font-size:var(--fs-sm)}
-.page-view .scale-val{display:grid;gap:var(--sp-1)}
-.page-view .scale-val span{font-family:var(--mono);font-size:var(--fs-sm);color:var(--q-text-1)}
-.page-view .scale-val i{display:block;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--q-accent-dim),var(--q-accent));box-shadow:0 0 8px color-mix(in srgb,var(--q-accent) 60%,transparent)}
-.page-view .formula{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);
-  font-size:var(--fs-sm);color:var(--q-text-3);}
-.page-view .formula .ket{font-size:var(--fs-xl);color:var(--q-text-1)}
 .page-view .steps{list-style:none;margin:0;padding:0;display:grid;counter-reset:step;position:relative}
 .page-view .steps::before{content:"";position:absolute;left:.9375rem;top:1rem;bottom:1rem;width:1px;
   background:linear-gradient(to bottom,var(--q-violet-400),var(--q-accent),var(--q-glow));opacity:.5;}
@@ -168,34 +127,9 @@
 .page-view .step-body p{font-size:var(--fs-sm);color:var(--q-text-3);line-height:1.55}
 .page-view .step-body .ket{color:var(--q-text-2)}
 .page-view .truths{display:grid;gap:var(--sp-2)}
-.page-view .truth{display:grid;grid-template-columns:1.5rem 1fr;gap:var(--sp-3);align-items:start;
-  padding:var(--sp-4);border-radius:var(--radius-md);
-  background:var(--q-surface-1);border:1px solid var(--q-line);}
-.page-view .truth svg{margin-top:.15rem}
-.page-view .truth p{font-size:var(--fs-sm);line-height:1.5}
-.page-view .truth strong{color:var(--q-text-1);font-weight:500;display:block;font-size:var(--fs-md);margin-bottom:var(--sp-050)}
-.page-view .keys{border-top:1px solid var(--q-line)}
-.page-view .key{padding-block:var(--sp-5);border-bottom:1px solid var(--q-line);display:grid;gap:var(--sp-2)}
-.page-view .key p{font-size:var(--fs-sm);color:var(--q-text-3)}
 .page-view .algos{display:grid;gap:var(--sp-3)}
-.page-view .algo{display:grid;gap:var(--sp-2);
-  padding:var(--sp-5) var(--sp-4);
-  border-radius:var(--radius-md);
-  border:1px solid var(--q-line);
-  background:linear-gradient(160deg,var(--q-surface-2),var(--q-surface-1));}
-.page-view .algo-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3)}
-.page-view .algo h3{font-size:var(--fs-xl);font-weight:300;letter-spacing:-.03em}
-.page-view .algo p{font-size:var(--fs-sm);color:var(--q-text-3)}
-.page-view .chips{display:flex;flex-wrap:wrap;gap:var(--sp-2);list-style:none;margin:0;padding:0}
-.page-view .chip{display:inline-flex;align-items:center;gap:var(--sp-2);
-  padding:var(--sp-2) var(--sp-3);
-  border-radius:var(--radius-sm);
-  background:var(--q-surface-1);
-  border:1px solid var(--q-line-strong);
-  font-size:var(--fs-sm);color:var(--q-text-1);}
-.page-view .chip::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--q-section);box-shadow:0 0 6px var(--q-section)}
 .page-view .areas{display:grid;gap:var(--sp-2)}
-.page-view .area{padding:var(--sp-3);border-top:1px solid var(--q-section);display:grid;gap:var(--sp-1)}
+.page-view .area{padding:var(--sp-3);border-top:1px solid var(--q-section);display:grid;gap:var(--sp-1);align-content:start}
 .page-view .area b{font-weight:500;color:var(--q-text-1);font-size:var(--fs-sm)}
 .page-view .area span{font-size:var(--fs-xs);color:var(--q-text-3);line-height:1.45}
 .page-view figure{margin:0;display:grid;gap:var(--sp-3)}
@@ -223,15 +157,8 @@
 .page-view{--gutter: var(--sp-8);
     --fs-3xl: 3.5rem;
     --fs-2xl: 2.25rem;}
-.page-view .hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
-    grid-template-areas:"title sphere" "lead sphere";
-    align-items:end;column-gap:var(--sp-8);
-    padding-block:var(--sp-12) var(--sp-4);}
-.page-view .hero h1{grid-area:title;align-self:end}
-.page-view .hero .lead{grid-area:lead;align-self:start}
-.page-view .sphere-wrap{grid-area:sphere;margin-inline:0;max-width:100%;aspect-ratio:1/1}
-.page-view .sphere-caption{left:0}
-.page-view .areas{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-4)}
+.page-view .hero{padding-block:var(--sp-12) var(--sp-4)}
+.page-view .areas{grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:var(--sp-4)}
 .page-view .pg-next{margin-inline:0;padding-inline:0;background:radial-gradient(60% 140% at 100% 50%, color-mix(in srgb,var(--q-section) 14%,transparent), transparent 70%)}
 .page-view .next-title span{font-size:var(--fs-2xl)}
 }
@@ -240,9 +167,7 @@
     --fs-3xl: 4.5rem;
     --fs-2xl: 2.5rem;
     --section-gap: var(--sp-24);}
-.page-view .hero{grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    column-gap:var(--sp-12);
-    padding-block:var(--sp-16) var(--sp-8);}
+.page-view .hero{padding-block:var(--sp-16) var(--sp-8)}
 .page-view .hero .lead{font-size:1.25rem}
 .page-view .section{grid-template-columns:minmax(0,5fr) minmax(0,7fr);
     column-gap:var(--sp-12);
@@ -260,7 +185,6 @@
 @keyframes pg-rise{from{opacity:.001;transform:translateY(12px)}to{opacity:1;transform:none}}
 }
 @media (max-width: 22rem){
-.page-view .compare{grid-template-columns:1fr}
 .page-view .areas{grid-template-columns:1fr}
 }
 
@@ -351,5 +275,281 @@
   .rail,
   .rail-sub {
     transition: none;
+  }
+}
+
+/* ── Bloques (28/09/2026) ─────────────────────────────────────────────────────────────────
+   La página es un documento con cabecera y bloques (bloques.js). Estos estilos completan los
+   del diseño para lo que el diseño no tenía: la cabecera con imagen o vídeo en lugar de la
+   esfera, los marcos de vídeo, el texto en Markdown y el bloque con la imagen a la izquierda. */
+.page-view .hero-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
+  align-content: end;
+}
+.page-view .hero:not(.has-media) .hero-text {
+  max-width: 56rem;
+}
+/* Con imagen o vídeo, el título sigue a todo el ancho —a media columna no cabría una
+   palabra como «COMUNICACIONES»— y debajo van la entradilla y el vídeo en las columnas de los
+   bloques (5/7). Hasta 75rem, uno debajo de otro. */
+@media (min-width: 75rem) {
+  .page-view .hero.has-media {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--sp-12);
+    align-items: start;
+  }
+  .page-view .hero.has-media .hero-text {
+    display: contents;
+  }
+  .page-view .hero.has-media .hero-text > * {
+    grid-column: 1 / -1;
+    max-width: 56rem;
+  }
+  .page-view .hero.has-media .hero-text > .lead {
+    grid-column: 1;
+  }
+  .page-view .hero.has-media .hero-media {
+    grid-column: 2;
+  }
+}
+/* Imagen, vídeo subido o vídeo de YouTube/Vimeo: el mismo marco del diseño. Los vídeos, en
+   16:9; las imágenes, en su proporción. */
+.page-view .fig-frame video,
+.page-view .fig-frame iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  background: #000;
+  object-fit: cover;
+}
+.page-view .fig-frame video[controls] {
+  object-fit: contain;
+}
+.page-view .media-error {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+}
+.page-view figcaption .mono-label:only-child {
+  margin-right: auto;
+}
+/* Texto en Markdown: párrafos, listas, subtítulos y enlaces con la tipografía del diseño. */
+.page-view .md > * + * {
+  margin-top: 0.9em;
+}
+.page-view .md ul,
+.page-view .md ol {
+  margin-block: 0;
+  padding-left: 1.2em;
+  max-width: 65ch;
+}
+.page-view .md li + li {
+  margin-top: 0.35em;
+}
+.page-view .md li::marker {
+  color: var(--q-section);
+}
+.page-view .md h3 {
+  margin-top: 1.4em;
+}
+/* Una imagen dentro del Markdown no pasa del ancho del texto. */
+.page-view .md img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.page-view .md strong {
+  font-weight: 500;
+  color: var(--q-text-1);
+}
+.page-view .md a,
+.page-view .area a,
+.page-view .step-body a {
+  color: var(--q-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.page-view .blk-texto.section--wide .md {
+  max-width: 65ch;
+}
+.page-view .blk-texto .section-body {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+  font-weight: 300;
+}
+/* Lo demás que puede traer el Markdown: citas, separadores, código y tablas. */
+.page-view .md blockquote {
+  margin: 0;
+  padding-left: var(--sp-5);
+  border-left: 1px solid var(--q-section);
+  color: var(--q-text-1);
+  font-size: 1.2em;
+  line-height: 1.45;
+  font-weight: 200;
+  max-width: 65ch;
+}
+.page-view .md hr {
+  border: 0;
+  border-top: 1px solid var(--q-line-strong);
+}
+.page-view .md code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  background: var(--q-surface-2);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.page-view .md pre {
+  margin: 0;
+  padding: var(--sp-4);
+  overflow-x: auto;
+  background: var(--q-surface-1);
+  border: 1px solid var(--q-line-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+.page-view .md pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+/* Tablas: como la lista de datos, con la cabecera en etiqueta mono. Si no caben, la caja se
+   desplaza de lado y la página no. */
+.page-view .md-tabla {
+  overflow-x: auto;
+}
+.page-view .md table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-md);
+  line-height: 1.45;
+}
+.page-view .md th,
+.page-view .md td {
+  padding: var(--sp-4) var(--sp-6) var(--sp-4) 0;
+  border-bottom: 1px solid var(--q-line);
+  text-align: left;
+  vertical-align: top;
+}
+.page-view .md :is(th, td):last-child {
+  padding-right: 0;
+}
+.page-view .md th {
+  padding-block: var(--sp-3);
+  border-bottom-color: var(--q-line-strong);
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--q-text-3);
+  white-space: nowrap;
+}
+.page-view .md td {
+  color: var(--q-text-1);
+}
+.page-view .md :is(th, td)[align="center"] {
+  text-align: center;
+}
+.page-view .md :is(th, td)[align="right"] {
+  text-align: right;
+}
+/* Bloque «markdown»: un documento entero a todo el ancho. El texto se queda a un ancho
+   cómodo de leer; las imágenes, las tablas y los separadores ocupan todo el bloque. `#` llega
+   aquí como título de sección (h2), `##` como subtítulo (h3) y `###` como h4. */
+.page-view .md-doc {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.page-view .md-doc > * + * {
+  margin-top: 1em;
+}
+.page-view .md-doc > :is(ul, ol) {
+  max-width: 65ch;
+}
+.page-view .md-doc > h2 {
+  max-width: 56rem;
+}
+.page-view .md-doc > :is(h2, h3, h4) {
+  margin-top: var(--sp-12);
+}
+.page-view .md-doc > :is(h2, h3, h4) + * {
+  margin-top: var(--sp-4);
+}
+.page-view .md-doc > h2 + * {
+  margin-top: var(--sp-5);
+}
+.page-view .md-doc > :first-child {
+  margin-top: 0;
+}
+.page-view .md-doc h3 {
+  font-size: var(--fs-xl);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.page-view .md-doc h4 {
+  font-size: var(--fs-lg);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--q-text-1);
+}
+.page-view .md-doc :is(h5, h6) {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--q-text-3);
+}
+.page-view .md-doc > :is(figure, .md-tabla, hr, pre, blockquote) {
+  margin-block: var(--sp-10);
+}
+/* Lo que va justo debajo de un título, pegado a él aunque sea una imagen o una tabla. */
+.page-view .md-doc > :is(h2, h3, h4) + :is(figure, .md-tabla, pre, blockquote) {
+  margin-top: var(--sp-5);
+}
+.page-view .md-doc > :is(figure, .md-tabla, hr, pre, blockquote):first-child {
+  margin-top: 0;
+}
+.page-view .md-doc > :is(figure, .md-tabla, hr, pre, blockquote):last-child {
+  margin-bottom: 0;
+}
+/* Lista de datos: la de «hardware» del diseño, ahora como lista de definición. */
+.page-view .hw {
+  margin: 0;
+}
+.page-view .hw-row dt {
+  font-weight: 400;
+  color: var(--q-text-1);
+  letter-spacing: -0.01em;
+}
+.page-view .hw-row dd {
+  margin: 0;
+  text-align: right;
+}
+/* Texto con imagen a la izquierda: en escritorio se invierten las columnas; en móvil el
+   texto va siempre primero. */
+@media (min-width: 75rem) {
+  .page-view .section--flip {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+  .page-view .section--flip .section-head {
+    order: 2;
+  }
+}
+/* «Siguiente»: en escritorio el diseño deja la flecha pegada al borde derecho del bloque,
+   donde además el degradado es más claro; se separa del borde. */
+@media (min-width: 48rem) {
+  .page-view .pg-next {
+    padding-right: var(--sp-8);
   }
 }

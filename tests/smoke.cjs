@@ -51,6 +51,9 @@ function check(reducedMotion = false, canvasAvailable = true) {
       w.clearTimeout = () => {};
       w.scrollTo = () => {};
       w.HTMLElement.prototype.scrollIntoView = () => {};
+      // jsdom no reproduce vídeo: la página para los suyos al cerrarse.
+      w.HTMLMediaElement.prototype.pause = () => {};
+      w.HTMLMediaElement.prototype.play = () => Promise.resolve();
       w.HTMLDialogElement.prototype.showModal = function () {
         this.setAttribute("open", "");
       };
@@ -562,7 +565,16 @@ function check(reducedMotion = false, canvasAvailable = true) {
   d.querySelectorAll(".field-sub")[0].click();
   assert(d.body.classList.contains("in-page"), "A subitem opens its page");
   assert.equal(w.location.hash, "#/ciencia/computacion-cuantica");
-  assert(d.querySelector("#page .fig-frame img"), "Computación cuántica carries the designer's content");
+  // Computación cuántica es un documento de bloques (src/paginas/), con la infografía del
+  // diseño como imagen y sin la esfera de Bloch, que el cliente no podría subir.
+  const blocks = () => [...d.querySelectorAll("#page [data-bloque]")].map((s) => s.dataset.bloque);
+  assert.deepEqual(
+    blocks(),
+    ["tarjetas", "datos", "pasos", "tarjetas", "imagen-video", "datos"],
+    "Computación cuántica is built from blocks"
+  );
+  assert.equal(d.querySelector("#page .fig-frame img").getAttribute("src"), "/media/computacion-mapa.jpg");
+  assert.equal(d.querySelectorAll("#page canvas").length, 0, "No Bloch sphere on the page");
   assert.equal(d.querySelectorAll(".rail-subs.is-open .rail-sub").length, 3, "The side menu lists the subitems");
   assert.equal(d.querySelector(".rail-sub[aria-current]").textContent, "Computación cuántica");
   assert.equal(w.eval("pageState.open"), true);
@@ -570,6 +582,11 @@ function check(reducedMotion = false, canvasAvailable = true) {
   d.querySelector("#page .pg-next").click();
   assert.equal(w.location.hash, "#/ciencia/comunicaciones-cuanticas");
   assert(/Página de prueba/.test(d.querySelector("#page").textContent), "Subitems without content get a test page");
+  assert.deepEqual([...new Set(blocks())].sort(), [...w.eval("TIPOS")].sort(), "…that shows every block type");
+  const heroVideo = d.querySelector("#page .hero video");
+  assert(heroVideo, "…with a video header");
+  assert.equal(heroVideo.hasAttribute("autoplay"), !reducedMotion, "It plays by itself unless motion is reduced");
+  assert.equal(heroVideo.hasAttribute("controls"), reducedMotion);
   // La miga del territorio vuelve a su campo de cúbits, que sigue abierto.
   d.querySelector('#page [data-crumb="territory"]').click();
   assert(!d.body.classList.contains("in-page"), "The territory crumb closes the page");
@@ -587,6 +604,44 @@ function check(reducedMotion = false, canvasAvailable = true) {
   d.querySelector('#page [data-crumb="home"]').click();
   assert(!d.body.classList.contains("in-page"));
   assert(d.querySelector(".rail-home").classList.contains("active"), "The Universo crumb returns to the sphere");
+  // Lo que escribe el cliente no mete código: el Markdown se sanea, el texto simple se
+  // escapa y las direcciones que no son del sitio ni http(s) se descartan.
+  const box = d.createElement("div");
+  box.innerHTML = w.eval(`bloques([
+    { tipo: "texto", titulo: "<b>t</b>", texto: 'x <img src=x onerror="alert(1)"> [a](javascript:alert(1)) <script>alert(1)</script> <iframe src="https://example.com"></iframe> [b](https://example.com)' },
+    { tipo: "imagen-video", media: { tipo: "imagen", src: "javascript:alert(1)", alt: "a" }, pie: "p" },
+    { tipo: "imagen-video", media: { tipo: "enlace", url: "https://example.com/v" } },
+    { tipo: "otro" },
+  ])`);
+  assert.equal(box.querySelectorAll("script, iframe, [onerror]").length, 0, "Markdown is sanitized");
+  assert.equal(box.querySelectorAll('a[href^="javascript"]').length, 0);
+  assert.equal(box.querySelector('a[href="https://example.com"]').rel, "noopener noreferrer");
+  assert.equal(box.querySelector("h2").textContent, "<b>t</b>", "Plain text is escaped");
+  assert.equal(box.querySelectorAll(".media-imagen, figcaption").length, 0, "An unsafe image is dropped");
+  assert(box.querySelector(".media-error"), "An unknown video link says so");
+  assert.equal(box.querySelectorAll("section").length, 3, "An unknown block type is skipped");
+  // El bloque «markdown»: un documento entero a todo el ancho, con sus títulos por debajo del
+  // de la página, las imágenes sueltas como figuras numeradas y las tablas en su caja.
+  w.__md = '# Uno\n\n## Dos\n\n![alt](/media/x.jpg "Pie")\n\n| a | b |\n| - | - |\n| 1 | 2 |\n\nFin ![x](data:image/png;base64,AAAA)';
+  box.innerHTML = w.eval('bloques([{ tipo: "markdown", texto: __md }])');
+  assert(box.querySelector("section.section--wide .md-doc"), "The markdown block spans the whole width");
+  assert.equal(box.querySelectorAll("h1").length, 0, "Markdown never adds a second page title");
+  assert.equal(box.querySelector("h2").textContent, "Uno");
+  assert.equal(box.querySelector("h3").textContent, "Dos");
+  assert.equal(box.querySelector("figure .fig-frame img").getAttribute("src"), "/media/x.jpg");
+  assert.equal(box.querySelector("figcaption").textContent, "Fig. 01 · Pie");
+  assert(box.querySelector(".md-tabla > table"), "Tables get their scroll box");
+  assert.equal(box.querySelectorAll("img").length, 1, "Markdown images follow the same address rule");
+  // Vídeos de YouTube y Vimeo: el enlace de siempre, al reproductor sin rastreo.
+  const embed = (u) => w.eval(`embedUrl(${JSON.stringify(u)})?.src ?? null`);
+  const yt = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0";
+  assert.equal(embed("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10"), yt);
+  assert.equal(embed("https://youtu.be/dQw4w9WgXcQ?si=x"), yt);
+  assert.equal(embed("https://www.youtube.com/shorts/dQw4w9WgXcQ"), yt);
+  assert.equal(embed("https://vimeo.com/76979871"), "https://player.vimeo.com/video/76979871?dnt=1");
+  assert.equal(embed("https://vimeo.com/76979871/0a1b2c3d4e"), "https://player.vimeo.com/video/76979871?h=0a1b2c3d4e&dnt=1");
+  assert.equal(embed("https://example.com/watch?v=dQw4w9WgXcQ"), null);
+  assert.equal(embed("javascript:alert(1)"), null);
   assert.equal(errors.length, 0, errors.join("\n"));
   // Nada de fuera: ni scripts, ni hojas, ni marcos. Las imágenes, solo las del propio build
   // (los logos de los socios de la entrada), nunca una URL de otro sitio.
@@ -601,7 +656,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
     ["EHU, Universidad del País Vasco", "Tecnalia", "GAIA", "Euskampus"]
   );
   console.log(
-    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, mobile menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles.`
+    `PASS: reduced motion=${reducedMotion}, canvas=${canvasAvailable}; intro hold, sphere→chip, tabs as qubits, live circuit, field orbit, side menu, mobile menu, no card, outside dismissal, camera reset, Bloch geometry, fixed particles, third-level blocks.`
   );
   dom.window.close();
 }
