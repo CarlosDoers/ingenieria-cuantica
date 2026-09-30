@@ -329,6 +329,20 @@ function check(reducedMotion = false, canvasAvailable = true) {
       t.children.every((c) => Math.acos(dot(points[qubitSource[c]], ANCHORS[i])) < 0.2))`),
     "Each section is born from the point under its ring, and its tabs from its neighbours"
   );
+  // Cada territorio dibuja su propia forma en el chip (antes, los cinco la misma «T»), y la
+  // luz llega por su camino a todas sus pestañas.
+  assert.equal(
+    new Set(
+      w.eval(`territories.map((t) => t.children.map((c) =>
+        (chip.nodes[c].row - chip.nodes[t.hub].row) + ":" + (chip.nodes[c].col - chip.nodes[t.hub].col)).join(" "))`)
+    ).size,
+    5,
+    "Each territory draws its own shape"
+  );
+  assert(
+    w.eval("territories.every((t) => t.hub >= 0 && t.children.every((c) => c >= 0 && t.hops.has(c)))"),
+    "Every tab is reached by its territory's light path"
+  );
   // Y el reparto es un desenrollado: la fila 0 —la del fondo, arriba en pantalla— se queda
   // el casquete de |0⟩ (y negativa en este motor) y la última, el de |1⟩. Al revés, las dos
   // mitades de la esfera se cruzaban por el medio.

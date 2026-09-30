@@ -2599,6 +2599,13 @@ body:not(.intro-active) .rail-item {
 .orbit-node[data-back="true"]:not(:hover):not(:focus-visible):not(.is-hover) {
   z-index: 2;
 }
+/* Con menú lateral (escritorio), los nombres de la esfera sobran: ya están en el menú
+   (30/09/2026). En el chip se quedan, y en móvil también, que no tiene menú a la vista. */
+@media (min-width: 761px) {
+  .scene:not(.in-field) .orbit-node .node-name {
+    display: none;
+  }
+}
 @media (max-width: 760px) {
   /* En móvil el menú lateral deja paso al botón de abajo y su panel a pantalla completa. */
   .rail {

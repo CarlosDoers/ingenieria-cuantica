@@ -711,10 +711,15 @@ function ballStyle(qi, b) {
         size = base + (SUB_R - base) * lit;
         b.glow = (0.2 + 0.35 * on) * lit;
       } else {
-        sat += (62 - sat) * lit;
-        lum += (66 - lum) * lit;
-        size = base * (1 + 0.55 * lit);
-        b.glow = 0.25 * lit;
+        // Cúbit de paso del camino. El puente crece; uno de fila apenas, porque ya es casi
+        // tan grande como una pestaña y encendido a su tamaño parecería otra más (las
+        // formas que no son la «T» pasan por cúbits de fila, 30/09).
+        // Y más apagados que las pestañas (luz 50 frente a 78, y menos halo; antes 66 y el
+        // puente crecía un 55 %): se tienen que leer como el camino, no como otro item.
+        sat += (58 - sat) * lit;
+        lum += (50 - lum) * lit;
+        size = base * (1 + (chip.nodes[qi].bridge ? 0.3 : 0.05) * lit);
+        b.glow = (chip.nodes[qi].bridge ? 0.1 : 0.06) * lit;
       }
     }
   }

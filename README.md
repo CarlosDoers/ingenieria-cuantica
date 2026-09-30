@@ -221,6 +221,31 @@ Pulsarla la señala: su cúbit se enciende del todo y las otras dos ceden un poc
 respuesta visible mientras no haya un tercer nivel. La luz del territorio recorre el camino
 real del chip —sección, puente, fila— hasta ellas.
 
+**Cada territorio, su forma** (30/09/2026). Antes los cinco dibujaban la misma «T» (la
+sección, su puente y las tres pestañas en la fila de arriba). Ahora cada uno tiene la suya,
+en `SHAPES` (`src/field.js`), por orden de territorio: **tridente** (una pestaña a cada lado
+de la sección y otra arriba), **escalera** (dos arriba y la tercera un escalón más al fondo),
+**escuadra** (las tres arriba, hacia un lado), **gancho** (dos arriba y una al lado de la
+sección) y la **T** de siempre. Cada forma son las celdas de sus pestañas y los recorridos
+de la luz, relativos a la sección; para cambiar la de un territorio basta reordenar la lista
+o añadir otra. Reglas que hay que respetar al inventar una:
+
+- La retícula solo tiene puente entre filas una de cada cuatro columnas, alternas: desde la
+  sección se sube por su columna y el siguiente puente al fondo está dos columnas más allá.
+  Una forma que no cabe en ningún sitio deja al territorio sin sección.
+- Crecen **hacia la izquierda**: por el giro de la cámara, cada fila hacia el fondo se ve una
+  columna más a la derecha, y las formas alargadas a la derecha se salían de pantalla en
+  móvil.
+- Los cúbits de paso (los del camino que no son pestaña) se encienden sin crecer, para que
+  no parezcan otra pestaña.
+- **De una a seis pestañas.** `SHAPES[n]` tiene formas para cada número, porque el cliente
+  podrá añadir y quitar pestañas: con cuatro, por ejemplo, hay tres (corona, escuadra con la
+  cuarta al lado y cuadro), que se reparten por orden de territorio. Con más de seis van en
+  fila arriba, como la «T», y en móvil las últimas se salen del encuadre.
+- Pendiente: en móvil, las etiquetas de pestañas seguidas en la misma fila se pisan si los
+  nombres son largos (más de unos 12 caracteres). Ya pasaba con la «T»; con cinco o seis
+  pestañas es más fácil que ocurra.
+
 ## Tercer nivel: las páginas de los subitems
 
 Añadido el 25/09/2026 a partir de la maqueta de la diseñadora (`computacion-cuantica-desktop`

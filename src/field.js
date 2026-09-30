@@ -217,11 +217,99 @@ function claimNearest(territories, anchors, points, qubitSource, pointQubit) {
 }
 
 /**
- * Cada territorio vive en un cúbit con puente hacia la fila de arriba, y sus hijas —una por
- * pestaña de su ficha— son las columnas seguidas de esa fila, unidas por el puente. Es la
- * misma regla de `campo-cubits`. Cada territorio cae en el cúbit válido **cuyo punto de la
- * esfera está más cerca de su ancla**: así la sección nace exactamente donde acaba de
- * converger la luz, que es lo que cose los dos niveles.
+ * Formas de los territorios (30/09/2026): antes todos dibujaban la misma «T» —la sección, su
+ * puente y las tres pestañas en la fila de arriba— y se pidió que cada uno se formara de una
+ * manera. Hay formas para una a seis pestañas (`SHAPES[n]`), porque el cliente podrá añadir y
+ * quitar pestañas. Cada forma dice dónde caen las pestañas (`children`, celdas `[fila, columna]`
+ * relativas a la sección, de izquierda a derecha) y por dónde viaja la luz hasta ellas
+ * (`walks`, recorridos de celdas contiguas; un paso de fila pasa por su puente).
+ *
+ * Todas respetan la retícula heavy-hex: las filas van unidas de lado a lado y entre dos filas
+ * solo hay puente una de cada cuatro columnas, alternas, así que desde la sección se sube por
+ * su columna y el siguiente puente hacia el fondo queda dos columnas más allá.
+ *
+ * **Crecen hacia la izquierda, no hacia la derecha.** Con el giro de la cámara, cada fila
+ * hacia el fondo se ve una columna más a la derecha en pantalla: la fila de arriba de la «T»
+ * ya ocupa desde la sección hasta dos columnas a su derecha. Una forma que además se alargue
+ * a la derecha no cabe en móvil (la sección y la última etiqueta quedaban cortadas); hacia la
+ * izquierda, en cambio, queda centrada sobre la sección. Y ninguna va hacia delante de la
+ * sección, donde taparía su nombre.
+ */
+const UP = [[0, 0], [-1, 0]]; // de la sección a la fila de arriba, por su puente
+const SHAPES = {
+  1: [{ children: [[-1, 0]], walks: [UP] }],
+  2: [
+    // Las dos arriba.
+    { children: [[-1, -1], [-1, 0]], walks: [[...UP, [-1, -1]]] },
+    // Una a cada lado de la sección.
+    { children: [[0, -1], [0, 1]], walks: [[[0, 0], [0, -1]], [[0, 0], [0, 1]]] },
+    // Una arriba y otra al lado.
+    { children: [[-1, 0], [0, 1]], walks: [UP, [[0, 0], [0, 1]]] },
+  ],
+  3: [
+    // Tridente: una pestaña a cada lado de la sección y otra arriba.
+    { children: [[0, -1], [-1, 0], [0, 1]], walks: [[[0, 0], [0, -1]], UP, [[0, 0], [0, 1]]] },
+    // Escalera: dos en la fila de arriba, con un cúbit de paso entre ellas, y la tercera un
+    // escalón más al fondo, que en pantalla queda en medio y más alta.
+    { children: [[-1, -2], [-2, -2], [-1, 0]], walks: [[...UP, [-1, -1], [-1, -2], [-2, -2]]] },
+    // Escuadra: las tres en la fila de arriba, hacia un lado; en pantalla, un arco sobre la
+    // sección.
+    { children: [[-1, -2], [-1, -1], [-1, 0]], walks: [[...UP, [-1, -1], [-1, -2]]] },
+    // Gancho: dos arriba y la tercera al lado de la sección.
+    { children: [[-1, -1], [-1, 0], [0, 1]], walks: [[...UP, [-1, -1]], [[0, 0], [0, 1]]] },
+    // T: la de siempre.
+    { children: [[-1, -1], [-1, 0], [-1, 1]], walks: [[...UP, [-1, -1]], [[-1, 0], [-1, 1]]] },
+  ],
+  4: [
+    // Corona: una a cada lado de la sección y dos arriba.
+    {
+      children: [[0, -1], [-1, -1], [-1, 0], [0, 1]],
+      walks: [[[0, 0], [0, -1]], [...UP, [-1, -1]], [[0, 0], [0, 1]]],
+    },
+    // Escuadra con la cuarta al lado de la sección.
+    {
+      children: [[-1, -2], [-1, -1], [-1, 0], [0, 1]],
+      walks: [[...UP, [-1, -1], [-1, -2]], [[0, 0], [0, 1]]],
+    },
+    // Cuadro: dos a los lados de la sección y dos arriba, separadas por un cúbit de paso.
+    {
+      children: [[0, -1], [-1, -2], [-1, 0], [0, 1]],
+      walks: [[[0, 0], [0, -1]], [...UP, [-1, -1], [-1, -2]], [[0, 0], [0, 1]]],
+    },
+  ],
+  5: [
+    // Una a cada lado de la sección y tres arriba.
+    {
+      children: [[0, -1], [-1, -2], [-1, -1], [-1, 0], [0, 1]],
+      walks: [[[0, 0], [0, -1]], [...UP, [-1, -1], [-1, -2]], [[0, 0], [0, 1]]],
+    },
+  ],
+  6: [
+    // Lo mismo y la sexta un escalón más al fondo.
+    {
+      children: [[0, -1], [-1, -2], [-2, -2], [-1, -1], [-1, 0], [0, 1]],
+      walks: [[[0, 0], [0, -1]], [...UP, [-1, -1], [-1, -2], [-2, -2]], [[0, 0], [0, 1]]],
+    },
+  ],
+};
+/**
+ * La forma del territorio `i` con `n` pestañas: las de su número se reparten por orden de
+ * territorio. Con más de seis no hay forma compacta: van en fila arriba, como la «T», y en
+ * móvil las últimas se salen del encuadre.
+ */
+function shapeOf(i, n) {
+  const list = SHAPES[n];
+  if (list) return list[i % list.length];
+  const first = Math.floor((n - 1) / 2),
+    row = Array.from({ length: n }, (_, j) => [-1, j - first]);
+  return { children: row, walks: [UP, row] };
+}
+
+/**
+ * Cada territorio vive en un cúbit —su sección— y sus hijas, una por pestaña de su ficha,
+ * son cúbits vecinos unidos a él por el camino de su forma (`SHAPES`). Cada territorio cae
+ * en el cúbit válido **cuyo punto de la esfera está más cerca de su ancla**: así la sección
+ * nace exactamente donde acaba de converger la luz, que es lo que cose los dos niveles.
  *
  * Las secciones pueden caer en cualquier parte de la oblea, no solo en el bloque central:
  * los cinco territorios están repartidos por toda la esfera y el bloque central es apenas
@@ -238,43 +326,61 @@ const EDGE_ROW_FRONT = 4; // filas hacia delante
 function buildTerritories(anchors, qubitSource, points) {
   const used = new Set();
   return anchors.map((anchor, i) => {
-    const n = DATA[i].tabs.length;
-    const first = Math.floor((n - 1) / 2);
+    const shape = shapeOf(i, DATA[i].tabs.length);
+    // La forma colocada con la sección en `node`: sus cúbits (celdas y puentes) y los
+    // acopladores del camino, o `null` si ahí no cabe: fuera de margen, sin puente donde
+    // hace falta o pisando a otro territorio.
+    const place = (node) => {
+      const cells = new Set([node.index]),
+        path = [];
+      let back = 0;
+      for (const walk of shape.walks) {
+        for (let k = 0; k < walk.length; k++) {
+          const r = node.row + walk[k][0],
+            c = node.col + walk[k][1],
+            q = cell(r, c);
+          if (q < 0 || c < EDGE_COL || c > COLS - 1 - EDGE_COL) return null;
+          back = Math.min(back, walk[k][0]);
+          cells.add(q);
+          if (!k) continue;
+          const pr = node.row + walk[k - 1][0],
+            prev = cell(pr, node.col + walk[k - 1][1]);
+          // De una fila a otra se pasa por el puente de esa columna, si lo hay.
+          const via = pr === r ? [prev, q] : [prev, cell(Math.min(pr, r), c, true), q];
+          if (via.includes(-1)) return null;
+          for (let v = 1; v < via.length; v++) {
+            const e = edgeAt.get(via[v - 1] < via[v] ? `${via[v - 1]}:${via[v]}` : `${via[v]}:${via[v - 1]}`);
+            if (e === undefined) return null;
+            path.push(e);
+            cells.add(via[v]);
+          }
+        }
+      }
+      // El margen del fondo se cuenta desde la fila de arriba de la sección, como antes; una
+      // forma que sube un escalón más necesita una fila más.
+      if (node.row < EDGE_ROW_BACK - 1 - back || node.row > ROWS - 1 - EDGE_ROW_FRONT) return null;
+      for (const q of cells) if (used.has(q)) return null;
+      return { cells, path };
+    };
     let hub = -1,
+      placed = null,
       bestDot = -2;
     for (const node of chip.nodes) {
-      if (node.dust || node.bridge || !hasBridge(node.row - 1, node.col)) continue;
-      if (node.row < EDGE_ROW_BACK || node.row > ROWS - 1 - EDGE_ROW_FRONT) continue;
-      const start = node.col - first;
-      const cols = Array.from({ length: n }, (_, j) => start + j);
-      if (start < EDGE_COL || start + n - 1 > COLS - 1 - EDGE_COL) continue;
-      if (used.has(node.index) || cols.some((c) => used.has(cell(node.row - 1, c)))) continue;
+      if (node.dust || node.bridge) continue;
       const p = points[qubitSource[node.index]],
         dt = p.x * anchor.x + p.y * anchor.y + p.z * anchor.z;
-      if (dt > bestDot) {
-        bestDot = dt;
-        hub = node.index;
-      }
+      if (dt <= bestDot) continue;
+      const fit = place(node);
+      if (!fit) continue;
+      bestDot = dt;
+      hub = node.index;
+      placed = fit;
     }
-    const h = chip.nodes[hub];
-    const cols = Array.from({ length: n }, (_, j) => h.col - first + j);
-    const children = cols.map((c) => cell(h.row - 1, c));
-    used.add(hub);
-    children.forEach((c) => used.add(c));
+    const h = chip.nodes[hub],
+      { path } = placed;
+    const children = shape.children.map(([r, c]) => cell(h.row + r, h.col + c));
+    placed.cells.forEach((q) => used.add(q));
 
-    // Camino de la luz: puente hacia arriba y tramo de la fila superior.
-    const path = [];
-    const push = (a, b) => {
-      const e = edgeAt.get(a < b ? `${a}:${b}` : `${b}:${a}`);
-      if (e !== undefined) path.push(e);
-    };
-    const bridge = cell(h.row - 1, h.col, true),
-      above = cell(h.row - 1, h.col);
-    push(hub, bridge);
-    push(bridge, above);
-    for (let c = Math.min(h.col, cols[0]); c < Math.max(h.col, cols[n - 1]); c++) {
-      push(cell(h.row - 1, c), cell(h.row - 1, c + 1));
-    }
     // Saltos desde la sección a cada cúbit del camino, para que la luz viaje.
     const hops = new Map([[hub, 0]]);
     const adj = new Map();
@@ -291,9 +397,18 @@ function buildTerritories(anchors, qubitSource, points) {
         queue.push(j);
       }
     }
-    // Punto de mira de la cámara: entre la sección y sus hijas, más cerca de ellas.
-    const top = chip.nodes[children[0]];
-    return { hub, children, path, hops, aim: { x: h.x + AIM_SIDE, z: h.z + (top.z - h.z) * AIM_ALONG } };
+    // Punto de mira de la cámara: entre la sección y el centro de sus hijas, más cerca de
+    // ellas y algo a un lado. Con la «T» es el mismo de siempre.
+    const n = children.length,
+      cx = children.reduce((a, q) => a + chip.nodes[q].x, 0) / n,
+      cz = children.reduce((a, q) => a + chip.nodes[q].z, 0) / n;
+    return {
+      hub,
+      children,
+      path,
+      hops,
+      aim: { x: h.x + (cx - h.x) * AIM_ALONG + AIM_SIDE, z: h.z + (cz - h.z) * AIM_ALONG },
+    };
   });
 }
 
