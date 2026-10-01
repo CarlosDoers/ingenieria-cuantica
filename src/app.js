@@ -36,9 +36,7 @@ DATA.forEach((d, i) => {
       d.color
     }" aria-pressed="false" aria-label="Explorar ${
       d.name
-    }" aria-controls="detail"><span class="node-name" aria-hidden="true">${icon(
-      d.icon
-    )}<span>${d.name}</span></span></button>`
+    }" aria-controls="detail"><span class="node-name" aria-hidden="true"><span>${d.name}</span></span></button>`
   );
 });
 export const nodeEls = $$(".orbit-node");
@@ -175,15 +173,17 @@ rail.innerHTML =
   // La marca del activo es **una sola pieza que se desplaza** de un territorio a otro, no un
   // borde que se enciende y se apaga: el menú cuenta así de dónde vienes y a dónde vas.
   `<span class="rail-marker" aria-hidden="true"></span>` +
-  // «Universo Quantum» es **el primer nivel**, la esfera, y los cinco territorios cuelgan de
-  // él: va como un elemento más del menú, algo mayor, y los territorios sangrados debajo.
-  // Solo texto (petición de diseño): sin los iconos de la esfera ni la línea de árbol.
-  `<button class="rail-item rail-home" type="button" style="--i:0"><span class="rail-name">Universo Quantum</span></button>` +
+  // Solo los cinco territorios (01/10/2026): «Universo Quantum», el primer nivel, iba encima
+  // como un item más y se quitó; a la esfera se vuelve con el logo, la miga «Universo» de las
+  // páginas, Escape o pulsando fuera. Cada territorio lleva delante el icono de su punto, en
+  // su color (también del 01/10: se quitaron de los nombres de la esfera y vinieron aquí).
   `<div class="rail-children">` +
   DATA.map(
     (d, i) =>
-      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1}"><span class="rail-name">${d.name}</span></button>` +
-      // Sus subitems: solo se despliegan en el tercer nivel, bajo el territorio abierto.
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${d.color}"><span class="rail-icon">${icon(
+        d.icon
+      )}</span><span class="rail-name">${d.name}</span></button>` +
+      // Sus subitems: se despliegan bajo el territorio abierto, en su campo y en sus páginas.
       `<div class="rail-subs" data-subs="${i}">${d.tabs
         .map((t, j) => `<button class="rail-sub" type="button" data-sub="${j}">${t.name}</button>`)
         .join("")}</div>`
@@ -211,19 +211,27 @@ $$(".rail-item[data-rail]").forEach((b) => {
 });
 $$(".rail-subs").forEach((g) => {
   const i = Number(g.dataset.subs);
-  g.querySelectorAll(".rail-sub").forEach((b) =>
+  g.querySelectorAll(".rail-sub").forEach((b) => {
+    const j = Number(b.dataset.sub),
+      // En el campo, señalar un subitem en el menú señala su cúbit, como su etiqueta.
+      mark = (on) => !pageState.open && hoverFieldTab(on ? i : -1, on ? j : -1);
     b.addEventListener("click", () => {
-      if (pageState.territory !== i || pageState.tab !== Number(b.dataset.sub)) openPage(i, Number(b.dataset.sub));
-    })
-  );
-});
-$(".rail-home").addEventListener("click", () => {
-  if (selected >= 0) resetExperience(false);
+      mark(false);
+      if (!pageState.open || pageState.territory !== i || pageState.tab !== j) openPage(i, j);
+    });
+    b.addEventListener("pointerenter", () => mark(true));
+    b.addEventListener("pointerleave", () => mark(false));
+    b.addEventListener("focus", () => mark(true));
+    b.addEventListener("blur", () => mark(false));
+  });
 });
 function syncRail() {
   let current = null;
+  // En la esfera no hay ningún item activo y la marca se oculta (`has-selection`). Al volver
+  // a aparecer, nace bajo su territorio en vez de llegar deslizándose desde donde se quedó.
+  const appearing = selected >= 0 && !rail.classList.contains("has-selection");
   $$(".rail-item").forEach((b) => {
-    const on = b.dataset.rail === undefined ? selected < 0 : Number(b.dataset.rail) === selected;
+    const on = Number(b.dataset.rail) === selected;
     b.classList.toggle("active", on);
     if (on) {
       current = b;
@@ -231,12 +239,14 @@ function syncRail() {
     } else b.removeAttribute("aria-current");
   });
   rail.classList.toggle("has-selection", selected >= 0);
-  // Subitems del territorio abierto, desplegados solo en su página, con la actual marcada.
+  // Subitems del territorio abierto, desplegados en su campo de cúbits y en sus páginas, con
+  // la actual marcada en la página (01/10/2026; antes, solo en la página).
+  const open = pageState.open ? pageState.territory : selected;
   $$(".rail-subs").forEach((g) => {
-    const mine = pageState.open && Number(g.dataset.subs) === pageState.territory;
+    const mine = open >= 0 && Number(g.dataset.subs) === open;
     g.classList.toggle("is-open", mine);
     g.querySelectorAll(".rail-sub").forEach((b) => {
-      if (mine && Number(b.dataset.sub) === pageState.tab) b.setAttribute("aria-current", "page");
+      if (mine && pageState.open && Number(b.dataset.sub) === pageState.tab) b.setAttribute("aria-current", "page");
       else b.removeAttribute("aria-current");
     });
   });
@@ -246,10 +256,16 @@ function syncRail() {
   if (!current) return;
   // La marca se coloca con las medidas del elemento activo, no con un índice: así no se
   // descoloca si cambian el texto o el tamaño de letra.
+  const marker = $(".rail-marker");
+  if (appearing) marker.style.transitionProperty = "opacity";
   rail.style.setProperty("--my", current.offsetTop + "px");
   rail.style.setProperty("--mh", current.offsetHeight + "px");
   rail.style.setProperty("--mx", current.offsetLeft + "px");
   rail.style.setProperty("--mw", current.offsetWidth + "px");
+  if (appearing) {
+    void marker.offsetWidth;
+    marker.style.transitionProperty = "";
+  }
 }
 /**
  * Menú de móvil (petición de diseño, a partir del de aaronjcunningham.com): en vez del menú
@@ -264,10 +280,10 @@ function syncRail() {
 const sheet = $("#nav-sheet"),
   sheetLinks = $("#nav-sheet-links"),
   trigger = $("#nav-trigger");
-const UNIVERSE_COLOR = "#9aa9ff";
 sheetLinks.innerHTML =
-  // Solo texto, como el menú de escritorio (petición de diseño): sin el icono delante.
-  `<button class="sheet-link sheet-home" type="button" style="--i:0;--row:${UNIVERSE_COLOR}"><span class="sheet-name">Universo Quantum</span><span class="sheet-go" aria-hidden="true">↗</span></button>` +
+  // Solo los cinco territorios, como el menú de escritorio (01/10/2026: «Universo Quantum» se
+  // quitó de los dos; a la esfera se vuelve con el logo o tocando en vacío). Solo texto
+  // (petición de diseño): sin el icono delante.
   DATA.map(
     (d, i) =>
       `<button class="sheet-link" type="button" data-sheet="${i}" style="--i:${i + 1};--row:${d.color}"><span class="sheet-name">${d.name}</span><span class="sheet-go" aria-hidden="true">↗</span></button>`
@@ -314,10 +330,6 @@ sheet.addEventListener("cancel", (e) => {
   closeSheet();
 });
 sheet.addEventListener("close", () => trigger.setAttribute("aria-expanded", "false"));
-$(".sheet-home").addEventListener("click", () => {
-  if (selected >= 0) resetExperience(false);
-  closeSheet();
-});
 $$(".sheet-link[data-sheet]").forEach((b) =>
   b.addEventListener("click", () => {
     // La transformación arranca ya, detrás del menú mientras se desvanece.
@@ -332,7 +344,7 @@ $$(".sheet-link[data-sheet]").forEach((b) =>
 );
 function syncSheet() {
   $$(".sheet-link").forEach((b) => {
-    const on = b.dataset.sheet === undefined ? selected < 0 : Number(b.dataset.sheet) === selected;
+    const on = Number(b.dataset.sheet) === selected;
     b.classList.toggle("active", on);
     if (on) b.setAttribute("aria-current", "true");
     else b.removeAttribute("aria-current");

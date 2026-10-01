@@ -225,14 +225,18 @@ function check(reducedMotion = false, canvasAvailable = true) {
     assert.equal(d.querySelector(sel), null, `${sel} is gone`)
   );
   assert(!/Un universo\. Cinco conexiones/.test(d.querySelector(".site-footer").textContent));
-  d.querySelector(".rail-home").click();
+  // El menú lateral son solo los cinco territorios (01/10/2026: se quitó «Universo
+  // Quantum»); a la esfera se vuelve con el logo, y entonces no hay ningún item activo.
+  assert.equal(d.querySelector(".rail-home"), null, "No first-level item in the side menu");
+  assert(!/Universo Quantum/.test(d.querySelector("#rail").textContent));
+  d.querySelector("#home").click();
   assert(d.querySelector("#detail").hidden);
   assert.equal(w.eval("lightCenter()"), null);
-  assert(d.querySelector(".rail-home").classList.contains("active"));
+  assert.equal(d.querySelector(".rail-item.active"), null, "On the sphere no territory is marked");
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
-  assert.equal(d.querySelector(".rail-home").textContent.trim(), "Universo Quantum");
-  // Menú solo de texto (petición de diseño): sin iconos delante de los nombres.
-  assert.equal(d.querySelectorAll("#rail svg").length, 0, "The side menu is text only");
+  // Iconos solo en los territorios, uno por fila, en el color de su punto (01/10/2026; antes
+  // el menú era solo texto).
+  assert.equal(d.querySelectorAll("#rail svg").length, 5, "Only the territories carry an icon");
   assert.equal(
     d.querySelectorAll(".rail-children .rail-item[data-rail]").length,
     5,
@@ -497,7 +501,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert.equal(w.eval("CX"), w.eval("W") * 0.5, "Scene stays centred");
   assert(w.eval("R") > baseRadius);
   assert(d.querySelector("#detail-close").hidden, "No card close button");
-  d.querySelector(".rail-home").click();
+  d.querySelector("#home").click();
   w.eval("stepCamera(1);draw()");
   // Al volver a la esfera el chip se apaga: ni medida a la vista ni cúbit señalado.
   assert(w.eval("circuit.readout.every((r) => r === 0)"), "The chip stops measuring on the sphere");
@@ -507,7 +511,9 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert.equal(w.eval("R"), baseRadius);
   assert(d.querySelector("#detail-close").hidden);
   assert(d.querySelector("#detail").hidden);
-  assert.equal(d.querySelectorAll(".node-name svg").length, 5);
+  // Los nombres de los puntos, solo texto (01/10/2026): sin el icono del territorio.
+  assert.equal(d.querySelectorAll(".node-name").length, 5);
+  assert.equal(d.querySelectorAll(".node-name svg").length, 0, "Point labels carry no icon");
   assert.equal(
     d.querySelector("#hold-start").parentElement,
     d.querySelector("#gateway"),
@@ -538,34 +544,36 @@ function check(reducedMotion = false, canvasAvailable = true) {
   );
   d.querySelector(".scene-footer").click();
   assert(
-    d.querySelector(".rail-home").classList.contains("active"),
+    d.querySelector(".rail-item.active") === null && !d.querySelector("#rail").classList.contains("has-selection"),
     "Outside click returns to the sphere"
   );
   assert.equal(w.eval("camera.target"), 0);
-  // Menú de móvil: el botón de abajo abre la navegación a pantalla completa, con el primer
-  // nivel y los cinco territorios; elegir en ella un territorio lo abre y cierra el panel.
+  // Menú de móvil: el botón de abajo abre la navegación a pantalla completa, con los cinco
+  // territorios (sin «Universo Quantum» desde el 01/10/2026, como el de escritorio); elegir
+  // en ella un territorio lo abre y cierra el panel.
   const sheetEl = d.querySelector("#nav-sheet"),
     trigger = d.querySelector("#nav-trigger");
   trigger.click();
   assert(sheetEl.hasAttribute("open"), "The mobile menu opens");
   assert.equal(trigger.getAttribute("aria-expanded"), "true");
-  assert.equal(d.querySelectorAll(".sheet-link").length, 6, "First level plus five territories");
+  assert.equal(d.querySelectorAll(".sheet-link").length, 5, "The five territories, no first level");
+  assert.equal(d.querySelector(".sheet-home"), null);
   assert.equal(sheetEl.querySelectorAll(".sheet-link svg").length, 0, "Mobile menu rows are text only");
-  assert(d.querySelector(".sheet-home").classList.contains("active"), "It shows where you are");
+  assert.equal(d.querySelector(".sheet-link.active"), null, "On the sphere no territory is marked");
   d.querySelector('.sheet-link[data-sheet="3"]').click();
   assert.equal(
     d.querySelector(".rail-item.active").dataset.rail,
     "3",
     "Picking in the mobile menu opens that territory"
   );
-  assert(d.querySelector('.sheet-link[data-sheet="3"]').classList.contains("active"));
+  assert(d.querySelector('.sheet-link[data-sheet="3"]').classList.contains("active"), "It shows where you are");
   assert(
     reducedMotion ? !sheetEl.hasAttribute("open") : sheetEl.classList.contains("is-closing"),
     "…and the menu closes"
   );
   // Cambiar de territorio dentro del campo reancla la transformación al nuevo: la vuelta a la
   // esfera sale de él. Si se quedaba en el primero, el campo se salía de la pantalla al volver.
-  d.querySelector(".rail-home").click();
+  d.querySelector("#home").click();
   w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
   d.querySelector('[data-rail="0"]').click();
   w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
@@ -573,7 +581,7 @@ function check(reducedMotion = false, canvasAvailable = true) {
   w.eval("stepCamera(1);stepCamera(1)");
   assert.equal(w.eval("zoom.from"), 3, "Switching territory re-anchors the return to the sphere");
   // A mitad de la entrada, el reanclaje espera a que el campo esté abierto del todo.
-  d.querySelector(".rail-home").click();
+  d.querySelector("#home").click();
   w.eval("stepCamera(1);stepCamera(1);stepCamera(1);stepCamera(1)");
   d.querySelector('[data-rail="1"]').click();
   if (!reducedMotion) {
@@ -616,7 +624,17 @@ function check(reducedMotion = false, canvasAvailable = true) {
   d.querySelector('#page [data-crumb="territory"]').click();
   assert(!d.body.classList.contains("in-page"), "The territory crumb closes the page");
   assert.equal(d.querySelector(".rail-item.active").dataset.rail, "1", "…and stays in its field");
-  assert.equal(d.querySelectorAll(".rail-subs.is-open").length, 0, "Subitems fold away outside the page");
+  // En el campo el menú sigue desplegando los subitems de su territorio (01/10/2026), sin
+  // ninguno marcado: no hay página abierta. Pulsar uno abre su página.
+  assert.deepEqual(
+    [...d.querySelectorAll(".rail-subs.is-open")].map((g) => g.dataset.subs),
+    ["1"],
+    "The field keeps its territory's subitems in the side menu"
+  );
+  assert.equal(d.querySelectorAll(".rail-sub[aria-current]").length, 0, "…with none marked");
+  d.querySelectorAll('.rail-subs[data-subs="1"] .rail-sub')[1].click();
+  assert.equal(w.location.hash, "#/ciencia/comunicaciones-cuanticas", "A subitem in the menu opens its page");
+  d.querySelector('#page [data-crumb="territory"]').click();
   // Escape desde la página vuelve al campo, no al universo.
   d.querySelectorAll(".field-sub")[2].click();
   d.dispatchEvent(new w.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -628,7 +646,8 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(d.body.classList.contains("in-page"), "Clicking inside the page keeps it open");
   d.querySelector('#page [data-crumb="home"]').click();
   assert(!d.body.classList.contains("in-page"));
-  assert(d.querySelector(".rail-home").classList.contains("active"), "The Universo crumb returns to the sphere");
+  assert.equal(d.querySelector(".rail-item.active"), null, "The Universo crumb returns to the sphere");
+  assert.equal(d.querySelectorAll(".rail-subs.is-open").length, 0, "Subitems fold away on the sphere");
   // Lo que escribe el cliente no mete código: el Markdown se sanea, el texto simple se
   // escapa y las direcciones que no son del sitio ni http(s) se descartan.
   const box = d.createElement("div");

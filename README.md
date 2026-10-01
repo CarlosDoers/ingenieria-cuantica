@@ -401,25 +401,25 @@ menú lo destaca también en la escena. Desde el chip se salta directamente a ot
 y la cámara se desplaza por el chip hasta él.
 
 Tiene forma de **índice en filas**, a la manera de studiors.be (petición de diseño): una
-línea fina arriba de la lista y otra bajo cada fila, **solo texto** —los iconos de cada
-territorio que llevaba delante del nombre se quitaron el 24/09/2026, a petición de diseño,
-y se dio más aire entre filas (17 px arriba y abajo)—, y la fila entera que se desplaza hacia
+línea fina arriba de la lista y otra bajo cada fila, y la fila entera que se desplaza hacia
 dentro al señalarla (0,4 s, curva de salida larga). Se presenta de arriba abajo al terminar
 la intro. El territorio abierto se queda desplazado, con el nombre algo mayor —se escala, no
 cambia de cuerpo, así el menú no se recoloca—; y la marca del activo es **la línea bajo su
 fila, encendida, que se desliza** de una fila a otra, en vez de un borde que se enciende y se
-apaga: cuenta de dónde vienes y a dónde vas. En pantallas estrechas el menú va arriba en horizontal, se desplaza solo para
-dejar a la vista el territorio abierto y la vuelta se queda fija a la izquierda.
+apaga: cuenta de dónde vienes y a dónde vas. En la esfera no hay activo y la marca se oculta.
 
-Arriba va **«Universo Quantum»**, el primer nivel —la esfera—, y los cinco territorios
-**cuelgan de él**: es una fila del menú como las demás pero con más peso (el nombre algo
-mayor), y los territorios van sangrados debajo. Iban unidos a él por una línea vertical de
-árbol, que se quitó con los iconos: el sangrado basta para leer los dos niveles. Antes era
-una etiqueta pequeña en versaleta encima de la lista y no se leía como el nivel de arriba.
-Cuando se está en él, la marca se queda bajo su fila; con un territorio abierto, pulsarlo vuelve a la
-esfera. Sin la ficha desapareció su X y hacía falta una vuelta visible: en un kiosco táctil
-no basta con Escape ni con adivinar que se puede pulsar en vacío (las dos cosas siguen
-funcionando). En móvil va fijo a la izquierda del menú horizontal.
+- **Iconos.** Cada territorio lleva delante el icono de su punto, en su color. Se quitaron
+  el 24/09/2026 (solo texto, a petición de diseño) y volvieron el 01/10/2026, cuando se
+  quitaron de los nombres de la esfera.
+- **Sin «Universo Quantum»** (01/10/2026). Encima de los territorios iba el primer nivel
+  —la esfera— como un item más, con los territorios sangrados debajo, y era la vuelta
+  visible a la esfera. Se quitó: a la esfera se vuelve con el logo de la cabecera, la miga
+  «Universo» de las páginas, Escape o pulsando en vacío. En un kiosco táctil la vuelta
+  visible es ahora solo el logo. También se quitó del menú de móvil, que lista solo los
+  cinco territorios.
+- **Subitems.** Con un territorio abierto —su campo de cúbits o una de sus páginas— el menú
+  sube arriba y despliega sus subitems; pulsar uno abre su página y, en el campo, señalarlo
+  enciende su cúbit. En la página, el actual va marcado.
 
 ## Menú en móvil
 

@@ -237,12 +237,15 @@
   }
 }
 
-/* Menú lateral en el tercer nivel: sube arriba, como el del diseño, y despliega los subitems
-   del territorio abierto con el actual marcado. En los otros niveles no cambia nada. */
+/* Menú lateral con un territorio abierto —su campo de cúbits o una de sus páginas—: sube
+   arriba, como el del diseño, y despliega los subitems del territorio, con el actual
+   marcado en la página. En la esfera se queda centrado. Hasta el 01/10/2026 esto era solo
+   en el tercer nivel; en el campo, desplegarlo con el menú centrado lo hacía saltar. */
 .rail {
   transition: top 0.5s var(--ease-out), transform 0.5s var(--ease-out);
 }
-.in-page .rail {
+.in-page .rail,
+.rail.has-selection {
   top: 48px;
   transform: none;
 }
@@ -252,8 +255,15 @@
   padding: 6px 0 12px 30px;
   border-bottom: 1px solid var(--rule);
 }
-.in-page .rail-subs.is-open {
+.rail-subs.is-open {
   display: flex;
+  animation: rail-subs-in 0.45s var(--ease-out) both;
+}
+@keyframes rail-subs-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 .rail-sub {
   padding: 7px 0;
@@ -275,6 +285,9 @@
   .rail,
   .rail-sub {
     transition: none;
+  }
+  .rail-subs.is-open {
+    animation: none;
   }
 }
 

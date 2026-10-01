@@ -2010,12 +2010,6 @@ body {
 .orbit-node[aria-pressed="true"] .node-name {
   display: flex;
 }
-.node-name svg {
-  width: 19px;
-  height: 19px;
-  color: var(--node-color);
-  filter: drop-shadow(0 0 4px var(--node-color));
-}
 .orbit-node:hover,
 .orbit-node:focus-visible {
   z-index: 7;
@@ -2481,17 +2475,24 @@ body {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
   transform: translate(var(--mx, 0px), calc(var(--my, 0px) + var(--mh, 0px) - 1px));
-  transition: transform 0.5s var(--ease-out), width 0.5s var(--ease-out), background 0.3s, box-shadow 0.3s;
+  transition: transform 0.5s var(--ease-out), width 0.5s var(--ease-out), background 0.3s, box-shadow 0.3s,
+    opacity 0.3s;
   pointer-events: none;
   z-index: 1;
+}
+/* En la esfera no hay territorio activo que marcar. */
+.rail:not(.has-selection) .rail-marker {
+  opacity: 0;
 }
 .rail-item {
   display: flex;
   align-items: center;
   gap: 14px;
   text-align: left;
-  /* Más aire entre filas ahora que son solo texto. */
-  padding: 17px 0;
+  /* Más aire entre filas. El hueco de la derecha es el que la fila cede al desplazarse hacia
+     dentro (abajo): así no cambia de ancho, ni el menú con ella, y la marca del activo, que
+     se mide al cambiar, no se queda corta con el nombre más largo. */
+  padding: 17px 12px 17px 0;
   border: 0;
   background: transparent;
   color: rgba(238, 240, 255, 0.82);
@@ -2499,7 +2500,7 @@ body {
   font-size: 16px;
   font-weight: var(--weight);
   letter-spacing: -0.01em;
-  transition: padding-left 0.4s var(--ease-out), color 0.4s var(--ease-out);
+  transition: padding 0.4s var(--ease-out), color 0.4s var(--ease-out);
 }
 .rail-item[data-rail] {
   border-bottom: 1px solid var(--rule);
@@ -2520,6 +2521,17 @@ body:not(.intro-active) .rail-item {
   animation: rail-in 0.6s var(--ease-out) backwards;
   animation-delay: calc(var(--i, 0) * 70ms);
 }
+/* Icono del territorio, en su color: el de su punto en la esfera (01/10/2026). */
+.rail-icon {
+  display: inline-flex;
+  flex: none;
+}
+.rail-icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--node-color);
+  filter: drop-shadow(0 0 4px var(--node-color));
+}
 /* El nombre se escala en vez de cambiar de cuerpo: el activo se ve más grande sin que el
    menú entero se recoloque a cada cambio. */
 .rail-name {
@@ -2533,6 +2545,7 @@ body:not(.intro-active) .rail-item {
 .rail-item:hover,
 .rail-item:focus-visible {
   padding-left: 12px;
+  padding-right: 0;
   color: var(--text);
   outline: none;
 }
@@ -2545,31 +2558,19 @@ body:not(.intro-active) .rail-item {
    color del acento. */
 .rail-item[data-rail].active {
   padding-left: 12px;
+  padding-right: 0;
   color: var(--text);
 }
 .rail-item[data-rail].active .rail-name {
   --scale: 1.08;
 }
-/* «Universo Quantum» es el primer nivel —la esfera— y los territorios cuelgan de él. Va como
-   una fila más del menú pero con más peso: el nombre algo mayor y su línea de abajo, que
-   hace de línea de arriba de la lista. Cuando se está en él, la marca se queda bajo su fila;
-   con un territorio abierto, es la vuelta. */
-.rail-home {
-  font-size: 19px;
-  letter-spacing: -0.015em;
-  color: var(--text);
-  border-bottom: 1px solid var(--rule);
-}
-.rail.has-selection .rail-home {
-  color: rgba(238, 240, 255, 0.82);
-}
-/* Los territorios, sangrados bajo el primer nivel: el sangrado basta para leer los dos
-   niveles. Iban unidos a él por una línea vertical de árbol, que se quitó (petición de
-   diseño) junto con los iconos. */
+/* Los territorios, con una línea arriba de la lista y otra bajo cada fila. Hasta el
+   01/10/2026 colgaban sangrados de «Universo Quantum», que hacía de primer nivel y ponía la
+   línea de arriba con la suya de abajo; se quitó del menú. */
 .rail-children {
   display: flex;
   flex-direction: column;
-  padding-left: 18px;
+  border-top: 1px solid var(--rule);
 }
 /* Señalar un territorio en el menú lo destaca en la escena, como el hover sobre el punto. */
 .orbit-node.is-hover:after {
@@ -2599,11 +2600,14 @@ body:not(.intro-active) .rail-item {
 .orbit-node[data-back="true"]:not(:hover):not(:focus-visible):not(.is-hover) {
   z-index: 2;
 }
-/* Con menú lateral (escritorio), los nombres de la esfera sobran: ya están en el menú
-   (30/09/2026). En el chip se quedan, y en móvil también, que no tiene menú a la vista. */
+/* Con menú lateral (escritorio), los nombres de la esfera solo aparecen al señalar su punto
+   —con el ratón, el teclado o pasando por su territorio en el menú—: siempre a la vista
+   sobraban, porque ya están en el menú (30/09/2026; al señalar, 01/10). En el chip se
+   quedan como estaban, y en móvil se ven siempre, que no tiene menú a la vista. */
 @media (min-width: 761px) {
-  .scene:not(.in-field) .orbit-node .node-name {
-    display: none;
+  .scene:not(.in-field) .orbit-node:not(:hover):not(:focus-visible):not(.is-hover) .node-name {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 @media (max-width: 760px) {
@@ -2848,11 +2852,6 @@ body:not(.intro-active) .rail-item {
   text-wrap: balance;
   padding: 10px 0;
   transition: transform 0.58s cubic-bezier(0.16, 1, 0.3, 1);
-}
-/* «Universo Quantum» es el primer nivel y su nombre es más largo: va algo menor, en una
-   línea. */
-.sheet-home .sheet-name {
-  font-size: clamp(20px, 5.8vw, 34px);
 }
 .sheet-go {
   font-size: 13px;
