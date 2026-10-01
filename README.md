@@ -417,6 +417,12 @@ apaga: cuenta de dónde vienes y a dónde vas. En la esfera no hay activo y la m
   «Universo» de las páginas, Escape o pulsando en vacío. En un kiosco táctil la vuelta
   visible es ahora solo el logo. También se quitó del menú de móvil, que lista solo los
   cinco territorios.
+- **Más legible** (01/10/2026, «está un poco soso»). Tras probar en la propia web siete
+  variantes (cadena, cristal, índice, tambor, medida, rodillo y capítulos, esta con los
+  conceptos cuánticos y un cursor cúbit), se eligió **medida** sin su onda ni su cifra:
+  nombres a 18 px casi blancos (antes 16 px al 82 %), iconos a 20 px, subitems a 15 px y
+  más claros, y con un territorio abierto los demás se apagan un punto (al 72 %) sin dejar
+  de leerse.
 - **Subitems.** Con un territorio abierto —su campo de cúbits o una de sus páginas— el menú
   sube arriba y despliega sus subitems; pulsar uno abre su página y, en el campo, señalarlo
   enciende su cúbit. En la página, el actual va marcado.

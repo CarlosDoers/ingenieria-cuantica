@@ -252,7 +252,7 @@
 .rail-subs {
   display: none;
   flex-direction: column;
-  padding: 6px 0 12px 30px;
+  padding: 6px 0 12px 32px;
   border-bottom: 1px solid var(--rule);
 }
 .rail-subs.is-open {
@@ -268,8 +268,8 @@
 .rail-sub {
   padding: 7px 0;
   text-align: left;
-  font-size: 14px;
-  color: rgba(238, 240, 255, 0.55);
+  font-size: 15px;
+  color: rgba(238, 240, 255, 0.74);
   transition: color 0.3s, transform 0.4s var(--ease-out);
 }
 .rail-sub:hover,
@@ -278,7 +278,7 @@
   transform: translateX(4px);
 }
 .rail-sub[aria-current] {
-  color: #8f9efb;
+  color: #a9b6ff;
 }
 @media (prefers-reduced-motion: reduce) {
   .page-view,
