@@ -2495,12 +2495,14 @@ body {
   padding: 17px 12px 17px 0;
   border: 0;
   background: transparent;
-  /* 18 px y casi blanco (antes 16 px al 82 %): más legible sobre la escena (01/10/2026). */
+  /* Casi blanco, en mayúsculas y a 20 px (01/10/2026; antes 16 px al 82 % y en minúsculas):
+     más legible sobre la escena. */
   color: rgba(238, 240, 255, 0.94);
   font: inherit;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: var(--weight);
-  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   transition: padding 0.4s var(--ease-out), color 0.4s var(--ease-out);
 }
 .rail-item[data-rail] {
@@ -2521,17 +2523,6 @@ body {
 body:not(.intro-active) .rail-item {
   animation: rail-in 0.6s var(--ease-out) backwards;
   animation-delay: calc(var(--i, 0) * 70ms);
-}
-/* Icono del territorio, en su color: el de su punto en la esfera (01/10/2026). */
-.rail-icon {
-  display: inline-flex;
-  flex: none;
-}
-.rail-icon svg {
-  width: 20px;
-  height: 20px;
-  color: var(--node-color);
-  filter: drop-shadow(0 0 4px var(--node-color));
 }
 /* El nombre se escala en vez de cambiar de cuerpo: el activo se ve más grande sin que el
    menú entero se recoloque a cada cambio. */

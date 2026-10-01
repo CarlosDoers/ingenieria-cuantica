@@ -175,14 +175,12 @@ rail.innerHTML =
   `<span class="rail-marker" aria-hidden="true"></span>` +
   // Solo los cinco territorios (01/10/2026): «Universo Quantum», el primer nivel, iba encima
   // como un item más y se quitó; a la esfera se vuelve con el logo, la miga «Universo» de las
-  // páginas, Escape o pulsando fuera. Cada territorio lleva delante el icono de su punto, en
-  // su color (también del 01/10: se quitaron de los nombres de la esfera y vinieron aquí).
+  // páginas, Escape o pulsando fuera. Solo texto, en mayúsculas (01/10/2026: los iconos que
+  // llevaban delante se quitaron).
   `<div class="rail-children">` +
   DATA.map(
     (d, i) =>
-      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${d.color}"><span class="rail-icon">${icon(
-        d.icon
-      )}</span><span class="rail-name">${d.name}</span></button>` +
+      `<button class="rail-item" type="button" data-rail="${i}" style="--i:${i + 1};--node-color:${d.color}"><span class="rail-name">${d.name}</span></button>` +
       // Sus subitems: se despliegan bajo el territorio abierto, en su campo y en sus páginas.
       `<div class="rail-subs" data-subs="${i}">${d.tabs
         .map((t, j) => `<button class="rail-sub" type="button" data-sub="${j}">${t.name}</button>`)

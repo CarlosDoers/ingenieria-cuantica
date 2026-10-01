@@ -408,9 +408,9 @@ cambia de cuerpo, así el menú no se recoloca—; y la marca del activo es **la
 fila, encendida, que se desliza** de una fila a otra, en vez de un borde que se enciende y se
 apaga: cuenta de dónde vienes y a dónde vas. En la esfera no hay activo y la marca se oculta.
 
-- **Iconos.** Cada territorio lleva delante el icono de su punto, en su color. Se quitaron
-  el 24/09/2026 (solo texto, a petición de diseño) y volvieron el 01/10/2026, cuando se
-  quitaron de los nombres de la esfera.
+- **Sin iconos.** Se quitaron el 24/09/2026 (solo texto, a petición de diseño), volvieron
+  el 01/10/2026 al quitarlos de los nombres de la esfera y se quitaron otra vez ese mismo
+  día: el menú es solo texto.
 - **Sin «Universo Quantum»** (01/10/2026). Encima de los territorios iba el primer nivel
   —la esfera— como un item más, con los territorios sangrados debajo, y era la vuelta
   visible a la esfera. Se quitó: a la esfera se vuelve con el logo de la cabecera, la miga
@@ -422,7 +422,8 @@ apaga: cuenta de dónde vienes y a dónde vas. En la esfera no hay activo y la m
   conceptos cuánticos y un cursor cúbit), se eligió **medida** sin su onda ni su cifra:
   nombres a 18 px casi blancos (antes 16 px al 82 %), iconos a 20 px, subitems a 15 px y
   más claros, y con un territorio abierto los demás se apagan un punto (al 72 %) sin dejar
-  de leerse.
+  de leerse. Después, los territorios pasaron a **mayúsculas a 20 px**, sin iconos, y los
+  subitems a un sangrado de 18 px (era de 32, para alinearlos con el nombre tras el icono).
 - **Subitems.** Con un territorio abierto —su campo de cúbits o una de sus páginas— el menú
   sube arriba y despliega sus subitems; pulsar uno abre su página y, en el campo, señalarlo
   enciende su cúbit. En la página, el actual va marcado.

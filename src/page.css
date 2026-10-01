@@ -252,7 +252,7 @@
 .rail-subs {
   display: none;
   flex-direction: column;
-  padding: 6px 0 12px 32px;
+  padding: 6px 0 12px 18px;
   border-bottom: 1px solid var(--rule);
 }
 .rail-subs.is-open {

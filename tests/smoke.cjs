@@ -234,9 +234,8 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert.equal(w.eval("lightCenter()"), null);
   assert.equal(d.querySelector(".rail-item.active"), null, "On the sphere no territory is marked");
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
-  // Iconos solo en los territorios, uno por fila, en el color de su punto (01/10/2026; antes
-  // el menú era solo texto).
-  assert.equal(d.querySelectorAll("#rail svg").length, 5, "Only the territories carry an icon");
+  // Solo texto, sin iconos delante de los territorios (01/10/2026).
+  assert.equal(d.querySelectorAll("#rail svg").length, 0, "The side menu is text only");
   assert.equal(
     d.querySelectorAll(".rail-children .rail-item[data-rail]").length,
     5,
