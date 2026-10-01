@@ -485,6 +485,24 @@ holdButton.addEventListener("keyup", (e) => {
 });
 holdButton.addEventListener("blur", cancelHold);
 /**
+ * La barra espaciadora carga desde cualquier sitio de la entrada, como dice su indicación,
+ * no solo con el botón enfocado: al cargar la página el foco no está en él. Si está en otro
+ * control (el del sonido, el enlace para saltar), el espacio sigue siendo suyo.
+ */
+const otherControl = (t) =>
+  t !== holdButton && t instanceof Element && !!t.closest("button, a[href], input, select, textarea, [contenteditable]");
+window.addEventListener("keydown", (e) => {
+  if (e.code !== "Space" || !introState.active || e.target === holdButton || otherControl(e.target)) return;
+  e.preventDefault();
+  if (!e.repeat) beginHold();
+});
+window.addEventListener("keyup", (e) => {
+  if (e.code !== "Space" || e.target === holdButton || otherControl(e.target)) return;
+  cancelHold();
+});
+// Cambiar de ventana a mitad de la carga la suelta: el keyup se perdería.
+window.addEventListener("blur", cancelHold);
+/**
  * Mantener pulsado vale en cualquier sitio de la entrada, no solo en el botón: la nube
  * entera es lo que se toca. El botón sigue ahí para el teclado y como indicación.
  */

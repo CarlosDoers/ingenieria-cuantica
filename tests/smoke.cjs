@@ -124,6 +124,17 @@ function check(reducedMotion = false, canvasAvailable = true) {
   w.eval("cancelHold()");
   assert.equal(w.eval("introState.progress"), 0);
   assert(w.eval("introState.active"));
+  // La barra espaciadora carga desde cualquier sitio de la entrada, no solo con el botón
+  // enfocado (al cargar, el foco no está en él); con el foco en otro control, es de ese.
+  const space = (type, target = d.body) =>
+    target.dispatchEvent(new w.KeyboardEvent(type, { key: " ", code: "Space", bubbles: true, cancelable: true }));
+  space("keydown");
+  assert(w.eval("introState.holding"), "Holding the space bar charges without focusing the button");
+  space("keyup");
+  assert(!w.eval("introState.holding"), "…and releasing it cancels");
+  space("keydown", d.querySelector("#intro-sound"));
+  assert(!w.eval("introState.holding"), "Space on another control stays with that control");
+  space("keyup", d.querySelector("#intro-sound"));
   w.eval("beginHold();frameBirth(introState.started+1850)");
   if (!reducedMotion) {
     assert(w.eval("introState.bursting"));
