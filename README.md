@@ -424,6 +424,26 @@ apaga: cuenta de dónde vienes y a dónde vas. En la esfera no hay activo y la m
   más claros, y con un territorio abierto los demás se apagan un punto (al 72 %) sin dejar
   de leerse. Después, los territorios pasaron a **mayúsculas a 20 px**, sin iconos, y los
   subitems a un sangrado de 18 px (era de 32, para alinearlos con el nombre tras el icono).
+- **Menú de la diseñadora: el principal** desde el 02/10/2026 (`src/menu-diseno.js` y
+  `.css`). El anterior —en filas, con su línea debajo— queda como alternativa con
+  `?menu=clasico`. Abajo a la izquierda, como en el diseño, con los nombres y el botón en el
+  margen de los textos de debajo (32 px, como el logo): anclado por abajo, crece hacia arriba al
+  desplegar los subitems. Debajo, el botón «Menú» del diseño (círculo con su punto y la
+  etiqueta en Hack) **pliega y despliega el menú**; empieza desplegado. Al plegar, los
+  nombres bajan hacia el botón y se esconden uno tras otro; plegado, el punto late despacio.
+  Solo en escritorio: en móvil sigue el botón que abre la navegación a pantalla completa.
+  Los corchetes se
+  centran en la altura real de las mayúsculas (medida con la fuente) y no en la caja de la
+  línea: Area reserva mucho sitio encima y el texto quedaba bajo. Con las medidas de su
+  Figma (nodo 115:124): nombres en mayúsculas a 24 px muy
+  juntos, sin iconos ni líneas, con «Laboratorio» como nombre corto (`short` en
+  `content.js`); al señalar uno, entre corchetes finos, y los demás al 60 % y algo
+  desenfocados; el abierto, en negrita y del color con que se ven las esferas de su
+  territorio en el campo (medido en pantalla; en el diseño era lila), entre corchetes, con sus
+  subitems debajo a 14,5 px. Transiciones añadidas: los corchetes son una sola pieza que se
+  desliza con un leve rebote al nombre señalado y vuelve al abierto; al abrir un territorio
+  sus letras se barajan y se resuelven; los subitems abren su hueco sin saltos y entran
+  escalonados; tras la intro, los nombres suben desde detrás de una máscara.
 - **Subitems.** Con un territorio abierto —su campo de cúbits o una de sus páginas— el menú
   sube arriba y despliega sus subitems; pulsar uno abre su página y, en el campo, señalarlo
   enciende su cúbit. En la página, el actual va marcado.
@@ -506,22 +526,31 @@ npm run package    # build + ZIP para Netlify
 
 ## Tipografía
 
-Unificada el 25/09/2026 (petición del cliente). **Todo sale de `src/fonts.css`**: el resto
-del CSS y el lienzo de la esfera usan `--font`, `--mono` y `--weight`, nunca un nombre de
+Unificada el 25/09/2026 (petición del cliente) y cambiada a **Area** y **Hack** el
+02/10/2026 (de la diseñadora). **Todo sale de `src/fonts.css`**: el resto del CSS y el lienzo
+de la esfera usan `--font`, `--font-strong`, `--mono` y `--weight`, nunca un nombre de
 fuente.
 
-- **Inter Light (300)** en todo el sitio: textos, títulos, menús y las etiquetas de los ejes
-  de la esfera («z · |0⟩», antes en Georgia). Los pesos 400, 500 y 600 que había repartidos,
-  y el 100 de los nombres del menú de móvil, pasaron todos a `--weight`.
-- **JetBrains Mono (400)** en los rótulos pequeños en mayúsculas: los del menú de móvil
-  («// Navegación», el pie, «Menú»/«Cerrar») y, por ser el mismo tipo de texto, el rótulo
-  del circuito del chip y el subtítulo de la intro.
+- **Area Light (300)** en todo el sitio: textos, títulos, menús y las etiquetas de los ejes
+  de la esfera (antes Inter Light). En Adobe Fonts el Light es una familia aparte
+  (`area-normal-light`) y el Regular y el Bold, otra (`area-normal`): lo que pide 400 o más
+  —negritas, subtítulos `h3`, la indicación de la entrada— usa `--font-strong`, porque con
+  la Light el navegador fingiría la negrita.
+- **Hack (400)** en los rótulos pequeños en mayúsculas (antes JetBrains Mono): los del menú
+  de móvil («// Navegación», el pie, «Menú»/«Cerrar»), el rótulo del circuito del chip y el
+  subtítulo de la intro.
+- **Se cargan del kit de Adobe Fonts de la diseñadora** (`fsm2ktl`, enlazado en
+  `index.html`): la licencia de Adobe no permite alojarlas en el proyecto. Es lo único que
+  la web carga de fuera y **necesita red**; sin ella (un kiosco sin conexión) la web sigue
+  con Inter y JetBrains Mono, que se quedan dentro del proyecto con Fontsource como reserva.
+  El kit va ligado a la cuenta de Adobe de quien lo creó: si esa cuenta se da de baja, las
+  fuentes dejan de servirse.
+- El kit trae Area Normal Light, Regular y Bold (y Extended), pero **no el Thin ni el
+  SemiBold** que la diseñadora usa en su menú: hasta que los añada, el Thin se ve con el
+  Light y el SemiBold, con el Bold.
 - El aviso de arriba a la izquierda de la escena («Explora las conexiones» / «Explorando /
   territorio») se quitó el 25/09/2026 a petición del cliente: el menú lateral ya dice dónde
   se está.
-- Se sirven desde el propio proyecto con Fontsource (`@fontsource-variable/inter` y
-  `@fontsource-variable/jetbrains-mono`), no desde Google Fonts: funcionan sin red, no hay
-  petición a Google al abrir la página y el navegador solo baja los alfabetos que usa.
 
 **Logos de socios y textos de la entrada** (25/09/2026, del Figma «Universo Quantum», nodo
 1:548 de diseño). Bajo «Mantén pulsado para comenzar» va la fila de socios —EHU, Tecnalia,
@@ -530,7 +559,7 @@ reduce en bloque (`zoom: 0.72`) para caber. Los archivos están en `src/assets/p
 salen tal cual del Figma: EHU y GAIA son sus vectores; Tecnalia, su exportación, a la que
 solo se le quitaron los dos fondos y la opacidad que Figma mete del marco del diseño (se
 veían como un recuadro oscuro sobre las partículas); Euskampus es una imagen en el Figma y
-va en PNG a 3×. Los dos textos siguen el diseño: la indicación en Inter **Regular** 16 px
+va en PNG a 3×. Los dos textos siguen el diseño: la indicación en **Regular** 16 px
 (la única excepción al Light del sitio) y la ayuda en Light 14 px, los dos en #cac6da, a
 12 px, y la ayuda sin punto final.
 
@@ -542,9 +571,9 @@ diseño (52 px en pantallas estrechas); la imagen trae aire alrededor de la Q, y
 márgenes negativos lo recogen para que la Q quede a ras del contenido y a unos 10 px del
 nombre, como en el Figma.
 
-**Para probar otra fuente** (p. ej. Manrope en lugar de Inter): `npm install
-@fontsource-variable/manrope`, cambiar la importación de `fonts.css` y poner `--font-main:
-"Manrope Variable"`. Los pasos están también en el comentario de `fonts.css`.
+**Para probar otra fuente**: añadirla al kit de Adobe Fonts (o instalarla con Fontsource:
+`npm install @fontsource-variable/<nombre>` e importarla en `fonts.css`) y cambiar los nombres
+de `--font-main`, `--font-main-strong` y `--font-mono` en `fonts.css`.
 
 ## Tecnologías
 
@@ -555,7 +584,7 @@ nombre, como en el Figma.
 - Web Audio API para sintetizar efectos y música ambiental mediante osciladores, filtros y envolventes.
 - Pointer Events, requestAnimationFrame, ResizeObserver y Fullscreen API.
 
-No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución, fuentes remotas ni archivos de música. Lo que se publica son un HTML, un CSS, un JS, los archivos de las dos tipografías, que Vite copia al build desde Fontsource, y las imágenes y vídeos de `public/media/`. Desde el 28/09/2026 el JS lleva dentro dos librerías para las páginas de tercer nivel: `marked` (Markdown a HTML) y DOMPurify (saneado). Vite, jsdom y Fontsource son solo herramientas de desarrollo.
+No utiliza Three.js, Blender, React, backend, base de datos, servicios de IA en ejecución ni archivos de música. Lo único que carga de fuera es el kit de tipografías de Adobe Fonts (Area y Hack, desde el 02/10/2026; ver «Tipografía»). Lo que se publica son un HTML, un CSS, un JS, los archivos de las tipografías de reserva (Inter y JetBrains Mono), que Vite copia al build desde Fontsource, y las imágenes y vídeos de `public/media/`. Desde el 28/09/2026 el JS lleva dentro dos librerías para las páginas de tercer nivel: `marked` (Markdown a HTML) y DOMPurify (saneado). Vite, jsdom y Fontsource son solo herramientas de desarrollo.
 
 ## Dónde editar
 

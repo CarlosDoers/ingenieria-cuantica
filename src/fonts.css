@@ -1,30 +1,49 @@
 /*
  * Tipografías del sitio. **Todo sale de aquí**: el resto del CSS y el lienzo de la esfera
- * usan `--font`, `--mono` y `--weight`, nunca un nombre de fuente.
+ * usan `--font`, `--font-strong`, `--mono` y `--weight`, nunca un nombre de fuente.
  *
- * Se sirven desde el propio proyecto (Fontsource), no desde Google Fonts: funcionan sin
- * red, no hay petición a Google al abrir la página y cargan con el resto.
+ * Desde el 02/10/2026 son **Area** (texto) y **Hack** (rótulos mono), de la diseñadora. Las
+ * sirve su kit de Adobe Fonts (`fsm2ktl`), enlazado en index.html: la licencia de Adobe no
+ * permite alojarlas en el proyecto, así que **necesitan red**. Sin ella —un kiosco sin
+ * conexión—, la web sigue con Inter y JetBrains Mono, que sí van dentro del proyecto
+ * (Fontsource) y quedan como reserva en las pilas de abajo.
  *
- * Para probar otra fuente, p. ej. Manrope en lugar de Inter:
- *   1. npm install @fontsource-variable/manrope
- *   2. cambiar la importación de abajo por  @import "@fontsource-variable/manrope";
- *   3. cambiar  --font-main  por  "Manrope Variable"
- * El nombre exacto de cada fuente está en fontsource.org. Si la fuente no tiene versión
- * variable, el paquete es @fontsource/<nombre> y el nombre va sin «Variable».
+ * Area en Adobe Fonts viene partida en familias por peso: `area-normal-light` solo tiene el
+ * Light (300) y `area-normal`, el Regular (400) y el Bold (700). Por eso hay dos pilas:
+ * `--font`, Light, para el texto general, y `--font-strong`, para lo que pide 400 o más
+ * (negritas, subtítulos). Si lo que pide 400 usara la Light, el navegador fingiría la
+ * negrita engordándola. El kit no trae el Thin ni el SemiBold que usa la diseñadora en el
+ * menú: el Thin se ve con el Light y el SemiBold, con el Bold, hasta que se añadan al kit.
+ *
+ * Para cambiar de fuente: añadirla al kit de Adobe (o instalarla con Fontsource) y cambiar
+ * los nombres de abajo.
  */
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
 :root {
-  /* Texto de todo el sitio. */
-  --font-main: "Inter Variable";
+  /* Texto de todo el sitio: Area Light. */
+  --font-main: "area-normal-light";
+  /* Area Regular y Bold, para lo que pide 400 o más. */
+  --font-main-strong: "area-normal";
   /* Rótulos pequeños en mayúsculas: el menú de móvil y los rótulos técnicos. */
-  --font-mono: "JetBrains Mono Variable";
+  --font-mono: "hack";
   /* Peso del texto de todo el sitio: 300 es Light. */
   --weight: 300;
   /* Peso de los rótulos monoespaciados: a 9-11 px, el Light se quedaba sin cuerpo. */
   --mono-weight: 400;
 
-  --font: var(--font-main), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Reserva sin red: Inter y JetBrains Mono, que van dentro del proyecto. */
+  --font: var(--font-main), var(--font-main-strong), "Inter Variable", system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-strong: var(--font-main-strong), "Inter Variable", system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --mono: var(--font-mono), "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+}
+
+/* Las negritas, con el Area que las tiene. */
+b,
+strong {
+  font-family: var(--font-strong);
 }

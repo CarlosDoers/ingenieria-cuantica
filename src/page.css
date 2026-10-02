@@ -96,7 +96,7 @@
   letter-spacing:-.035em;
   text-transform:uppercase;
   font-weight:200;}
-.page-view h3{font-size:var(--fs-md);font-weight:500;letter-spacing:-.01em;line-height:1.35}
+.page-view h3{font-size:var(--fs-md);font-weight:500;font-family:var(--font-strong);letter-spacing:-.01em;line-height:1.35}
 .page-view p{margin:0;max-width:65ch}
 .page-view .lead{font-size:var(--fs-lg);line-height:1.55;color:var(--q-text-2);font-weight:300}
 .page-view .ket{font-family:var(--font);font-style:normal;letter-spacing:0}
@@ -510,6 +510,7 @@
 }
 .page-view .md-doc h4 {
   font-size: var(--fs-lg);
+  font-family: var(--font-strong);
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--q-text-1);
@@ -541,6 +542,7 @@
   margin: 0;
 }
 .page-view .hw-row dt {
+  font-family: var(--font-strong);
   font-weight: 400;
   color: var(--q-text-1);
   letter-spacing: -0.01em;

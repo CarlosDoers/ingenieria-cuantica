@@ -1,0 +1,371 @@
+/*
+ * Menú lateral de la diseñadora, el principal desde el 02/10/2026 (qué hace cada estado y
+ * cada transición, en menu-diseno.js). Medidas del Figma «Universo Quantum», nodo 115:124.
+ * Con `?menu=clasico` no se aplica nada de esto y queda el menú anterior (styles.css).
+ *
+ * En el diseño los nombres van en Area Normal Thin y el abierto en SemiBold. El kit de Adobe
+ * Fonts aún no trae esos cortes: el Thin se ve con el Light y el SemiBold, con el Bold.
+ */
+
+/* ── Reposo: mayúsculas muy juntas, sin iconos, líneas ni marca ─────────────────────────── */
+.rail[data-variant="diseno"] {
+  --dz-text: #c6cce6;
+  --dz-accent: #b4a0e6;
+  min-width: 0;
+}
+/* Abajo a la izquierda, como en el diseño (02/10/2026), en todos los niveles: anclado por
+   abajo, al abrir un territorio sus subitems lo hacen crecer hacia arriba. Debajo va el
+   botón «Menú». Los nombres y el círculo del botón, en el margen de los textos de debajo
+   (el rótulo del chip, «Donostia / San Sebastián») y del logo; el corchete cuelga fuera de
+   esa línea. El bloque queda separado del rótulo del chip. Solo en escritorio: en móvil el
+   menú lateral no se ve. */
+@media (min-width: 761px) {
+  .rail[data-variant="diseno"],
+  .rail[data-variant="diseno"].has-selection,
+  .in-page .rail[data-variant="diseno"] {
+    top: auto;
+    bottom: 164px;
+    transform: none;
+  }
+}
+/* La marca de línea base de cada texto: no ocupa nada; solo sirve para medir. */
+.dz-base {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: baseline;
+}
+.rail[data-variant="diseno"] .rail-children {
+  position: relative;
+  border-top: 0;
+}
+.rail[data-variant="diseno"] .rail-icon,
+.rail[data-variant="diseno"] .rail-marker {
+  display: none;
+}
+/* 24 px, interlineado 1,02 y −1,09 px de tracking; una fila cada 31 px. */
+.rail[data-variant="diseno"] .rail-item[data-rail],
+.rail[data-variant="diseno"] .rail-item[data-rail]:hover,
+.rail[data-variant="diseno"] .rail-item[data-rail]:focus-visible,
+.rail[data-variant="diseno"] .rail-item[data-rail].active {
+  padding: 3px 0;
+  border-bottom: 0;
+  font-size: 24px;
+  line-height: 1.02;
+  font-weight: var(--weight);
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  color: var(--dz-text);
+  outline: none;
+  /* Las transiciones, más abajo, con las de plegar y desplegar. */
+}
+.rail[data-variant="diseno"] .rail-item:focus-visible .rail-name {
+  text-decoration: none;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail] .rail-name {
+  --scale: 1;
+}
+/* Entrada al acabar la intro: cada nombre sube desde detrás de una máscara, escalonado. */
+@keyframes dz-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(70%);
+  }
+  to {
+    clip-path: inset(0 0 -20% 0);
+    transform: none;
+  }
+}
+body:not(.intro-active) .rail[data-variant="diseno"] .rail-item {
+  animation: dz-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ── Señalado y abierto: los demás, al 60 % y algo desenfocados ─────────────────────────── */
+.rail[data-variant="diseno"] .rail-children:has(.rail-item[data-rail]:hover) .rail-item[data-rail]:not(:hover):not(.active),
+.rail[data-variant="diseno"].has-selection .rail-item[data-rail]:not(.active):not(:hover):not(:focus-visible) {
+  opacity: 0.6;
+  filter: blur(0.9px);
+}
+.rail[data-variant="diseno"] .rail-item[data-rail]:hover {
+  color: #fff;
+}
+/* El abierto: en negrita (SemiBold en el diseño) y del color con que se ven las esferas de
+   su territorio en el campo de cúbits (02/10/2026; en el diseño, lila para todos). Son los
+   tonos **medidos en pantalla** sobre las esferas, no el color de `content.js`: el brillo y
+   el relieve del chip los aclaran y los desplazan mucho (Casos Industriales se define
+   #cf8cff y se ve #ffbcff). Si cambia el aspecto del chip, hay que volver a medirlos. */
+.rail[data-variant="diseno"] .rail-item[data-rail].active {
+  color: var(--dz-accent);
+  font-family: var(--font-strong);
+  font-weight: 600;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail="0"].active {
+  color: #fbc7ff;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail="1"].active {
+  color: #a1c3ee;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail="2"].active {
+  color: #d4ffff;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail="3"].active {
+  color: #ffbcff;
+}
+.rail[data-variant="diseno"] .rail-item[data-rail="4"].active {
+  color: #b5ffff;
+}
+
+/* ── Los corchetes: una sola pieza que se desliza (la mueve menu-diseno.js) ─────────────────
+   Cada corchete, un trazo de 1,39 px con remates de 3,5 px, como el vector del diseño. Al
+   aparecer se abren desde dentro del texto hacia fuera; al irse, se cierran. */
+.dz-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 1;
+  color: #fff;
+  will-change: transform, width, height;
+}
+.dz-frame i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border: 1.4px solid currentColor;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.25);
+}
+.dz-frame .dz-l {
+  left: 0;
+  border-right: 0;
+  transform: translateX(12px) scaleY(0.3);
+}
+.dz-frame .dz-r {
+  right: 0;
+  border-left: 0;
+  transform: translateX(-12px) scaleY(0.3);
+}
+.dz-frame.is-on i {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Subitems: 14,5 px en mayúsculas, sangrados 35 px y separados 14 px ─────────────────────
+   El hueco se abre poco a poco (filas de rejilla de 0fr a 1fr), sin saltos, y los subitems
+   entran uno tras otro subiendo. Al cerrarse, salen todos a la vez y deprisa. */
+.rail[data-variant="diseno"] .rail-subs {
+  display: grid;
+  grid-template-rows: 0fr;
+  padding: 0;
+  border-bottom: 0;
+  /* Cerrados, fuera también para el lector de pantalla y el tabulador; tras su salida. */
+  visibility: hidden;
+  transition: grid-template-rows 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.5s;
+}
+.rail[data-variant="diseno"] .rail-subs.is-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  animation: none;
+  transition: grid-template-rows 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s;
+}
+.rail[data-variant="diseno"] .dz-subs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-height: 0;
+  overflow: hidden;
+  /* Hueco a la izquierda para el corchete del subitem abierto, que si no se recorta. */
+  padding-left: 35px;
+}
+.rail[data-variant="diseno"] .rail-subs.is-open .dz-subs {
+  padding-top: 10px;
+  padding-bottom: 16px;
+}
+.rail[data-variant="diseno"] .rail-sub {
+  position: relative;
+  padding: 3px 0;
+  font-size: 14.5px;
+  font-weight: var(--weight);
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  text-transform: uppercase;
+  color: var(--dz-text);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s, color 0.3s;
+}
+.rail[data-variant="diseno"] .rail-subs.is-open .rail-sub {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.45s, transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.3s;
+  transition-delay: calc(140ms + var(--j, 0) * 55ms), calc(140ms + var(--j, 0) * 55ms), 0s;
+}
+.rail[data-variant="diseno"] .rail-subs.is-open .rail-sub:hover,
+.rail[data-variant="diseno"] .rail-subs.is-open .rail-sub:focus-visible {
+  color: #fff;
+  transform: translateX(4px);
+  transition-delay: 0s;
+}
+/* El subitem abierto: en lila, entre corchetes pequeños, como su territorio. */
+.rail[data-variant="diseno"] .rail-sub[aria-current] {
+  color: var(--dz-accent);
+}
+/* Centrados en las mayúsculas, como los grandes (las medidas las pone menu-diseno.js). */
+.rail[data-variant="diseno"] .rail-sub::before,
+.rail[data-variant="diseno"] .rail-sub::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--dz-sub-top, 3px) - var(--dz-sub-h, 10px) * 0.3);
+  height: calc(var(--dz-sub-h, 10px) * 1.6);
+  width: 3px;
+  border: 1px solid currentColor;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1.25);
+}
+.rail[data-variant="diseno"] .rail-sub::before {
+  left: -7px;
+  border-right: 0;
+  transform: translateX(6px);
+}
+.rail[data-variant="diseno"] .rail-sub::after {
+  right: -7px;
+  border-left: 0;
+  transform: translateX(-6px);
+}
+.rail[data-variant="diseno"] .rail-sub[aria-current]::before,
+.rail[data-variant="diseno"] .rail-sub[aria-current]::after {
+  opacity: 0.9;
+  transform: none;
+}
+
+/* ── Botón «Menú»: pliega y despliega el menú (menu-diseno.js) ─────────────────────────────
+   Como en el diseño: un círculo de 46 px con un punto de luz y la etiqueta en Hack a su
+   derecha, bajo el menú y alineado con sus nombres. Solo en escritorio: en móvil está el
+   botón de siempre, que abre la navegación a pantalla completa. */
+.dz-fab {
+  display: none;
+}
+@media (min-width: 761px) {
+  .dz-fab {
+    position: absolute;
+    left: 0;
+    bottom: 94px;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .in-page .dz-fab {
+    z-index: 8;
+  }
+}
+.dz-fab-orb {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(238, 240, 255, 0.72);
+  border-radius: 50%;
+  background: rgba(7, 8, 15, 0.7);
+  -webkit-backdrop-filter: blur(3.5px);
+  backdrop-filter: blur(3.5px);
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.4s cubic-bezier(0.2, 0.9, 0.25, 1.25);
+}
+.dz-fab-core {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f2f0ff;
+  box-shadow: 0 0 10px rgba(238, 240, 255, 0.45), 0 0 18px rgba(137, 181, 255, 0.4);
+  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.25), box-shadow 0.3s;
+}
+.dz-fab-label {
+  font-family: var(--mono);
+  font-weight: var(--mono-weight);
+  font-size: 9.8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #bdbbca;
+  transition: color 0.25s;
+}
+.dz-fab:hover .dz-fab-orb,
+.dz-fab:focus-visible .dz-fab-orb {
+  border-color: rgba(238, 240, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(137, 181, 255, 0.2), 0 0 26px rgba(137, 181, 255, 0.22);
+}
+.dz-fab:hover .dz-fab-label,
+.dz-fab:focus-visible .dz-fab-label {
+  color: #fff;
+}
+.dz-fab:focus-visible {
+  outline: none;
+}
+.dz-fab:focus-visible .dz-fab-orb {
+  outline: 1px solid rgba(238, 240, 255, 0.9);
+  outline-offset: 5px;
+}
+.dz-fab:active .dz-fab-orb {
+  transform: scale(0.94);
+}
+/* Plegado, el punto se encoge un poco y late despacio: el menú está ahí, recogido. */
+.dz-fab.is-collapsed .dz-fab-core {
+  transform: scale(0.75);
+  animation: dz-fab-pulse 2.4s ease-in-out infinite;
+}
+@keyframes dz-fab-pulse {
+  50% {
+    box-shadow: 0 0 14px rgba(238, 240, 255, 0.7), 0 0 26px rgba(137, 181, 255, 0.6);
+  }
+}
+
+/* Plegar y desplegar: los nombres bajan hacia el botón y se esconden tras una máscara,
+   uno tras otro (primero el de arriba); al desplegar vuelven a salir, primero el de abajo,
+   el más cercano al botón. Usa `translate` y `clip-path`, que no comparte con nada más. */
+.rail[data-variant="diseno"] .rail-item[data-rail] {
+  transition: opacity 0.35s var(--ease-out), filter 0.35s var(--ease-out), color 0.35s var(--ease-out),
+    translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) calc((6 - var(--i, 1)) * 45ms),
+    clip-path 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) calc((6 - var(--i, 1)) * 45ms);
+}
+.rail[data-variant="diseno"].is-collapsed .rail-item[data-rail] {
+  translate: 0 60%;
+  clip-path: inset(0 0 100% 0);
+  transition: opacity 0.35s var(--ease-out), filter 0.35s var(--ease-out), color 0.35s var(--ease-out),
+    translate 0.4s cubic-bezier(0.6, 0, 0.8, 0.2) calc((var(--i, 1) - 1) * 40ms),
+    clip-path 0.4s cubic-bezier(0.6, 0, 0.8, 0.2) calc((var(--i, 1) - 1) * 40ms);
+}
+.rail[data-variant="diseno"] .rail-children {
+  transition: visibility 0s;
+}
+.rail[data-variant="diseno"].is-collapsed .rail-children {
+  /* Plegado, fuera también para el lector de pantalla y el tabulador, tras la animación. */
+  visibility: hidden;
+  transition: visibility 0s 0.6s;
+}
+.rail[data-variant="diseno"] .dz-frame,
+.rail[data-variant="diseno"] .rail-subs .dz-subs {
+  transition: opacity 0.3s;
+}
+.rail[data-variant="diseno"].is-collapsed .dz-frame,
+.rail[data-variant="diseno"].is-collapsed .rail-subs .dz-subs {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dz-fab-core {
+    animation: none !important;
+  }
+  .rail[data-variant="diseno"] .rail-item,
+  .rail[data-variant="diseno"] .rail-sub,
+  .rail[data-variant="diseno"] .rail-subs,
+  .dz-frame i {
+    animation: none !important;
+    transition: none !important;
+  }
+}

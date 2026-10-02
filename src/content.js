@@ -138,6 +138,8 @@ export const DATA = [
   {
     id: "laboratorio",
     name: "Del laboratorio a la Industria",
+    // Nombre corto para el menú lateral de la diseñadora.
+    short: "Laboratorio",
     verb: "De la idea al experimento",
     icon: "transfer",
     color: "#62ccff",

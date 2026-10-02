@@ -16,6 +16,7 @@ import {
 import { positionCard } from './card.js';
 import { closePage, openPage, pageState, setPageHooks } from './page.js';
 import { sound } from './audio.js';
+import { MENU_DISENO, menuDiseno } from './menu-diseno.js';
 
 /**
  * Pie de la escena. En el chip las indicaciones de la esfera ya no valen —ahí se arrastra
@@ -187,11 +188,14 @@ rail.innerHTML =
         .join("")}</div>`
   ).join("") +
   `</div>`;
+// El menú de la diseñadora (menu-diseno.js); con `?menu=clasico`, el anterior.
+const variant = MENU_DISENO ? menuDiseno(rail) : null;
 $$(".rail-item[data-rail]").forEach((b) => {
   const i = Number(b.dataset.rail),
     mark = (on) => {
       nodeEls[i].classList.toggle("is-hover", on);
       setFieldPreview(on ? i : -1);
+      variant?.hover(on ? i : -1);
     };
   b.addEventListener("click", () => {
     // Pulsar el territorio que ya está abierto recoloca la cámara si se había girado; desde
@@ -237,6 +241,7 @@ function syncRail() {
     } else b.removeAttribute("aria-current");
   });
   rail.classList.toggle("has-selection", selected >= 0);
+  variant?.sync(selected);
   // Subitems del territorio abierto, desplegados en su campo de cúbits y en sus páginas, con
   // la actual marcada en la página (01/10/2026; antes, solo en la página).
   const open = pageState.open ? pageState.territory : selected;

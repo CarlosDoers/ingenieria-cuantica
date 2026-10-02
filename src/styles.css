@@ -2987,6 +2987,7 @@ body:not(.intro-active) .rail-item {
 #gateway.has-matter .gateway-caption {
   margin-bottom: 12px;
   font-size: 16px;
+  font-family: var(--font-strong);
   font-weight: 400;
   letter-spacing: -0.02em;
   text-transform: uppercase;

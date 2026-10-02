@@ -12,9 +12,10 @@ const entry = fs.readFileSync(path.join(dist, "index.html"), "utf8");
 const local = (href) => path.join(dist, href.replace(/^\//, ""));
 let bundle = "";
 const html = entry
-  .replace(
-    /<link rel="stylesheet"[^>]*href="([^"]+)"\s*\/?>/g,
-    (_, file) => "<style>" + fs.readFileSync(local(file), "utf8") + "</style>"
+  // Las hojas del build se inlinean; la del kit de Adobe Fonts (fuera del build) se deja tal
+  // cual: jsdom no la descarga.
+  .replace(/<link rel="stylesheet"[^>]*href="([^"]+)"\s*\/?>/g, (tag, file) =>
+    /^https?:/.test(file) ? tag : "<style>" + fs.readFileSync(local(file), "utf8") + "</style>"
   )
   // Vite sube el script al `<head>` porque como módulo va diferido. Inlineado como
   // clásico se ejecutaría antes de que exista el DOM, así que se saca de ahí y se pone
@@ -236,6 +237,19 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert(!d.querySelector("#rail").classList.contains("has-selection"));
   // Solo texto, sin iconos delante de los territorios (01/10/2026).
   assert.equal(d.querySelectorAll("#rail svg").length, 0, "The side menu is text only");
+  // El menú de la diseñadora es el principal (02/10/2026): nombre corto para el laboratorio
+  // (el completo, para el lector de pantalla) y el botón «Menú», que lo pliega y lo despliega
+  // y empieza desplegado.
+  assert.equal(d.querySelector("#rail").dataset.variant, "diseno", "The designer's menu is the main one");
+  assert.equal(d.querySelector('[data-rail="2"]').textContent, "Laboratorio");
+  assert.equal(d.querySelector('[data-rail="2"]').getAttribute("aria-label"), "Del laboratorio a la Industria");
+  const fab = d.querySelector(".dz-fab");
+  assert.equal(fab.getAttribute("aria-expanded"), "true", "The menu starts unfolded");
+  fab.click();
+  assert(d.querySelector("#rail").classList.contains("is-collapsed"), "The Menú button folds it");
+  assert.equal(fab.getAttribute("aria-expanded"), "false");
+  fab.click();
+  assert(!d.querySelector("#rail").classList.contains("is-collapsed"), "…and unfolds it");
   assert.equal(
     d.querySelectorAll(".rail-children .rail-item[data-rail]").length,
     5,
@@ -686,9 +700,15 @@ function check(reducedMotion = false, canvasAvailable = true) {
   assert.equal(embed("https://example.com/watch?v=dQw4w9WgXcQ"), null);
   assert.equal(embed("javascript:alert(1)"), null);
   assert.equal(errors.length, 0, errors.join("\n"));
-  // Nada de fuera: ni scripts, ni hojas, ni marcos. Las imágenes, solo las del propio build
-  // (los logos de los socios de la entrada), nunca una URL de otro sitio.
-  assert.equal(d.querySelectorAll('script[src],link[rel="stylesheet"],iframe').length, 0);
+  // Nada de fuera: ni scripts ni marcos, y como hoja solo el kit de tipografías de Adobe
+  // Fonts (02/10/2026; su licencia no permite alojarlas aquí). Las imágenes, solo las del
+  // propio build (los logos de los socios de la entrada), nunca una URL de otro sitio.
+  assert.equal(d.querySelectorAll("script[src],iframe").length, 0);
+  assert.deepEqual(
+    [...d.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.getAttribute("href")),
+    ["https://use.typekit.net/fsm2ktl.css"],
+    "The only outside stylesheet is the Adobe Fonts kit"
+  );
   assert(
     [...d.querySelectorAll("img[src]")].every((img) => !/^(https?:)?\/\//.test(img.getAttribute("src"))),
     "Images are served from the build, never from another site"
